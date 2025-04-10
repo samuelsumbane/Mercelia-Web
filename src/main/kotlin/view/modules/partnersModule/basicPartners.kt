@@ -1,0 +1,15 @@
+package view.modules.partnersModule
+
+import androidx.compose.runtime.Composable
+import components.BtnDetails
+import view.basicGruppedPages
+
+@Composable
+fun basicPartners() {
+    val partnersPages = listOf(
+        BtnDetails("clientsBtn", "/clients", "Clientes"),
+        BtnDetails("suppliersBtn", "/suppliers", "Fornecedores"),
+    )
+
+    basicGruppedPages("Parceiros", partnersPages)
+}

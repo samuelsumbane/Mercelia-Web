@@ -1,0 +1,85 @@
+#afiliateDivData {
+  width: 55%;
+  margin: auto;
+  padding: 20px;
+  border-radius: 15px;
+}
+#afiliateDivData > table {
+  width: 90%;
+  height: 90%;
+  margin: auto;
+}
+#afiliateDivData > h3 {
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+.div-item {
+  width: 90%;
+  display: flex;
+  margin: auto;
+  margin-bottom: 7px;
+  justify-content: space-between;
+  border-bottom: 0.5px dotted gray;
+}
+
+.no-border {
+  border: none !important;
+}
+
+#eachAfiliateForm {
+  margin-top: 4%;
+}
+#eachAfiliateForm #leftAndRightSides {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-top: -1%;
+  gap: 10px;
+}
+#eachAfiliateForm #leftAndRightSides #productsList {
+  width: 60%;
+  margin-right: 10px;
+}
+#eachAfiliateForm #leftAndRightSides #productsList #eachProduct {
+  width: 100%;
+  height: 55px;
+  background: #EDF1F5;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+#eachAfiliateForm #leftAndRightSides #productsList #eachProduct p {
+  margin: auto 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+#eachAfiliateForm #leftAndRightSides #productsList #eachProduct .productRowBtns {
+  width: 210px;
+  display: flex;
+  justify-content: space-between;
+}
+#eachAfiliateForm #leftAndRightSides #prosQuantities {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid dodgerblue;
+  padding: 10px;
+}
+#eachAfiliateForm #leftAndRightSides #prosQuantities .productP {
+  font-weight: 800;
+  padding: 8px;
+}
+#eachAfiliateForm #leftAndRightSides #prosQuantities #totalProductP {
+  font-weight: 800;
+  padding-top: 10px;
+}
+#eachAfiliateForm .eachAfiliate-submit-buttons {
+  width: 50%;
+  margin: 5% auto 0 auto;
+}
+
+/*# sourceMappingURL=eachAfiliate.css.map */

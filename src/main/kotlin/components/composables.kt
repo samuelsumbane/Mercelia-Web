@@ -1,0 +1,375 @@
+package components
+
+import androidx.compose.runtime.Composable
+import app.softwork.routingcompose.Router
+import kotlinx.browser.window
+import org.jetbrains.compose.web.attributes.ButtonType
+import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.min
+import org.jetbrains.compose.web.attributes.readOnly
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.events.SyntheticInputEvent
+import org.w3c.dom.HTMLInputElement
+
+@Composable
+fun cardButtons(
+    showDetailsButton: Boolean = false,
+    onSeeDetails: () -> Unit = {},
+    onEditButton: () -> Unit = {},
+    showDeleteBtn: Boolean = true,
+    onDeleteButton: () -> Unit = {}
+) = Div(attrs = { classes("card-footer-buttons") }) {
+    if (showDetailsButton) {
+        button("card-editButton", "Ver") {
+            onSeeDetails()
+        }
+    } else {
+        button("card-editButton", "Editar") {
+            onEditButton()
+        }
+    }
+
+    if (showDeleteBtn) {
+        button("card-deleteButton", "Deletar") {
+            onDeleteButton()
+        }
+    }
+}
+
+@Composable
+fun userCardButtons(
+    onEditButton: () -> Unit,
+    onSuspendButton: () -> Unit = {}
+) = Div(attrs = { classes("card-footer-buttons") }) {
+    button("card-editButton", "Promover a >", onClick = onEditButton)
+    button("card-deleteButton", "Suspender", onClick = onSuspendButton)
+}
+
+
+
+
+//Input(type = InputType.Text, attrs = {
+//    classes("formTextInput")
+//    value(quantity)
+//    onInput { event -> quantity = event.value.toInt() }
+//})
+
+//@Composable
+//fun input(
+//    value: String,
+//    onChange: () -> Unit
+//) {
+//    Input(type = InputType.Text, attrs = {
+//        classes("formTextInput")
+//        value(value)
+//        onInput{ event ->
+//            onChange()
+//        }
+//
+//    })
+//}
+
+//@Composable
+//fun alert() {
+//    js("""
+//           swal({
+//                icon:"success",
+//                title:"ti",
+//                text:"te"
+//            })
+//        """
+//    )
+//}
+
+@JsName("showAlert")
+external fun showAlert(icon: String, title: String, text: String)
+
+@JsName("showAlertDelete")
+external fun showAlertDelete(icon: String, title: String, text: String, onDelete: () -> Unit)
+
+@JsName("showOkayAlert")
+external fun showOkayAlert(icon: String, title: String, text: String, onOkay: () -> Unit)
+
+fun alert(icon: String, title: String, text: String) {
+    window.setTimeout({
+        showAlert(icon, title, text)
+    }, 50)
+}
+
+fun onOkayAlert(icon: String, title: String, text: String, onOkay: () -> Unit) {
+    window.setTimeout({
+        showOkayAlert(icon, title, text, onOkay)
+    }, 50)
+}
+
+fun alertDelete(icon: String, title: String, text: String, onDelete: () -> Unit) {
+    window.setTimeout({
+        showAlertDelete(icon, title, text, onDelete)
+    }, 50)
+}
+
+
+
+//@JsName("allProductChart")
+//external fun allProductChart()
+//external fun allProductChart(productLabels: ArrayList<String>, productProfits: ArrayList<Int>)
+
+
+fun showAllProductChart(labels: Array<String>, profits: Array<String>) {
+    window.setTimeout({
+        (window.asDynamic().allProductChart)(labels, profits)
+    }, 500)
+}
+
+fun showSoldProductChart(labels: Array<String>, quantity: Array<String>) {
+    window.setTimeout({
+        (window.asDynamic().soldProductsChart)(labels, quantity)
+    }, 500)
+}
+
+fun showTopUsers(labels: Array<String>, sales: Array<String>) {
+    window.setTimeout({
+        (window.asDynamic().topUsersChart)(labels, sales)
+    }, 500)
+}
+
+fun showMonthlyProfits(labels: Array<String>, profits: Array<String>) {
+    window.setTimeout({
+        (window.asDynamic().salesProfitsByMonthsAndYear)(labels, profits)
+    }, 400)
+}
+fun showMonthlySales(labels: Array<String>, quantities: Array<String>) {
+    window.setTimeout({
+        (window.asDynamic().salesQuantitiesByMonthsAndYear)(labels, quantities)
+    }, 400)
+}
+
+
+fun initializeDataTable() {
+    window.setTimeout({
+        js("""
+            $(document).ready(function() {
+                $('.myTable').DataTable({
+                    stripeClasses: ['odd', 'even'],
+                    paging: true,
+                    searching: true,
+                    language: {
+                        "decimal":        "",
+                        "emptyTable": "",
+                        "zeroRecords": "",
+                        "info":           "Mostrando _START_ to _END_ of _TOTAL_ registros",
+                        "infoEmpty":      "Mostrando 0 to 0 of 0 registros",
+                        "infoFiltered":   "(Filtrado de _MAX_ total registros)",
+                        "infoPostFix":    "",
+                        "thousands":      ",",
+                        "lengthMenu":     "Mostrar _MENU_ registros",
+                        "loadingRecords": "Carregando...",
+                        "processing":     "",
+                        "search":         "Pesquisar:",
+                        "paginate": {
+                            "first":      "Primeiro",
+                            "last":       "Último",
+                            "next":       "Próximo",
+                            "previous":   "Anterior"
+                        },
+                        "aria": {
+                            "orderable":  "Ordenar esta coluna",
+                            "orderableReverse": " Reverse esta coluna"
+                        }
+                    }
+                });
+            });
+        """)
+    }, 500) // Aguarde para garantir que a tabela foi montada
+}
+
+fun initializeDataTable2() {
+    window.setTimeout({
+        js("""
+            $(document).ready(function() {
+                $('#reportsPageTable').DataTable({
+                    stripeClasses: ['odd', 'even'],
+                    paging: true,
+                    searching: true,
+                    language: {
+                         "decimal":        "",
+                        "emptyTable":     "Nenhum dado disponivel na tabela",
+                        "info":           "Mostrando _START_ to _END_ of _TOTAL_ registros",
+                        "infoEmpty":      "Mostrando 0 to 0 of 0 entries",
+                        "infoFiltered":   "(Filtrado de _MAX_ total entries)",
+                        "infoPostFix":    "",
+                        "thousands":      ",",
+                        "lengthMenu":     "Mostrar _MENU_ registros",
+                        "loadingRecords": "Carregando...",
+                        "processing":     "",
+                        "search":         "Pesquisar:",
+                        "zeroRecords":    "Nenhum registro correspondente",
+                        "paginate": {
+                            "first":      "Primeiro",
+                            "last":       "Ultimo",
+                            "next":       "Proximo",
+                            "previous":   "Anterior"
+                        },
+                        "aria": {
+                            "orderable":  "Ordenar esta coluna",
+                            "orderableReverse": " Reverse esta coluna"
+                        }
+                    }
+                });
+            });
+        """)
+    }, 400) // Aguarde para garantir que a tabela foi montada
+}
+
+fun printPaper() {
+    window.setTimeout({
+        js(
+            """
+            var printData = document.getElementById("parentMainDiv");
+            var newWin = window.open("");
+            newWin.document.write(printData.outerHTML);
+            newWin.print();
+            newWin.close(); 
+        """
+        )
+    })
+}
+
+
+@Composable
+fun CardPitem(pKey: String, pValue: String) {
+    Div {
+        P { Text("$pKey: ") }
+        P { Text(pValue) }
+    }
+}
+
+@Composable
+fun <K> formDiv(
+    label: String,
+    inputValue: String,
+    inputType: InputType<K>,
+    onInput: (SyntheticInputEvent<K, HTMLInputElement>) -> Unit,
+    spanError: String
+) {
+    Div {
+        Label { Text(label) }
+        Input(type = inputType, attrs = {
+            classes("formTextInput")
+            value(inputValue)
+            min("0")
+            onInput { event -> onInput(event) }
+        })
+        Span(attrs = { classes("errorText") }) { Text(spanError) }
+    }
+}
+
+@Composable
+fun formDivReadOnly(
+    label: String,
+    inputValue: String,
+) {
+    Div {
+        Label { Text(label) }
+        Input(type = InputType.Text, attrs = {
+            classes("formTextInput")
+            readOnly()
+            value(inputValue)
+        })
+    }
+}
+
+@Composable
+fun modalPItem(
+    key: String,
+    value:@Composable () -> Unit
+) {
+    Div(attrs = { classes("inRowDiv")}) {
+        Label { Text(key) }
+        value()
+    }
+}
+
+
+//sellButtonsControl
+@Composable
+fun submitButtons(
+    divClass: String = "min-submit-buttons",
+    submitBtnText: String = "Finalizar",
+    onBackClicked: () -> Unit,
+) {
+    Div(attrs = {
+//        id("sellButtonsControl")
+        classes("min-submit-buttons")
+    }) {
+        button("closeButton", "Fechar") { onBackClicked() }
+        button("submitButton", btnText = submitBtnText, ButtonType.Submit)
+    }
+}
+
+
+@Composable
+fun afStatusIndicator(spanText: String, id: String, labelText: Int) {
+    Div(attrs = { classes("tooltip") }) {
+        Span(attrs = { classes("tooltiptext") }) { Text(spanText) }
+        Div(attrs = { classes("afStatus-indicator"); id(id) })
+        Label(attrs = { id("") }) {
+            Text("$labelText")
+        }
+    }
+}
+
+@Composable
+fun PageNotFound() {
+    Div({
+        style {
+            textAlign("center")
+            fontSize(24.px)
+            color(Color.red)
+            margin(50.px)
+        }
+    }) {
+        Text("Erro 404 - Página não encontrada!")
+        Br()
+        A("#/") { Text("Voltar para a página inicial") }
+    }
+}
+
+@Composable
+fun homeDivMinResume(
+    divId: String,
+    title: String,
+    firstTextFirstDiv: String,
+    secondTextFirstDiv: String,
+    firstTextSecondDiv: String,
+    secondTextSecondDiv: String,
+) {
+    Div(attrs = { id(divId) }) {
+        H4 { Text(title) }
+        Br()
+        Div(attrs = { classes("flex") }) {
+            Label { Text("$firstTextFirstDiv: ") }
+            P(attrs = { classes("home-bold") }) {
+                Text(secondTextFirstDiv)
+            }
+        }
+        Br()
+        Div(attrs = { classes("flex") }) {
+            P { Text("$firstTextSecondDiv:") }
+            P (attrs = { classes("home-bold") }) {
+                Text(secondTextSecondDiv)
+            }
+        }
+    }
+}
+
+fun unknownErrorAlert() {
+    alert("error", "Erro", "Houve um erro desconhecido. Actualiza a pagina e tente novamente.\n Se o erro persistir entre em contacto com o gerente.")
+}
+
+fun userNotLogged(navigate: () -> Unit) {
+    onOkayAlert("warning", "Usuário não logado.", "Será redirecionado para pagina de login.") {
+        navigate()
+    }
+}

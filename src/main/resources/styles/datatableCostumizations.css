@@ -1,0 +1,33 @@
+.myTable {
+    border-radius: 8px;
+    overflow: hidden;
+
+    background:white;
+    border:1px solid #01172f;
+    border-bottom:0;
+}
+
+.myTable thead {
+    background-color: #021b36;
+    color: white;
+}
+
+
+.myTable tbody tr:nth-child(even) {
+    background-color: #E9ECEF; /* Cinza claro */
+}
+
+.myTable tbody tr:hover {
+    background-color: #D1FAE5; /* Verde suave */
+    transition: 0.3s;
+}
+
+.myTable td, .myTable th {
+    text-align: left;
+}
+
+.search-box {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
