@@ -1,13 +1,13 @@
 function showAlert(icon, title, text) {
-    swal({
-        icon: icon,
-        title: title,
-        text: text
+    Swal.fire({
+      title: title,
+      text: text,
+      icon: icon
     });
 }
 
 function showOkayAlert(icon, title, text, onOkay) {
-    swal({
+    Swal.fire({
         icon: icon,
         title: title,
         text: text
@@ -17,22 +17,59 @@ function showOkayAlert(icon, title, text, onOkay) {
 }
 
 
-function showAlertDelete(icon, title, text, deleteFun) {
-    swal({
-        title: title,
-        text: text,
-        icon: icon,
-        buttons: true,
-        dangerMode: true,
-    }).then((willDelete) => {
-        if (willDelete) {
-            deleteFun();
-        }
+function showAlertDelete(title, text, deleteFun) {
+    Swal.fire({
+      title: title,
+      text: text,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sim, deletar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteFun();
+      }
+    });
+}
+
+function showAlertTimer(title) {
+    Swal.fire({
+      position: "top-end",
+      icon: "success",
+      title: title,
+      showConfirmButton: false,
+      timer: 1500
     });
 }
 
 
+function basicPieChart(canvaId, labelsData, labelName, backgroundcolor, data, optionText) {
+    new Chart(document.getElementById(canvaId), {
+        type: 'pie',
+        data: {
+              labels: labelsData,
+              datasets: [{
+                label: labelName,
+                type: "pie",
+                backgroundColor: ['#02152a', '#f64535', '#185cee', '#60A5FA', '#93C5FD'],
+                data: data,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                 legend: {
+                   position: 'top',
+                   maintainAspectRatio: false,
+                 },
+            },
+        }
+    });
+}
+
 function basicBarChart(canvaId, labelsData, labelName, backgroundcolor, data, optionText) {
+//    let delayed;
     new Chart(document.getElementById(canvaId), {
         type: 'bar',
         data: {
@@ -55,7 +92,19 @@ function basicBarChart(canvaId, labelsData, labelName, backgroundcolor, data, op
             },
             legend: {
                 display: false
-            }
+            },
+//            animations: {
+//                onComplete: () => {
+//                    delayed = true;
+//                  },
+//                  delay: (context) => {
+//                    let delay = 0;
+//                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
+//                      delay = context.dataIndex * 300 + context.datasetIndex * 100;
+//                    }
+//                    return delay;
+//                  },
+//            }
         }
     });
 }
@@ -66,7 +115,7 @@ function soldProductsChart(labelsData, quantityData) {
 }
 
 function topUsersChart(labelsData, valuesData) {
-    basicBarChart("topUsers", labelsData, "Top Usuários", "#926ee4", valuesData, "Top Usuários")
+    basicPieChart("topUsers", labelsData, "Top Usuários", "#926ee4", valuesData, "Top Usuários")
 }
 
 function salesProfitsByMonthsAndYear(labelsData, profitsData) {
@@ -107,23 +156,7 @@ function salesQuantitiesByMonthsAndYear(labelsData, quantitiesData) {
 //  }
 //};
 //
-//// pie
-//const config = {
-//  type: 'pie',
-//  data: data,
-//  options: {
-//    responsive: true,
-//    plugins: {
-//      legend: {
-//        position: 'top',
-//      },
-//      title: {
-//        display: true,
-//        text: 'Chart.js Pie Chart'
-//      }
-//    }
-//  },
-//};
+
 
 //swal({
 //  title: "Are you sure?",

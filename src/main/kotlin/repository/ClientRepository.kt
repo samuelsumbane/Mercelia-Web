@@ -44,4 +44,9 @@ class ClientRepository(private val httpClient: HttpClient) {
         }
     }
 
+    suspend fun deleteClient(clientId: Int): Int {
+        val response = httpClient.delete("$apiClientsPath/delete-client/$clientId")
+        return response.status.value
+    }
+
 }

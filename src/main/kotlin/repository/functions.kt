@@ -8,3 +8,11 @@ const val apiProductsPath = "$apiPath/products"
 const val apiReportPath = "$apiPath/reports"
 const val apiSupplierPath = "$apiPath/suppliers"
 const val apiStockPath = "$apiPath/stocks"
+const val apiBranchesPath = "$apiPath/branches"
+
+
+enum class Role(val desc: String) { // desc -> description
+    V("Vendedor/Caixa"),
+    A("Admin"),
+    G("Gerente"),
+}

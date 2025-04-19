@@ -62,6 +62,7 @@ data class OrderItem(
     val orderDateTime: String?,
     val status: String,
     val userName: String,
+    val branchName: String,
 )
 
 @Serializable
@@ -108,6 +109,7 @@ data class OrderItemDraft(
     val status: String,
     val reason: String,
     val userId: Int,
+    val branchId: Int,
 )
 
 @Serializable
@@ -148,6 +150,7 @@ data class StockItem(
     val reason: String,
     val datetime: String,
     val userName: String,
+    val branchName: String
 )
 
 @Serializable
@@ -162,6 +165,7 @@ data class ProductNameAndCategory(
 data class LoginRequest(val email: String, val password: String)
 
 
+@Serializable
 data class SellTableItem(
     val id: Int,
     val name: String,
@@ -171,8 +175,6 @@ data class SellTableItem(
     val subTotal: Double,
     val availableProQuantity: Int?
 )
-
-//
 
 
 @Serializable
@@ -245,6 +247,13 @@ data class SysConfigItem(
     val id: Int,
 )
 
+@Serializable
+data class BranchItem(
+    val id: Int,
+    val name: String,
+    val address: String,
+)
+
 val emptyConfigItem =
     SysConfigItem("", "", "", 0)
 
@@ -261,6 +270,29 @@ val emptyConfigItem =
 //    val data: UserItem
 //)
 
+@Serializable
+data class LoggedUserDC(
+    val isLogged: Boolean,
+    val userId: Int,
+    val userName: String,
+    val userRole: String,
+)
+
+@Serializable
+data class ChangeStatusDC(
+    val status: Int,
+    val userId: Int,
+)
+
+@Serializable
+data class ChangeRoleDC(
+    val role: String,
+    val userId: Int,
+)
+
+val emptyLoggedUser = LoggedUserDC(
+    false, 0, "", ""
+)
 
 val emptyUserItem = UserItem (
     0, "", "", "", "", "", ""

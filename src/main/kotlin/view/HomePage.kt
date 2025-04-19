@@ -6,13 +6,10 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.browser.document
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.web.dom.*
-import org.w3c.dom.events.EventListener
-import org.w3c.dom.events.KeyboardEvent
 import repository.*
 
 
@@ -84,63 +81,79 @@ fun homeScreen() {
     var salesProfitsMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var isLoggedIn by remember { mutableStateOf(false) }
+    var user by remember { mutableStateOf(emptyLoggedUser) }
+    val router = Router.current
+    val coroutineScope = rememberCoroutineScope()
 
 
     LaunchedEffect(Unit) {
-        isLoggedIn = users.checkSession()
+        val session = users.checkSession()
+        if (session != null) {
+            if (session.isLogged) {
+                isLoggedIn = true
+                user = session
+            } else {
+                isLoggedIn = false
+            }
+        } else {
+            console.log("session expired")
+        }
 
         if (isLoggedIn) {
-            try {
-                val userStates = users.getUserStatus()
-                allAfiliatesCount = userStates.second
-                activeAfiliates = userStates.first
-                suspendedAfiliates = allAfiliatesCount - activeAfiliates
-                //
-                val (clientsValue, suppliersValue) = reports.getTotalClientsAndSuppliers()
-                totalClients = clientsValue
-                totalSuppliers = suppliersValue
+            if (user.userRole != Role.V.desc) {
+                try {
+                    val userStates = users.getUserStatus()
+                    allAfiliatesCount = userStates.second
+                    activeAfiliates = userStates.first
+                    suspendedAfiliates = allAfiliatesCount - activeAfiliates
+                    //
+                    val (clientsValue, suppliersValue) = reports.getTotalClientsAndSuppliers()
+                    totalClients = clientsValue
+                    totalSuppliers = suppliersValue
 
-                val (profitValue, salesValue) = reports.getTotalProfitAndSales()
+                    val (profitValue, salesValue) = reports.getTotalProfitAndSales()
 
-                totalProfit = profitValue
-                totalSales = salesValue
+                    totalProfit = profitValue
+                    totalSales = salesValue
 
-                topAfiliatesData = reports.getUsersTotalSales()
-                val topAfiliatesSalesData: Array<TopAfiliateDC> = Json.decodeFromString(topAfiliatesData.toString())
-                topAfiliatesNamesLabels = topAfiliatesSalesData.map { it.name }.toTypedArray()
-                topAfiliatesQtdsLabels = topAfiliatesSalesData.map { it.quantity }.toTypedArray()
-                showTopUsers(topAfiliatesNamesLabels, topAfiliatesQtdsLabels)
-
-
-                // Monthly profit
-                val totalProfitsByMonthAndYear = reports.getEachProductTotalProfit()
-                val totalProfitsByMonthAndYearData: Array<MonthlyProfitDC> = Json.decodeFromString(totalProfitsByMonthAndYear.toString())
-                salesProfitsMonthsLabels = totalProfitsByMonthAndYearData.map {
-                    "${numberToStringMonth(it.month)} - ${it.year}"
-                }.toTypedArray()
-                salesProfitsMonthsValues = totalProfitsByMonthAndYearData.map { it.profit }.toTypedArray()
-                showMonthlyProfits(salesProfitsMonthsLabels, salesProfitsMonthsValues)
-
-                // Monthly sales
-                val totalQuantitiesByMonthAndYear = reports.getTotalQuantitiesByMonthAndYear()
-                val totalQuantitiesByMonthAndYearData: Array<MonthlyQuantityDC> = Json.decodeFromString(totalQuantitiesByMonthAndYear.toString())
-                salesQuantitiesMonthsLabels = totalQuantitiesByMonthAndYearData.map {
-                    "${numberToStringMonth(it.month)} - ${it.year}"
-                }.toTypedArray()
-                salesQuantitiesMonthsValues = totalQuantitiesByMonthAndYearData.map { it.quantity }.toTypedArray()
-                showMonthlySales(salesQuantitiesMonthsLabels, salesQuantitiesMonthsValues)
+                    topAfiliatesData = reports.getUsersTotalSales()
+                    val topAfiliatesSalesData: Array<TopAfiliateDC> = Json.decodeFromString(topAfiliatesData.toString())
+                    topAfiliatesNamesLabels = topAfiliatesSalesData.map { it.name }.toTypedArray()
+                    topAfiliatesQtdsLabels = topAfiliatesSalesData.map { it.quantity }.toTypedArray()
+                    showTopUsers(topAfiliatesNamesLabels, topAfiliatesQtdsLabels)
 
 
-                // Sold products --------->>
-                soldProductsData = reports.getProductsMostBoughts()
-                console.log(soldProductsData)
-                val productsSoldData: Array<ProductsMostBought> = Json.decodeFromString(soldProductsData.toString())
-                soldProductsLabels = productsSoldData.map { it.productname }.toTypedArray()
-                soldProductsQtdsLabels = productsSoldData.map { it.quantity }.toTypedArray()
-                showSoldProductChart(soldProductsLabels, soldProductsQtdsLabels)
+                    // Monthly profit
+                    val totalProfitsByMonthAndYear = reports.getEachProductTotalProfit()
+                    val totalProfitsByMonthAndYearData: Array<MonthlyProfitDC> =
+                        Json.decodeFromString(totalProfitsByMonthAndYear.toString())
+                    salesProfitsMonthsLabels = totalProfitsByMonthAndYearData.map {
+                        "${numberToStringMonth(it.month)} - ${it.year}"
+                    }.toTypedArray()
+                    salesProfitsMonthsValues = totalProfitsByMonthAndYearData.map { it.profit }.toTypedArray()
+                    showMonthlyProfits(salesProfitsMonthsLabels, salesProfitsMonthsValues)
 
-            } catch (e: Exception) {
-                console.log("Error: ${e.message}")
+                    // Monthly sales
+                    val totalQuantitiesByMonthAndYear = reports.getTotalQuantitiesByMonthAndYear()
+                    val totalQuantitiesByMonthAndYearData: Array<MonthlyQuantityDC> =
+                        Json.decodeFromString(totalQuantitiesByMonthAndYear.toString())
+                    salesQuantitiesMonthsLabels = totalQuantitiesByMonthAndYearData.map {
+                        "${numberToStringMonth(it.month)} - ${it.year}"
+                    }.toTypedArray()
+                    salesQuantitiesMonthsValues = totalQuantitiesByMonthAndYearData.map { it.quantity }.toTypedArray()
+                    showMonthlySales(salesQuantitiesMonthsLabels, salesQuantitiesMonthsValues)
+
+                    // Sold products --------->>
+                    soldProductsData = reports.getProductsMostBoughts()
+                    console.log(soldProductsData)
+                    val productsSoldData: Array<ProductsMostBought> = Json.decodeFromString(soldProductsData.toString())
+                    soldProductsLabels = productsSoldData.map { it.productname }.toTypedArray()
+                    soldProductsQtdsLabels = productsSoldData.map { it.quantity }.toTypedArray()
+                    showSoldProductChart(soldProductsLabels, soldProductsQtdsLabels)
+
+                } catch (e: Exception) {
+                    console.log("Error: ${e.message}")
+                }
             }
         }
     }
@@ -170,62 +183,97 @@ fun homeScreen() {
 //    }
 
     if (isLoggedIn) {
-        Menu(activePath = "sidebar-btn-home")
-        //
-        Div(attrs = { classes("content-container", "dash-container") }) {
-            Header {
-                Div {
-                    Div(attrs = { id("afiliatesInfo") }) {
-                        Div {
-                            H4(attrs = { id("allUsersP") }) {
-                                Text("Usuários")
+        if (user.userRole == Role.V.desc) {
+            userHasNotAccessScreen()
+        } else {
+            console.log(user.userRole)
+            Menu(activePath = "sidebar-btn-home", user.userRole)
+            //
+            Div(attrs = { classes("content-container", "dash-container") }) {
+                Header {
+//                Div(attrs = { id("header-top") }) {
+//                    H3() {
+//                        val letter = user.userName[0]
+//                        Text(letter.toString())
+//                    }
+//                }
+                    Button(attrs = {
+                        id("header-top")
+
+                    }) {
+                        H3 {
+                            val letter = user.userName[0]
+                            Text(letter.toString())
+                        }
+                        Div(attrs = { id("user-perfil-options") }) {
+                            button("bt", "Perfil") {
+                                router.navigate("/eachUser")
+                            }
+
+                            button("bt", "Sair") {
+                                users.logout().also {
+                                    router.navigate("/")
+                                }
                             }
                         }
 
-                        Div(attrs = { id("afiliatesInfo-divs") }) {
-                            afStatusIndicator("Usuários Activos", "active-Status", activeAfiliates)
-                            afStatusIndicator("Usuários Pendentes", "suspended-Status", suspendedAfiliates)
-                            afStatusIndicator("Todos Usuários", "allUsers-Status", allAfiliatesCount)
-                        }
                     }
 
-                    homeDivMinResume("expensesInfo", "Parceiros", "Clientes",
-                        "$totalClients", "Fornecedores", "$totalSuppliers")
 
-                    homeDivMinResume("profits", "Ganhos Totais", "Vendas",
-                        "${totalSales.twoDigits<Double>()} MT", "Lucros", "${totalProfit.twoDigits<Double>()} MT")
+
+                    Div(attrs = { id("header-bottom") }) {
+                        Div(attrs = { id("afiliatesInfo") }) {
+                            Div {
+                                H4(attrs = { id("allUsersP") }) {
+                                    Text("Usuários")
+                                }
+                            }
+
+                            Div(attrs = { id("afiliatesInfo-divs") }) {
+                                afStatusIndicator("Usuários Activos", "active-Status", activeAfiliates)
+                                afStatusIndicator("Usuários Bloqueados", "suspended-Status", suspendedAfiliates)
+                                afStatusIndicator("Todos Usuários", "allUsers-Status", allAfiliatesCount)
+                            }
+                        }
+
+                        homeDivMinResume("expensesInfo", "Parceiros", "Clientes",
+                            "$totalClients", "Fornecedores", "$totalSuppliers")
+
+                        homeDivMinResume("profits", "Ganhos Totais", "Vendas",
+                            "${totalSales.twoDigits<Double>()} MT", "Lucros", "${totalProfit.twoDigits<Double>()} MT")
+                    }
                 }
-            }
 
-            Br()
+                Br()
 
-            Main {
-                Div(attrs = { id("divCharts") }) {
-                    Div(attrs = { id("fChartsDiv") }) {
-                        Div(attrs = { id("chart1") }) {
-                            Canvas(attrs = { id("monthlySalesQuantities") })
+                Main {
+                    Div(attrs = { id("divCharts") }) {
+                        Div(attrs = { id("fChartsDiv") }) {
+                            Div(attrs = { id("chart1") }) {
+                                Canvas(attrs = { id("monthlySalesQuantities") })
+                            }
+
+                            Div(attrs = { id("chart2") }) {
+                                Canvas(attrs = { id("topSales") })
+                            }
                         }
 
-                        Div(attrs = { id("chart2") }) {
-                            Canvas(attrs = { id("topSales") })
-                        }
-                    }
+                        Div(attrs = { id("sChartsDiv") }) {
+                            Div(attrs = { id("chart3") }) {
+                                Canvas(attrs = { id("topUsers") })
+                            }
 
-                    Div(attrs = { id("sChartsDiv") }) {
-                        Div(attrs = { id("chart3") }) {
-                            Canvas(attrs = { id("topUsers") })
-                        }
-
-                        Div(attrs = { id("chart4") }) {
-                            Canvas(attrs = { id("monthlyProfits") })
+                            Div(attrs = { id("chart4") }) {
+                                Canvas(attrs = { id("monthlyProfits") })
+                            }
                         }
                     }
                 }
             }
         }
+
     } else {
         userNotLoggedScreen()
     }
 
 }
-

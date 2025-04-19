@@ -62,7 +62,7 @@
     }
 }
 
-:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports){
+:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .card-editButton){
     @extend .btn;
     min-width:30px !important;
     height:30px;
@@ -80,7 +80,8 @@
     background-color:aliceblue;
 }
 
-:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight):hover{
+
+:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .card-editButton):hover{
     background-color:lightgray;
 }
 
@@ -93,6 +94,13 @@
     margin-right:5px
 }
 
+.card-editButton{
+    background-image:url("/media/icons/pen-fill.svg");
+}
+
+.eyeBtn{
+    background-image:url("/media/icons/eye-fill.svg");
+}
 
 .throwRight{
     background-image:url("/media/icons/arrow-right.svg");

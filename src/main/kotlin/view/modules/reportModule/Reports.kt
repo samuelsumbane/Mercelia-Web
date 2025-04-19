@@ -1,11 +1,12 @@
 package view.modules.reportModule
 
 import androidx.compose.runtime.*
+import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.browser.localStorage
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.*
@@ -40,7 +41,7 @@ fun reportsPage() {
 //    var maxModalState by remember { mutableStateOf("open-max-modal") } //closed = "" --------->>
     var maySendData by remember { mutableStateOf(false) }
 
-
+    val router = Router.current
     var initialDate by remember { mutableStateOf("") }
     var initialTime by remember { mutableStateOf("") }
     var finalDate by remember { mutableStateOf("") }
@@ -49,71 +50,98 @@ fun reportsPage() {
     var finalDateError by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var user by remember { mutableStateOf(emptyLoggedUser) }
 
 
     LaunchedEffect(Unit) {
-        isLoggedIn = users.checkSession()
+//        isLoggedIn = users.checkSession()
+        val session = users.checkSession()
+        if (session != null) {
+            if (session.isLogged) {
+                isLoggedIn = true
+                user = session
+            } else {
+                isLoggedIn = false
+            }
+        } else {
+            console.log("session expired")
+        }
+    }
 
+    LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             try {
-                reportsData = reports.fetchSaleReports()
-                console.log(reportsData)
+                isLoading = true
+                val reportsDeffered = async { reports.fetchSaleReports() }
+                reportsData = reportsDeffered.await()
                 initializeDataTable()
-//                initializeDataTable2()
             } catch (e: Exception) {
                 error = "Error: ${e.message}"
+            } finally {
+                isLoading = false
             }
         }
     }
 
     if (isLoggedIn) {
-        NormalPage(title = "Relatórios de Vendas", pageActivePath = "sidebar-btn-reports", hasNavBar = true, navButtons = {
+        NormalPage(
+            showBackButton = true,
+            onBackFunc = { router.navigate("/basicReportsPage") },
+            title = "Relatórios de Vendas", pageActivePath = "sidebar-btn-reports",
+            userRole = user.userRole,
+            hasNavBar = true, navButtons = {
             button("btnSolid", "Gerar Inventário") {
                 modalTitle = "Inventário de Vendas"
                 modalState = "open-min-modal"
             }
         }) {
-            if (error == null) {
-                if (reportsData.isEmpty()) {
-                    Div(attrs = { classes("centerDiv") }) {
-                        Text("Nenhum registro de vendas efectuadas.")
-                    }
-                } else {
-                    Table(attrs = {
-                        //                id("reportsPageTable")
-                        classes("display", "myTable")
-                    }) {
-                        Thead {
-                            Tr {
-                                Th { Text("Producto") }
-                                Th { Text("Quantidade") }
-                                Th { Text("Sub Total") }
-                                Th { Text("Lucro") }
-                                Th { Text("Status") }
-                                Th { Text("Usuário") }
-                                Th { Text("Data e hora") }
-                            }
+            if (isLoading) {
+                Div(attrs = { classes("centerDiv") }) {
+                    Text("Carregando...")
+                }
+            } else {
+                if (error == null) {
+                    if (reportsData.isEmpty()) {
+                        Div(attrs = { classes("centerDiv") }) {
+                            Text("Nenhum registro de vendas efectuadas.")
                         }
-                        Tbody {
-                            reportsData.map {
+                    } else {
+                        Table(attrs = {
+                            //                id("reportsPageTable")
+                            classes("display", "myTable")
+                        }) {
+                            Thead {
                                 Tr {
-                                    Td { Text(it.productName) }
-                                    Td { Text(it.quantity.toString()) }
-                                    Td { Text(it.subTotal.twoDigits()) }
-                                    Td { Text(it.profit.twoDigits()) }
-                                    Td { Text(it.status) }
-                                    Td { Text(it.userName) }
-                                    Td { Text(it.datetime.toString()) }
+                                    Th { Text("Producto") }
+                                    Th { Text("Quantidade") }
+                                    Th { Text("Sub Total") }
+                                    Th { Text("Lucro") }
+                                    Th { Text("Status") }
+                                    Th { Text("Usuário") }
+                                    Th { Text("Data e hora") }
+                                }
+                            }
+                            Tbody {
+                                reportsData.map {
+                                    Tr {
+                                        Td { Text(it.productName) }
+                                        Td { Text(it.quantity.toString()) }
+                                        Td { Text(it.subTotal.twoDigits()) }
+                                        Td { Text(it.profit.twoDigits()) }
+                                        Td { Text(it.status) }
+                                        Td { Text(it.userName) }
+                                        Td { Text(it.datetime.toString()) }
+                                    }
                                 }
                             }
                         }
                     }
+                } else if (error != null) {
+                    Div { Text(error!!) }
+                } else {
+                    Div { Text("Loading...") }
                 }
-
-            } else if (error != null) {
-                Div { Text(error!!) }
-            } else {
-                Div { Text("Loading...") }
             }
             minModal(modalState, "Selecionar Intervalo de Datas") {
                 Form(
@@ -145,7 +173,7 @@ fun reportsPage() {
                                 coroutineScope.launch {
                                     var teredReports =
                                         reports.fetchDateTimeSales(initialDate, initialTime, finalDate, finalTime)
-                                    console.log(teredReports)
+//                                    console.log(teredReports)
 
                                     if (teredReports.isEmpty()) {
                                         alert(
@@ -179,25 +207,25 @@ fun reportsPage() {
                     }
                 ) {
 
-                    formDiv("Data Inicial", initialDate, inputType = InputType.Date, onInput = { event ->
+                    formDiv("Data Inicial", initialDate, inputType = InputType.Date, oninput = { event ->
                         initialDate = event.value
                     }, initialDateError)
 
                     formDiv(
                         "Hora Inicial", initialTime, InputType.Time,
-                        onInput = { event -> initialTime = event.value }, ""
+                        oninput = { event -> initialTime = event.value }, ""
                     )
 
                     Br()
 
                     formDiv(
                         "Data Final", finalDate, InputType.Date,
-                        onInput = { event -> finalDate = event.value }, finalDateError
+                        oninput = { event -> finalDate = event.value }, finalDateError
                     )
 
                     formDiv(
                         "Hora Final", finalTime, InputType.Time,
-                        onInput = { event -> finalTime = event.value }, ""
+                        oninput = { event -> finalTime = event.value }, ""
                     )
 
                     Div(attrs = { classes("min-submit-buttons") }) {

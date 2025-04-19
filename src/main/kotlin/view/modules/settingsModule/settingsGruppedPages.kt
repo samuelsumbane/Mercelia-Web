@@ -9,6 +9,7 @@ fun basicSettingsPage() {
     val reportPages = listOf(
         BtnDetails("sellsBtn", "/settings", "Configurações do sistema"),
         BtnDetails("sellsBtn", "/users", "Usuários"),
+        BtnDetails("sellsBtn", "/branches", "Sucursais"),
     )
 
     basicGruppedPages("Configurações", reportPages)

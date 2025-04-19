@@ -1,6 +1,7 @@
 package view.modules.productsModule
 
 import androidx.compose.runtime.*
+import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -8,13 +9,14 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.InputType
+//import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.onSubmit
 import org.jetbrains.compose.web.dom.*
 import repository.*
 
 
 @Composable
-fun categoriesPage() {
+fun categoriesPage(userRole: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -22,6 +24,7 @@ fun categoriesPage() {
         }
     }
 
+    val router = Router.current
     val categories = CategoryRepository(httpClient)
     val users = UserRepository(httpClient)
 
@@ -37,6 +40,7 @@ fun categoriesPage() {
     var categoryNameError by remember { mutableStateOf("") }
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var isLoggedIn by remember { mutableStateOf(false) }
+    var formAction by remember { mutableStateOf("") }
 
 
     fun cleanFormFields() {
@@ -45,98 +49,115 @@ fun categoriesPage() {
     }
 
     LaunchedEffect(Unit) {
-        isLoggedIn = users.checkSession()
+        try {
+            categoriesData = categories.getCategories()
+        } catch (e: Exception) {
+            error = "Error: ${e.message}"
+        }
+    }
 
-        if (isLoggedIn) {
-            try {
-                categoriesData = categories.getCategories()
-            } catch (e: Exception) {
-                error = "Error: ${e.message}"
+    NormalPage(
+        showBackButton = true,
+        onBackFunc = { router.navigate("/basicProductsPage") },
+        title = "Categorias",
+        pageActivePath = "sidebar-btn-products",
+        hasMain = true,
+        hasNavBar = true,
+        userRole = userRole,
+        navButtons = {
+            button("btnSolid", "+ Categoria") {
+                modalTitle = "Adicionar Categorias"
+                modalState = "open-min-modal"
+                submitBtnText = "Submeter"
+                cleanFormFields()
+            }
+
+        }) {
+        if (categoriesData != null) {
+            categoriesData!!.forEach { item ->
+                cardWG(title = "", cardButtons = {
+                    cardButtons(
+                        onEditButton = {
+                            modalState = "open-min-modal"
+                            categoryId = item.id!!
+                            categoryName = item.name
+                            submitBtnText = "Editar"
+                        },
+                        showDeleteBtn = true,
+                        onDeleteButton = {
+//                                console.log("deu certo1.")
+
+                            alertDelete("Deletar está categoria?", "Está acção não pode ser desfeita.") {
+                                coroutineScope.launch {
+                                    // Delete category --------->
+                                    val status = categories.deleteCategory(item.id!!)
+                                    console.log(status)
+                                    when (status) {
+                                        200 -> {
+                                            alertTimer("Categoria deletada com sucesso.")
+                                            categoriesData = categories.getCategories()
+                                        }
+                                        406 -> alert("warning", "Delete não aceite", "O sistema deve ter pelo menos uma categoria")
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }) {
+                    H4 { Text(item.name) }
+                }
+            }
+        } else if (error != null) {
+            Div { Text(error!!) }
+        } else {
+            Div { Text("Carregando...") }
+        }
+
+        minModal(modalState, modalTitle) {
+            Form(
+                attrs = {
+                    classes("modalform")
+                    onSubmit { event ->
+                        event.preventDefault()
+
+                        if (categoryName.isBlank()) {
+                            categoryNameError = "Nome da categoria é obrigatório"
+                            return@onSubmit
+                        } else categoryNameError = ""
+
+                        coroutineScope.launch {
+                            if (categoryId != 0) {
+                                // Edit category --------->
+                                val status = categories.editCategory(CategoryItem(categoryId, categoryName))
+                                if (status == 201) alertTimer("Categoria actualizada com sucesso.")
+
+                                modalState = "closed"
+                            } else {
+                                // Save category --------->
+                                val status = categories.createCategory(CategoryItem(null, categoryName))
+                                if (status == 201) alertTimer("Categoria adicionada com sucesso.")
+                            }
+                            categoryName = ""
+                        }
+                    }
+                }
+            ) {
+
+                formDiv(
+                    "Nome", categoryName, InputType.Text,
+                    oninput = { event -> categoryName = event.value },
+                    categoryNameError
+                )
+
+                submitButtons(submitBtnText = submitBtnText) {
+                    modalState = "closed"
+                    categoryName = ""
+                    categoryId = 0
+                    coroutineScope.launch { categoriesData = categories.getCategories() }
+                    cleanFormFields()
+                }
             }
         }
     }
 
-    if (isLoggedIn) {
-        NormalPage(
-            title = "Categorias",
-            pageActivePath = "sidebar-btn-products",
-            hasMain = true,
-            hasNavBar = true,
-            navButtons = {
-                button("btnSolid", "+ Categoria") {
-                    modalTitle = "Adicionar Categorias"
-                    modalState = "open-min-modal"
-                    submitBtnText = "Submeter"
-                    cleanFormFields()
-                }
-
-            }) {
-            if (categoriesData != null) {
-                categoriesData!!.forEach { item ->
-                    cardWG(title = "", cardButtons = {
-                        cardButtons(
-                            onEditButton = {
-                                modalState = "open-min-modal"
-                                categoryId = item.id!!
-                                categoryName = item.name
-                                submitBtnText = "Editar"
-                            },
-                            showDeleteBtn = false
-                        )
-                    }) {
-                        H4 { Text(item.name) }
-                    }
-                }
-            } else if (error != null) {
-                Div { Text(error!!) }
-            } else {
-                Div { Text("Carregando...") }
-            }
-
-            minModal(modalState, modalTitle) {
-                Form(
-                    attrs = {
-                        classes("modalform")
-                        onSubmit { event ->
-                            event.preventDefault()
-
-                            if (categoryName.isBlank()) {
-                                categoryNameError = "Nome da categoria é obrigatório"
-                                return@onSubmit
-                            } else categoryNameError = ""
-
-                            coroutineScope.launch {
-                                // Save afiliate --------->
-                                if (categoryId != 0) {
-                                    val status = categories.editCategory(CategoryItem(categoryId, categoryName))
-                                    if (status == 201) alert("success", "Sucesso", "Categoria actualizada com sucesso.")
-                                    modalState = "closed"
-                                } else {
-                                    val status = categories.createCategory(CategoryItem(null, categoryName))
-                                    if (status == 201) alert("success", "Sucesso!", "Categoria adicionada com sucesso.")
-                                }
-                                categoryName = ""
-                            }
-                            //                        }
-                        }
-                    }
-                ) {
-
-                    formDiv(
-                        "Nome", categoryName, InputType.Text,
-                        onInput = { event -> categoryName = event.value },
-                        categoryNameError
-                    )
-
-                    submitButtons(submitBtnText = submitBtnText) {
-                        modalState = "closed"
-                        categoryName = ""
-                        categoryId = 0
-                        coroutineScope.launch { categoriesData = categories.getCategories() }
-                        cleanFormFields()
-                    }
-                }
-            }
-        }
-    } else userNotLoggedScreen()
 }

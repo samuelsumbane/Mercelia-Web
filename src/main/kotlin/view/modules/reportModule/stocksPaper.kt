@@ -11,20 +11,14 @@ import repository.twoDigits
 fun stockPaper(
     reportData: List<StockItem>
 ) {
-//    val reportData = listOf(
-//        StockItem("kjl", "Saída", 3, 3, 4, 12.2, 33.4, "38293", "fsdf", "oi"),
-//        StockItem("kjl", "Saída", 3, 3, 4, 12.2, 33.4, "38293", "fsdf", "oi"),
-//        StockItem("kjl", "Saída", 3, 3, 4, 12.2, 33.4, "38293", "fsdf", "oi"),
-//        StockItem("kjl", "Saída", 3, 3, 4, 12.2, 33.4, "38293", "fsdf", "oi"),
-//    )
     var totalFromSell by remember { mutableDoubleStateOf(0.0) }
 
     Div(attrs = {
         classes("parentMainDiv")
         id("parentMainDiv")
         style {
-            width(570.px)
-            height(800.px)
+            width(794.px) //570.px
+            height(1123.px) //800.px
             backgroundColor(Color.white)
             property("margin", "2% auto 0 auto")
             display(DisplayStyle.Flex)
@@ -94,16 +88,16 @@ fun stockPaper(
                             fontWeight(400)
                         }
                     }) {
-                        Td { Text("Producto") }
-                        Td { Text("Tipo") }
-                        Td { Text("Qtd.") }
-                        Td { Text("Qtd. Antes") }
-                        Td { Text("Qtd. Depois") }
-                        Td { Text("Custo") }
-                        Td { Text("Preço") }
-                        Td { Text("Razão") }
-                        Td { Text("Data e Hora") }
-                        Td { Text("Usuário") }
+                        Th { Text("Producto") }
+                        Th { Text("Tipo") }
+                        Th { Text("Qtd.") }
+                        Th { Text("Qtd. Antes") }
+                        Th { Text("Qtd. Depois") }
+                        Th { Text("Custo") }
+                        Th { Text("Preço") }
+                        Th { Text("Razão") }
+                        Th { Text("Data e Hora") }
+                        Th { Text("Usuário") }
                     }
                     Tbody(attrs = {
                         id("tbodyActivitiesList")

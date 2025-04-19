@@ -1,6 +1,7 @@
 package view.modules.settingsModule.usersPackage
 
 import androidx.compose.runtime.*
+import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -9,13 +10,12 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.onSubmit
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
-import repository.UserItem
-import repository.UserItemDraft
-import repository.UserRepository
+import repository.*
 
 @Composable
-fun UsersPage() {
+fun UsersPage(userRole: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -25,11 +25,15 @@ fun UsersPage() {
 
     val users = UserRepository(httpClient)
     var usersData by remember { mutableStateOf<List<UserItem>?>(null) }
+    val settings = SettingsRepository(httpClient)
+    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
+    var sysPackage by remember { mutableStateOf("") }
 
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     var modalTitle by remember { mutableStateOf("") }
     var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
+    var moreDetailsModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
 //    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
     var userId by remember { mutableStateOf(0) }
 
@@ -39,133 +43,284 @@ fun UsersPage() {
     var userName by remember { mutableStateOf("") }
     var userNameError by remember { mutableStateOf("") }
 
+    var userStatus by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
+    var newRole by remember { mutableStateOf("") }
     var roleError by remember { mutableStateOf("") }
+    val router = Router.current
 
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var showDialog by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        isLoggedIn = users.checkSession()
+        try {
+            usersData = users.fetchUsers()
+            sysConfigs = settings.getSettings()
+        } catch (e: Exception) {
+            error = "Error: ${e.message}"
+        }
 
-        if (isLoggedIn) {
-            try {
-                usersData = users.fetchUsers()
-            } catch (e: Exception) {
-                error = "Error: ${e.message}"
+        for((key, value) in sysConfigs) {
+            if (key == "active_package") sysPackage = value
+        }
+
+    }
+
+
+    fun alertStatusAndMessageResponse(status: Int, message: String) {
+        when (status) {
+            200 -> {
+                alertTimer(message)
+                coroutineScope.launch { usersData = users.fetchUsers() }
             }
+            404 -> alert("error", "Usuário não encontrado", message)
+            else -> unknownErrorAlert()
         }
     }
 
-    if (isLoggedIn) {
+    NormalPage(
+        showBackButton = true,
+        onBackFunc = { router.navigate("/basicSettingsPage") },
+        title = "Usuários",
+        pageActivePath = "sidebar-btn-settings",
+        hasMain = true,
+        hasNavBar = true,
+        userRole = userRole,
+        navButtons = {
+            val canAddUser = (sysPackage == "Lite" && usersData!!.size < 3) ||
+                    (sysPackage == "Plus" && usersData!!.size < 10) ||
+                    (sysPackage == "Pro")
 
-        NormalPage(
-            title = "Usuários",
-            pageActivePath = "sidebar-btn-settings",
-            hasMain = true,
-            hasNavBar = true,
-            navButtons = {
-
+            if (canAddUser) {
                 button("btnSolid", "+ Usuário") {
                     modalTitle = "Adicionar Usuário"
                     modalState = "open-min-modal"
                     submitBtnText = "Submeter"
                 }
-            }) {
-
-            if (usersData != null) {
-                usersData!!.forEach { item ->
-                    cardWG(title = "", cardButtons = {
-                        userCardButtons(
-                            onEditButton = { submitBtnText = "Promover a" },
-                            onSuspendButton = {
-                                //                        modalState = "open-min-modal"
-
-                            }
-                        )
-                    }) {
-                        CardPitem("Nome: ", item.name)
-                        CardPitem("Email: ", item.email)
-                        CardPitem("Papel: ", item.role)
-                        CardPitem("Estado: ", item.status)
-                    }
-                }
-            } else if (error != null) {
-                Div { Text(error!!) }
-            } else {
-                Div { Text("Loading...") }
             }
 
-            minModal(modalState, modalTitle) {
-                Form(
-                    attrs = {
-                        classes("modalform")
-                        onSubmit { event ->
-                            event.preventDefault()
+        }) {
 
-                            userNameError = if (userName == "") "O nome do usuário é obrigatório." else ""
-                            userEmailError = if (userEmail == "") "O email é obrigatório." else ""
+        if (usersData != null) {
+            usersData!!.forEach { item ->
+                cardWG(title = "", cardButtons = {
+                    userCardButtons(
+                        onSeeMoreDetailsButton = {
+                            userName = item.name
+                            userEmail = item.email
+                            role = item.role
+                            userStatus = item.status
+                            userId = item.id
+                            moreDetailsModalState = "open-min-modal"
+                        },
+                    )
+                }) {
+                    CardPitem("Nome ", item.name)
+                    CardPitem("Email ", item.email)
+                    CardPitem("Papel ", item.role)
+                    CardPitem("Estado ", item.status)
+                }
+            }
+        } else if (error != null) {
+            Div { Text(error!!) }
+        } else {
+            Div { Text("Loading...") }
+        }
 
-                            if (userName != "") {
-                                coroutineScope.launch {
-                                    val (statusCode, statusText) = users.createUser(
-                                        (UserItemDraft(userName, userEmail, role))
-                                    )
+        minModal(modalState, modalTitle) {
+            Form(
+                attrs = {
+                    classes("modalform")
+                    onSubmit { event ->
+                        event.preventDefault()
 
-                                    if (statusCode == 201) {
-                                        alert("success", "Usuário adicionado", "A senha é: $statusText")
-                                        userName = ""
-                                        userEmail = ""
-                                    }
+                        userNameError = if (userName == "") "O nome do usuário é obrigatório." else ""
+                        userEmailError = if (userEmail == "") "O email é obrigatório." else ""
+
+                        if (userName != "") {
+                            coroutineScope.launch {
+                                val (statusCode, message) = users.createUser(
+                                    (UserItemDraft(userName, userEmail, role))
+                                )
+
+                                when (statusCode) {
+                                    101, 102, 103 -> alert("error", "Usuário não adicionado", message)
+                                    201 -> alert("success", "Usuário adicionado", "A senha é: $message")
+                                    404 -> alert("error", "Usuário não adicionado", message)
+                                    else -> unknownErrorAlert()
                                 }
+                                userName = ""
+                                userEmail = ""
                             }
                         }
                     }
-                ) {
+                }
+            ) {
 
-                    formDiv(
-                        "Nome do usuário", userName, InputType.Text, { event -> userName = event.value }, userNameError
-                    )
+                formDiv(
+                    "Nome do usuário",
+                    userName,
+                    InputType.Text,
+                    { event -> userName = event.value },
+                    userNameError
+                )
 
-                    formDiv(
-                        "Email", userEmail, InputType.Email, { event -> userEmail = event.value }, userEmailError
-                    )
+                formDiv(
+                    "Email", userEmail, InputType.Email, { event -> userEmail = event.value }, userEmailError
+                )
 
-                    Div {
-                        Label { Text("Papel") }
+                Div {
+                    Label { Text("Papel") }
+                    Select(attrs = {
+                        classes("formTextInput")
+                        onChange {
+                            it.value?.let { option ->
+                                role = option.split(" - ")[1]
+                            }
+                        }
+                    }) {
+                        Option("0 - Vendedor/Caixa") {
+                            Text("Vendedor/Caixa")
+                        }
+                        Option("1 - Gerente") {
+                            Text("Gerente")
+                        }
+                        Option("2 - Administrador") {
+                            Text("Administrador")
+                        }
+                        Option("3 - Estoquista") {
+                            Text("Estoquista")
+                        }
+                        if (role.isBlank()) role = "Vendedor/Caixa"
+                    }
+                }
+
+                submitButtons {
+                    coroutineScope.launch {
+                        usersData = users.fetchUsers()
+                    }
+                    modalState = "u"
+                }
+                Br()
+            }
+        }
+
+        minModal(moreDetailsModalState, "Detalhes do usuário") {
+            Form(
+                attrs = {
+                    classes("modalform")
+                }
+            ) {
+                modalPItem("Nome do usuário", value = {
+                    P { Text(userName) }
+                })
+                modalPItem("Email", value = {
+                    P { Text(userEmail) }
+                })
+                modalPItem("Estado", value = {
+                    P { Text(userStatus) }
+                })
+
+                modalPItem("", value = {
+                    if (userStatus == "Activo") {
+                        button("btn", "Bloquear") {
+                            coroutineScope.launch {
+                                val (status, message) = users.changeUserStatus(
+                                    ChangeStatusDC(2, userId)
+                                )
+                                alertStatusAndMessageResponse(status, message)
+                            }
+                        }
+                    } else {
+                        button("btn", "Activar") {
+                            coroutineScope.launch {
+                                val (status, message) = users.changeUserStatus(
+                                    ChangeStatusDC(1, userId)
+                                )
+                                alertStatusAndMessageResponse(status, message)
+                            }
+                        }
+                    }
+
+                })
+                Br()
+                Hr()
+                Br()
+                modalPItem("Histórico de vendas", value = {
+                    if (userStatus == "Activo") {
+                        button("btn", "Ver") {
+                            coroutineScope.launch {
+                                val (status, message) = users.changeUserStatus(
+                                    ChangeStatusDC(2, userId)
+                                )
+                                alertStatusAndMessageResponse(status, message)
+                            }
+                        }
+                    }
+                })
+
+                modalPItem("Papel", value = {
+                    P { Text(role) }
+                })
+
+                modalPItem("Pro/Despromover à", value = {
+                    Div(attrs = {
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                        }
+                    }) {
                         Select(attrs = {
                             classes("formTextInput")
                             onChange {
                                 it.value?.let { option ->
-                                    role = option.split(" - ")[1]
+                                    newRole = if (option.split(" - ")[0] != "0") {
+                                        option.split(" - ")[1]
+                                    } else ""
                                 }
                             }
                         }) {
-                            Option("0 - Vendedor/Caixa") {
+                            Option("0 - Novo papel") {
+                                Text("Novo Papel")
+                            }
+                            Option("1 - Vendedor/Caixa") {
                                 Text("Vendedor/Caixa")
                             }
-                            Option("1 - Gerente") {
+                            Option("2 - Gerente") {
                                 Text("Gerente")
                             }
-                            Option("2 - Administrador") {
+                            Option("3 - Administrador") {
                                 Text("Administrador")
                             }
-                            Option("3 - Estoquista") {
+                            Option("4 - Estoquista") {
                                 Text("Estoquista")
                             }
-                            if (role.isBlank()) role = "Vendedor/Caixa"
                         }
                     }
 
-                    submitButtons {
-                        coroutineScope.launch {
-                            usersData = users.fetchUsers()
+                    if (newRole.isNotBlank()) {
+                        button("checkButton", "") {
+                            coroutineScope.launch {
+                                val (status, message) = users.changeUserRole(
+                                    ChangeRoleDC(newRole, userId)
+                                )
+                                alertStatusAndMessageResponse(status, message)
+                                newRole = ""
+                            }
                         }
-                        modalState = "u"
                     }
+                })
+                Br()
+                Hr()
+                Br()
+
+                Div(attrs = {
+                    classes("min-submit-buttons")
+                }) {
+                    button("closeButton", "Fechar") { moreDetailsModalState = "closed" }
                 }
             }
         }
-    } else userNotLoggedScreen()
+    }
 }

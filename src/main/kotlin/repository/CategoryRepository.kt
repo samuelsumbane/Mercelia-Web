@@ -43,6 +43,12 @@ class CategoryRepository(private val httpClient: HttpClient) {
         }
     }
 
+    suspend fun deleteCategory(categoryId: Int): Int {
+        val response = httpClient.delete("$apiCategoriesPath/delete-category/$categoryId")
+        return response.status.value
+    }
+
+
 }
 
 

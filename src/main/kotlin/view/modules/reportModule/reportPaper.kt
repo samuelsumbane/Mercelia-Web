@@ -12,20 +12,17 @@ import repository.twoDigits
 fun reportPaper(
     reportData: List<SaleReportItem>
 ) {
-//    val filteredReports = reportData
     var totalFromSell by remember { mutableDoubleStateOf(0.0) }
 //    val gruped = mutableListOf<ActivityItemGrupped>()
     val gruped = mutableListOf<ActivityItemGrupped>()
 
-//    console.log(reportData)
-    console.log("Received data is: $reportData")
 
     Div(attrs = {
         classes("parentMainDiv")
         id("parentMainDiv")
         style {
-            width(570.px)
-            height(800.px)
+            width(794.px) //570.px
+            height(1123.px) //800.px
             backgroundColor(Color.white)
             property("margin", "2% auto 0 auto")
             display(DisplayStyle.Flex)
@@ -95,13 +92,13 @@ fun reportPaper(
                             fontWeight(400)
                         }
                     }) {
-                        Td { Text("Producto") }
-                        Td { Text("Qtd.") }
-                        Td { Text("SubTotal") }
-                        Td { Text("Lucro") }
-                        Td { Text("Estado") }
-                        Td { Text("Usuário") }
-                        Td { Text("Data e hora") }
+                        Th { Text("Producto") }
+                        Th { Text("Qtd.") }
+                        Th { Text("SubTotal") }
+                        Th { Text("Lucro") }
+                        Th { Text("Estado") }
+                        Th { Text("Usuário") }
+                        Th { Text("Data e hora") }
                     }
                     Tbody(attrs = {
                         id("tbodyActivitiesList")

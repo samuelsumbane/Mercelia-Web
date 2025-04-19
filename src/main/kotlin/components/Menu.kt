@@ -6,6 +6,7 @@ import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import repository.Role
 
 data class BtnDetails(
     val btnClass: String,
@@ -14,17 +15,29 @@ data class BtnDetails(
 )
 
 @Composable
-fun Menu(activePath: String) {
+fun Menu(activePath: String, userRole: String) {
 
     val router = Router.current
-    val btnsListClasses = listOf(
-        BtnDetails("sidebar-btn-home", "/dashboard", "Home"),
-        BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
-        BtnDetails("sidebar-btn-partners","/basicPartnersPage", "Parceiros"),
-        BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
-        BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
-        BtnDetails("sidebar-btn-settings", "/basicSettingsPage", "Definições"),
-    )
+    val btnsListClasses = when (userRole) {
+        Role.V.desc -> {
+            listOf(
+                BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
+                BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
+                BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
+            )
+        }
+        Role.G.desc, Role.A.desc -> {
+            listOf(
+                BtnDetails("sidebar-btn-home", "/dashboard", "Home"),
+                BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
+                BtnDetails("sidebar-btn-partners","/basicPartnersPage", "Parceiros"),
+                BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
+                BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
+                BtnDetails("sidebar-btn-settings", "/basicSettingsPage", "Definições"),
+            )
+        }
+        else -> { emptyList<BtnDetails>() }
+    }
 
     var sideBarState by remember { mutableStateOf("-") }
 

@@ -2,6 +2,7 @@ package view.Afiliates
 
 
 import androidx.compose.runtime.*
+import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -15,15 +16,15 @@ import org.jetbrains.compose.web.dom.*
 import repository.*
 
 
-
 @Composable
-fun clientsPage() {
+fun clientsPage(userRole: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
             json(Json { isLenient = true })
         }
     }
+    val users = UserRepository(httpClient)
 
     val clients = ClientRepository(httpClient)
     var clientData by remember { mutableStateOf<List<ClientItem>?>(null) }
@@ -33,28 +34,35 @@ fun clientsPage() {
     var modalTitle by remember { mutableStateOf("") }
     var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
 //    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
-
     var clientId by remember { mutableStateOf(0) }
     var clientName by remember { mutableStateOf("") }
     var clientNameError by remember { mutableStateOf("") }
     var clientPhone by remember { mutableStateOf("") }
-
     var submitBtnText by remember { mutableStateOf("Submeter") }
+    val router = Router.current
 
-    NormalPage(title = "Clientes", pageActivePath = "sidebar-btn-partners", hasMain = true, hasNavBar = true, navButtons = {
-        button("btnSolid", "+ Cliente") {
-            modalTitle = "Adicionar Cliente"
-            modalState = "open-min-modal"
-            submitBtnText = "Submeter"
-        }
-    }) {
-        LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
+        if (userRole != Role.V.desc) {
             try {
                 clientData = clients.getClients()
             } catch (e: Exception) {
                 error = "Error: ${e.message}"
             }
         }
+    }
+
+    NormalPage(
+        showBackButton = true,
+        onBackFunc = { router.navigate("/basicPartnersPage") },
+        title = "Clientes", pageActivePath = "sidebar-btn-partners", userRole = userRole, hasMain = true, hasNavBar = true, navButtons = {
+            button("btnSolid", "+ Cliente") {
+                modalTitle = "Adicionar Cliente"
+                modalState = "open-min-modal"
+                submitBtnText = "Submeter"
+                //
+                clientNameError = ""
+            }
+        }) {
 
         if (clientData != null) {
             if (clientData!!.isEmpty()) {
@@ -72,7 +80,19 @@ fun clientsPage() {
                         modalState = "open-min-modal"
                         submitBtnText = "Editar"
                     },
-                    showDeleteBtn = false
+                    onDeleteButton = {
+                        coroutineScope.launch {
+                            val status = clients.deleteClient(item.id!!)
+                            when (status) {
+                                200 -> {
+                                    alertTimer("Cliente deletado com sucesso.")
+                                    clientData = clients.getClients()
+                                }
+                                404 -> alert("error", "Cliente não encontrado.", "")
+                                406 -> alert("warning", "Delete não aceite.", "O cliente já tem dados no sistema")
+                            }
+                        }
+                    }
                 ) }) {
                     CardPitem("Nome", item.name)
                     CardPitem("Telefone", item.telephone)
@@ -98,11 +118,11 @@ fun clientsPage() {
                             coroutineScope.launch {
                                 if (clientId != 0) {
                                     val status = clients.editClient(ClientItem(clientId, clientName, clientPhone))
-                                    if (status == 201) alert("success", "Sucesso!", "Cliente actualizado com sucesso.")
+                                    if (status == 201) alertTimer("Cliente actualizado com sucesso.")
                                     modalState = "closed"
                                 } else {
                                     val status = clients.createClient(ClientItem(null, clientName, clientPhone))
-                                    if (status == 201) alert("success", "Sucesso!", "Cliente adicionado com sucesso.")
+                                    if (status == 201) alertTimer("Cliente adicionado com sucesso.")
                                 }
                                 clientId = 0
                                 clientName = ""
@@ -125,7 +145,7 @@ fun clientsPage() {
                 Div(attrs = { classes("min-submit-buttons") }) {
                     button("closeButton", "Fechar") {
                         modalState = "closed"
-                            coroutineScope.launch {
+                        coroutineScope.launch {
                             clientData = clients.getClients()
                         }
                     }
@@ -134,5 +154,6 @@ fun clientsPage() {
             }
         }
     }
+
 }
 

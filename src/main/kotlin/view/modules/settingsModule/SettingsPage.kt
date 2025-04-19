@@ -1,8 +1,5 @@
 import androidx.compose.runtime.*
-import components.Menu
-import components.formDiv
-import components.formDivReadOnly
-import components.userNotLoggedScreen
+import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
@@ -10,10 +7,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.readOnly
 import org.jetbrains.compose.web.dom.*
-import repository.SettingsRepository
-import repository.SysConfigItem
-import repository.UserRepository
-import repository.emptyConfigItem
+import repository.*
 
 
 data class ConfigDetailsDc( // Dc (Data class) ------->>
@@ -38,9 +32,20 @@ fun settingsPage() {
     val users = UserRepository(httpClient)
     var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
+    var user by remember { mutableStateOf(emptyLoggedUser) }
 
     LaunchedEffect(Unit) {
-        isLoggedIn = users.checkSession()
+        val session = users.checkSession()
+        if (session != null) {
+            if (session.isLogged) {
+                isLoggedIn = true
+                user = session
+            } else {
+                isLoggedIn = false
+            }
+        } else {
+            console.log("session expired")
+        }
 
         if (isLoggedIn) {
             sysConfigs = settings.getSettings()
@@ -48,33 +53,36 @@ fun settingsPage() {
     }
 
     if (isLoggedIn) {
-        Menu(activePath = "sidebar-btn-settings")
+        if (user.userRole != Role.A.desc) {
+            userHasNotAccessScreen("dashboard")
+        } else {
+            Menu(activePath = "sidebar-btn-settings", user.userRole)
 
-        Div(attrs = { classes("content-container", "def-page") }) {
-            Div(attrs = { classes("def-page-header")}) {
-                Br()
-                H2(attrs = { classes("title")}) {
-                    Text("Configurações")
+            Div(attrs = { classes("content-container", "def-page") }) {
+                Div(attrs = { classes("def-page-header")}) {
+                    Br()
+                    H2(attrs = { classes("title")}) {
+                        Text("Configurações")
+                    }
                 }
-            }
 
-            Div(attrs = { classes("def-page-body")}) {
-                Div(attrs = { classes("def-page-body-search") }) {
+                Div(attrs = { classes("def-page-body")}) {
+                    Div(attrs = { classes("def-page-body-search") }) {
 
 //                Input(type = InputType.Text, attrs = {
 //                    classes("formTextInput")
 //                    value("2")
 ////                    onInput { event -> clientAddress = event.value }
 //                })
-                }
+                    }
 
 
-                Div(attrs = { classes("def-page-body-main") }) {
+                    Div(attrs = { classes("def-page-body-main") }) {
 //                Div(attrs = { classes("def-page-body-main-left") }) {
 //
 //                }
 
-                    Div(attrs = { classes("def-page-body-main-right") }) {
+                        Div(attrs = { classes("def-page-body-main-right") }) {
 
 //                    val defaultConfigs = mapOf(
 //                        "active_package" to SysPackage.PLUS.description,
@@ -82,62 +90,64 @@ fun settingsPage() {
 //                        "percentual_iva" to "17"
 //                    )
 
-                        var configsList = mutableListOf<ConfigDetailsDc>()
+                            var configsList = mutableListOf<ConfigDetailsDc>()
 
-                        for((k, v) in sysConfigs) {
-                            when (k) {
-                                "percentual_iva" -> configsList.add(ConfigDetailsDc("Percentagem de IVA", "Será calculada nas vendas", v)
-                                )
+                            for((k, v) in sysConfigs) {
+                                when (k) {
+                                    "percentual_iva" -> configsList.add(ConfigDetailsDc("Percentagem de IVA", "Será calculada nas vendas", v)
+                                    )
 
-                                "active_package" -> configsList.add(ConfigDetailsDc("Pacote do sistema (Apenas leitura)", "Sistema executa as funcionalidades do pacote $v", v, true)
-                                )
+                                    "active_package" -> configsList.add(ConfigDetailsDc("Pacote do sistema (Apenas leitura)", "Sistema executa as funcionalidades do pacote $v", v, true)
+                                    )
 
-                                "users_limit" -> configsList.add(ConfigDetailsDc("Limite de  (Apenas leitura)", "O número do usuários que aquele senhor suporta", v, true)
-                                )
+                                    "users_limit" -> configsList.add(ConfigDetailsDc("Limite de  (Apenas leitura)", "O número do usuários que aquele senhor suporta", v, true)
+                                    )
+
+                                }
 
                             }
 
-                        }
 
 
+                            for ((index, divConf) in configsList.withIndex()) {
+                                Div(attrs = { classes("defDivConf") }) {
+                                    Div(attrs = { classes("defDivConf-title") }) {
+                                        Text(divConf.title)
+                                    }
 
-                        for ((index, divConf) in configsList.withIndex()) {
-                            Div(attrs = { classes("defDivConf") }) {
-                                Div(attrs = { classes("defDivConf-title") }) {
-                                    Text(divConf.title)
-                                }
+                                    Div(attrs = { classes("defDivConf-desc") }) {
+                                        Text(divConf.description)
+                                    }
 
-                                Div(attrs = { classes("defDivConf-desc") }) {
-                                    Text(divConf.description)
-                                }
-
-                                if (divConf.readOnly) {
-                                    Input(type = InputType.Text, attrs = {
-                                        classes("formTextInput")
-                                        value(divConf.value)
-                                        readOnly()
-                                    })
-                                } else {
-                                    Input(type = InputType.Number, attrs = {
-                                        classes("formTextInput")
-                                        value(divConf.value)
-                                        onInput { event ->
-                                            val thisValue = event.value.toString()
-                                            configsList = configsList.toMutableList().apply {
-                                                this[index] = divConf.copy(value = thisValue)
+                                    if (divConf.readOnly) {
+                                        Input(type = InputType.Text, attrs = {
+                                            classes("formTextInput")
+                                            value(divConf.value)
+                                            readOnly()
+                                        })
+                                    } else {
+                                        Input(type = InputType.Number, attrs = {
+                                            classes("formTextInput")
+                                            value(divConf.value)
+                                            onInput { event ->
+                                                val thisValue = event.value.toString()
+                                                configsList = configsList.toMutableList().apply {
+                                                    this[index] = divConf.copy(value = thisValue)
+                                                }
+                                                divConf.value = thisValue
                                             }
-                                            divConf.value = thisValue
-                                        }
-                                    })
+                                        })
+                                    }
+
+
                                 }
-
-
                             }
                         }
                     }
                 }
             }
         }
+
     } else userNotLoggedScreen()
 
 }

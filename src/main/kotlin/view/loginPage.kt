@@ -27,8 +27,21 @@ fun loginPage() {
     var isLoggedIn by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        isLoggedIn = users.checkSession()
+        val session = users.checkSession()
+        if (session != null) {
+            if (session.isLogged) {
+                isLoggedIn = true
+            } else {
+                isLoggedIn = false
+            }
+        } else {
+            console.log("session expired")
+        }
     }
+
+    // admin@gmain : 1111 -> admin
+    // sam@gmail.com : 8262 -> gerente
+    // seller@gmail : 5692  -> vendedor
 
     val router = Router.current
     var email by remember { mutableStateOf("admin@gmain") }
@@ -53,11 +66,13 @@ fun loginPage() {
 
                                 if (status) {
                                     val userData = users.getUserById(userId)
+                                    console.log(userData)
+
                                     if (userData.role == "Vendedor/Caixa") {
                                         router.navigate("/sales")
                                     } else {
                                         router.navigate("/dashboard")
-                                        console.log("devia ter id")
+//                                        console.log("devia ter id")
                                     }
                                 } else {
                                     errorText = "Usuário ou senha invalida"
@@ -70,9 +85,9 @@ fun loginPage() {
                     H2 { Text("Mercelia") }
                     Br()
 
-                    formDiv("", email, InputType.Text, onInput = { event -> email = event.value
+                    formDiv("", email, InputType.Text, oninput = { event -> email = event.value
                     }, "")
-                    formDiv("", password, InputType.Password, onInput = { event -> password = event.value
+                    formDiv("", password, InputType.Password, oninput = { event -> password = event.value
                     }, "")
                     Br()
                     Div(attrs = { classes("loginbutton-div")}) {

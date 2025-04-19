@@ -2,6 +2,7 @@ package view.Afiliates
 
 
 import androidx.compose.runtime.*
+import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -14,9 +15,8 @@ import org.jetbrains.compose.web.dom.*
 import repository.*
 
 
-
 @Composable
-fun suppliersPage() {
+fun suppliersPage(userRole: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -38,23 +38,34 @@ fun suppliersPage() {
     var supplierNameError by remember { mutableStateOf("") }
     var supplierPhone by remember { mutableStateOf("") }
     var supplierAddress by remember { mutableStateOf("") }
-
     var submitBtnText by remember { mutableStateOf("Submeter") }
+    var isLoading by remember { mutableStateOf(false) }
 
-    NormalPage(title = "Fornecedores", pageActivePath = "sidebar-btn-partners", hasMain = true, hasNavBar = true, navButtons = {
-        button("btnSolid", "+ Fornecedor") {
-            modalTitle = "Adicionar Fornecedor"
-            modalState = "open-min-modal"
-            submitBtnText = "Submeter"
+    val router = Router.current
+
+    LaunchedEffect(Unit) {
+        try {
+            supplierData = suppliers.getSuppliers()
+        } catch (e: Exception) {
+            error = "Error: ${e.message}"
         }
-    }) {
-        LaunchedEffect(Unit) {
-            try {
-                supplierData = suppliers.getSuppliers()
-            } catch (e: Exception) {
-                error = "Error: ${e.message}"
+    }
+
+    NormalPage(
+        showBackButton = true,
+        onBackFunc = { router.navigate("/basicPartnersPage") },
+        title = "Fornecedores",
+        pageActivePath = "sidebar-btn-partners",
+        userRole = userRole,
+        hasMain = true,
+        hasNavBar = true,
+        navButtons = {
+            button("btnSolid", "+ Fornecedor") {
+                modalTitle = "Adicionar Fornecedor"
+                modalState = "open-min-modal"
+                submitBtnText = "Submeter"
             }
-        }
+        }) {
 
         if (supplierData != null) {
             if (supplierData!!.isEmpty()) {
@@ -63,17 +74,19 @@ fun suppliersPage() {
                 }
             }
             supplierData!!.forEach { item ->
-                cardWG(title = "", cardButtons = { cardButtons(
-                    onEditButton = {
-                        supplierId = item.id!!
-                        supplierName = item.name
-                        supplierPhone = item.contact
-                        supplierAddress = item.address
-                        modalState = "open-min-modal"
-                        submitBtnText = "Editar"
-                    },
-                    showDeleteBtn = false
-                ) }) {
+                cardWG(title = "", cardButtons = {
+                    cardButtons(
+                        onEditButton = {
+                            supplierId = item.id!!
+                            supplierName = item.name
+                            supplierPhone = item.contact
+                            supplierAddress = item.address
+                            modalState = "open-min-modal"
+                            submitBtnText = "Editar"
+                        },
+                        showDeleteBtn = false
+                    )
+                }) {
                     CardPitem("Nome", item.name)
                     CardPitem("Telefone", item.contact)
                     CardPitem("Endereço", item.address)
@@ -97,12 +110,26 @@ fun suppliersPage() {
                         if (supplierName.isNotBlank()) {
                             coroutineScope.launch {
                                 if (supplierId != 0) {
-                                    val status = suppliers.editSupplier(SupplierItem(supplierId, supplierName, supplierPhone, supplierAddress))
-                                    if (status == 201) alert("success", "Sucesso!", "Fornecedor actualiado com sucesso.")
+                                    val status = suppliers.editSupplier(
+                                        SupplierItem(
+                                            supplierId,
+                                            supplierName,
+                                            supplierPhone,
+                                            supplierAddress
+                                        )
+                                    )
+                                    if (status == 201) alertTimer("Fornecedor actualiado com sucesso.")
                                     else unknownErrorAlert()
                                 } else {
-                                    val status = suppliers.createSupplier(SupplierItem(null, supplierName, supplierPhone, supplierAddress))
-                                    if (status == 201) alert("success", "Sucesso!", "Fornecedor adicionado com sucesso.")
+                                    val status = suppliers.createSupplier(
+                                        SupplierItem(
+                                            null,
+                                            supplierName,
+                                            supplierPhone,
+                                            supplierAddress
+                                        )
+                                    )
+                                    if (status == 201) alertTimer("Fornecedor adicionado com sucesso.")
                                     else unknownErrorAlert()
                                 }
 
@@ -117,16 +144,19 @@ fun suppliersPage() {
                 }
             ) {
 
-                formDiv("Nome", supplierName, InputType.Text,
-                    { event -> supplierName = event.value}, supplierNameError
+                formDiv(
+                    "Nome", supplierName, InputType.Text,
+                    { event -> supplierName = event.value }, supplierNameError
                 )
 
-                formDiv("Telefone", supplierPhone, InputType.Text,
-                    { event -> supplierPhone = event.value}, ""
+                formDiv(
+                    "Telefone", supplierPhone, InputType.Text,
+                    { event -> supplierPhone = event.value }, ""
                 )
-                
-                formDiv("Endereço", supplierAddress, InputType.Text,
-                    { event -> supplierAddress = event.value}, ""
+
+                formDiv(
+                    "Endereço", supplierAddress, InputType.Text,
+                    { event -> supplierAddress = event.value }, ""
                 )
 
                 submitButtons(submitBtnText) {
@@ -138,5 +168,6 @@ fun suppliersPage() {
             }
         }
     }
+
 }
 

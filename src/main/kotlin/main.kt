@@ -1,29 +1,80 @@
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import app.softwork.routingcompose.HashRouter
+import app.softwork.routingcompose.Router
+import components.pageNotFoundScreen
+import components.userNotLoggedScreen
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.mediacapture.Settings
+import repository.Role
+import repository.UserRepository
+import repository.emptyLoggedUser
 import view.*
 import view.Afiliates.clientsPage
 import view.Afiliates.eachUserPage
+//import view.Afiliates.eachUserPage
 import view.Afiliates.suppliersPage
 import view.modules.partnersModule.basicPartners
 import view.modules.productsModule.basicProductsPage
 import view.modules.productsModule.categoriesPage
 import view.modules.productsModule.productsPage
-import view.modules.reportModule.stockPage
+//import view.modules.productsModule.categoriesPage
+//import view.modules.productsModule.productsPage
+//import view.modules.reportModule.stockPage
 import view.modules.reportModule.basicReportsPage
 import view.modules.reportModule.reportsPage
+import view.modules.reportModule.stockPage
+//import view.modules.reportModule.reportsPage
 import view.modules.sellModule.basicSalePage
 import view.modules.sellModule.salesPage
-import view.modules.settingsModule.usersPackage.UsersPage
+//import view.modules.settingsModule.usersPackage.UsersPage
 import view.modules.settingsModule.basicSettingsPage
+import view.modules.settingsModule.brancesPage
+import view.modules.settingsModule.usersPackage.UsersPage
 
-//import view.Afiliates.afiliatesPage
-//import view.Afiliates.eachAfiliatePage
+//import view.modules.settingsModule.brancesPage
+
+val httpClient = HttpClient {
+    install(ContentNegotiation) {
+        json(Json { isLenient = true })
+    }
+}
+
 
 fun main() {
     renderComposable(rootElementId = "root") {
         HashRouter(initPath = "/") {
+            val router = Router.current
+            val users = UserRepository(httpClient)
+            var isLoggedIn by remember { mutableStateOf(false) }
+            var isLoading by remember { mutableStateOf(false) }
+            var hasLoading by remember { mutableStateOf(false) }
+            var user by remember { mutableStateOf(emptyLoggedUser) }
+
+            LaunchedEffect(Unit) {
+                val session = users.checkSession()
+                if (session != null) {
+                    if (session.isLogged) {
+                        isLoggedIn = true
+                        user = session
+                    } else {
+                        isLoggedIn = false
+                    }
+                } else {
+                    console.log("session expired")
+                }
+            }
+
 
 //            val currentPath = rememberHashPath()
 //
@@ -38,78 +89,121 @@ fun main() {
 //            }
 
 
+
             route("/") {
                 loginPage()
             }
 
-            route("/categories") {
-                categoriesPage()
-            }
+            if (user.isLogged) {
 
-            route("/dashboard") {
-                homeScreen()
-            }
+                noMatch {
+                    pageNotFoundScreen()
+                }
 
-            route("/products") {
-                productsPage()
-            }
+                if (user.userRole == Role.V.desc) {
+                    route("/products") {
+                        productsPage(user.userRole)
+                    }
 
-            route("/clients") {
-                clientsPage()
-            }
+                    route("/sales") {
+                        salesPage(user.userId, user.userRole)
+                    }
 
-            route("/sales") {
-                salesPage()
-            }
+                    route("/reports") {
+                        reportsPage()
+                    }
 
-            route("/users") {
-                UsersPage()
-            }
+                    route("/stockPage") {
+                        stockPage()
+                    }
 
-            route("/eachUser") {
-                eachUserPage()
-            }
+                } else if (user.userRole == Role.G.desc
+                    || user.userRole == Role.A.desc) {
+                    route("/categories") {
+                        categoriesPage(user.userRole)
+                    }
 
-            route("*") {
-                Text("found")
-            }
+                    route("/products") {
+                        productsPage(user.userRole)
+                    }
 
-            route("/reports") {
-                reportsPage()
-            }
+                    route("/sales") {
+                        salesPage(user.userId, user.userRole)
+                    }
 
-            route("/suppliers") {
-                suppliersPage()
-            }
+                    route("/reports") {
+                        reportsPage()
+                    }
 
-            route("/stockPage") {
-                stockPage()
-            }
+                    route("/stockPage") {
+                        stockPage()
+                    }
 
-            route("/settings") {
-                settingsPage()
-            }
+                    route("/dashboard") {
+                        homeScreen()
+                    }
 
-            // -------->>
 
-            route("/basicPartnersPage") {
-                basicPartners()
-            }
+                    route("/clients") {
+                        clientsPage(user.userRole)
+                    }
 
-            route("/basicProductsPage") {
-                basicProductsPage()
-            }
 
-            route("/basicReportsPage") {
-                basicReportsPage()
-            }
+                    route("/users") {
+                        UsersPage(user.userRole)
+                    }
 
-            route("/basicSellPage") {
-                basicSalePage()
-            }
+                    route("/eachUser") {
+                        eachUserPage(user.userId, user.userRole)
+                    }
 
-            route("/basicSettingsPage") {
-                basicSettingsPage()
+
+                    route("/reports") {
+                        reportsPage()
+                    }
+
+
+                    route("/suppliers") {
+                        suppliersPage(user.userRole)
+                    }
+
+                    route("/stockPage") {
+                        stockPage()
+                    }
+
+                    route("/settings") {
+                        settingsPage()
+                    }
+
+                    route("/branches") {
+                        brancesPage()
+                    }
+                }
+
+
+                // -------->>
+
+                route("/basicPartnersPage") {
+                    basicPartners()
+                }
+
+                route("/basicProductsPage") {
+                    basicProductsPage()
+                }
+
+                route("/basicReportsPage") {
+                    basicReportsPage()
+                }
+
+                route("/basicSellPage") {
+                    basicSalePage()
+                }
+
+                route("/basicSettingsPage") {
+                    basicSettingsPage()
+                }
+            } else {
+                userNotLoggedScreen()
             }
 
 

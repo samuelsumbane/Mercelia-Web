@@ -23,7 +23,7 @@ class StockRepository(private val httpClient: HttpClient) {
         finalDate: String,
         finalTime: String,
     ): List<StockItem> {
-        return httpClient.get("$apiStockPath/filteredByDates/$initialDate/$initialTime/$finalDate/$finalTime?timezoneid=Africa/Harare").body()
+        return httpClient.get("$apiStockPath/filteredStocksByDates/$initialDate/$initialTime/$finalDate/$finalTime?timezoneid=Africa/Harare").body()
     }
 
 }

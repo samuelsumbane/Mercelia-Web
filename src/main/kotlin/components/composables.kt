@@ -1,10 +1,10 @@
 package components
 
 import androidx.compose.runtime.Composable
-import app.softwork.routingcompose.Router
 import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
+//import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.min
 import org.jetbrains.compose.web.attributes.readOnly
 import org.jetbrains.compose.web.css.*
@@ -21,17 +21,17 @@ fun cardButtons(
     onDeleteButton: () -> Unit = {}
 ) = Div(attrs = { classes("card-footer-buttons") }) {
     if (showDetailsButton) {
-        button("card-editButton", "Ver") {
+        button("eyeBtn", "", hoverText = "Ver detalhes") {
             onSeeDetails()
         }
     } else {
-        button("card-editButton", "Editar") {
+        button("card-editButton", "", hoverText = "Editar") {
             onEditButton()
         }
     }
 
     if (showDeleteBtn) {
-        button("card-deleteButton", "Deletar") {
+        button("deleteButton", "", hoverText = "Deletar") {
             onDeleteButton()
         }
     }
@@ -39,11 +39,9 @@ fun cardButtons(
 
 @Composable
 fun userCardButtons(
-    onEditButton: () -> Unit,
-    onSuspendButton: () -> Unit = {}
+    onSeeMoreDetailsButton: () -> Unit,
 ) = Div(attrs = { classes("card-footer-buttons") }) {
-    button("card-editButton", "Promover a >", onClick = onEditButton)
-    button("card-deleteButton", "Suspender", onClick = onSuspendButton)
+    button("eyeBtn", "", hoverText = "Ver Detalhes", onClick = onSeeMoreDetailsButton)
 }
 
 
@@ -85,9 +83,6 @@ fun userCardButtons(
 @JsName("showAlert")
 external fun showAlert(icon: String, title: String, text: String)
 
-@JsName("showAlertDelete")
-external fun showAlertDelete(icon: String, title: String, text: String, onDelete: () -> Unit)
-
 @JsName("showOkayAlert")
 external fun showOkayAlert(icon: String, title: String, text: String, onOkay: () -> Unit)
 
@@ -103,13 +98,26 @@ fun onOkayAlert(icon: String, title: String, text: String, onOkay: () -> Unit) {
     }, 50)
 }
 
-fun alertDelete(icon: String, title: String, text: String, onDelete: () -> Unit) {
+
+@JsName("showAlertDelete")
+external fun showAlertDelete(title: String, text: String, onDelete: () -> Unit)
+
+fun alertDelete(title: String, text: String, onDelete: () -> Unit) {
     window.setTimeout({
-        showAlertDelete(icon, title, text, onDelete)
+        showAlertDelete(title, text, onDelete)
     }, 50)
 }
 
+@JsName("showAlertTimer")
+external fun showAlertTimer(title: String)
 
+fun alertTimer(title: String) {
+    window.setTimeout({
+        showAlertTimer(title)
+    }, 10)
+}
+
+//showAlertDelete
 
 //@JsName("allProductChart")
 //external fun allProductChart()
@@ -250,7 +258,7 @@ fun <K> formDiv(
     label: String,
     inputValue: String,
     inputType: InputType<K>,
-    onInput: (SyntheticInputEvent<K, HTMLInputElement>) -> Unit,
+    oninput: (SyntheticInputEvent<K, HTMLInputElement>) -> Unit,
     spanError: String
 ) {
     Div {
@@ -259,11 +267,31 @@ fun <K> formDiv(
             classes("formTextInput")
             value(inputValue)
             min("0")
-            onInput { event -> onInput(event) }
+            onInput { event -> oninput(event) }
         })
         Span(attrs = { classes("errorText") }) { Text(spanError) }
     }
 }
+
+//@Composable
+//fun formDiv(
+//    label: String,
+//    inputValue: String,
+//    inputType: InputType.Email,
+//    oninput: (SyntheticInputEvent<String, HTMLInputElement>) -> Unit,
+//    spanError: String
+//) {
+//    Div {
+//        Label { Text(label) }
+//        Input(type = inputType, attrs = {
+//            classes("formTextInput")
+//            value(inputValue)
+//            min("0")
+//            onInput { event -> oninput(event) }
+//        })
+//        Span(attrs = { classes("errorText") }) { Text(spanError) }
+//    }
+//}
 
 @Composable
 fun formDivReadOnly(
@@ -366,10 +394,4 @@ fun homeDivMinResume(
 
 fun unknownErrorAlert() {
     alert("error", "Erro", "Houve um erro desconhecido. Actualiza a pagina e tente novamente.\n Se o erro persistir entre em contacto com o gerente.")
-}
-
-fun userNotLogged(navigate: () -> Unit) {
-    onOkayAlert("warning", "Usuário não logado.", "Será redirecionado para pagina de login.") {
-        navigate()
-    }
 }

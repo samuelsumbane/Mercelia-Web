@@ -16,7 +16,7 @@ class ReportsRepository(
     suspend fun fetchSaleReports(): List<SaleReportItem> {
         val encodedRegion = "Africa/Harare"
         return httpClient.get("$apiReportPath/sales_reports") {
-            header(HttpHeaders.Authorization, "Bearer $token")
+//            header(HttpHeaders.Authorization, "Bearer $token")
         }.body()
     }
 

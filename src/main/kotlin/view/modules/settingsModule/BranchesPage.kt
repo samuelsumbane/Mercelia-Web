@@ -1,0 +1,281 @@
+package view.modules.settingsModule
+
+import androidx.compose.runtime.Composable
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.attributes.ButtonType
+//import org.jetbrains.compose.web.attributes.InputType
+import androidx.compose.runtime.*
+import app.softwork.routingcompose.Router
+import components.*
+import io.ktor.client.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.localStorage
+import kotlinx.coroutines.async
+import kotlinx.serialization.json.Json
+import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.onSubmit
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.*
+import org.w3c.dom.set
+import repository.*
+
+
+@Composable
+fun brancesPage() {
+
+    val httpClient = HttpClient {
+        install(ContentNegotiation) {
+            json(Json { isLenient = true })
+        }
+    }
+    val router = Router.current
+    val users = UserRepository(httpClient)
+    var usersData by remember { mutableStateOf<List<UserItem>?>(null) }
+    val settings = SettingsRepository(httpClient)
+    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
+    var sysPackage by remember { mutableStateOf("") }
+
+    val branches = BranchRepository(httpClient)
+    var branchData by remember { mutableStateOf(emptyList<BranchItem>()) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    var modalTitle by remember { mutableStateOf("") }
+    var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
+    var branchId by remember { mutableStateOf(0) }
+    var branchName by remember { mutableStateOf("") }
+    var systemLocation by remember { mutableStateOf("") }
+    var branchAddress by remember { mutableStateOf("") }
+
+    var branchNameError by remember { mutableStateOf("") }
+    var branchAddressError by remember { mutableStateOf("") }
+    var submitBtnText by remember { mutableStateOf("Submeter") }
+    var isLoggedIn by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var user by remember { mutableStateOf(emptyLoggedUser) }
+
+
+    fun cleanVarFields() {
+        branchId = 0
+        branchName = ""
+        branchAddress = ""
+    }
+
+    LaunchedEffect(Unit) {
+
+        val session = users.checkSession()
+        if (session != null) {
+            if (session.isLogged) {
+                isLoggedIn = true
+                user = session
+            } else {
+                isLoggedIn = false
+            }
+        } else {
+            console.log("session expired")
+        }
+
+        if (user.userRole != Role.V.desc) {
+            try {
+                isLoading = true
+                val branchesDeffered = async { branches.allBranches() }
+                branchData = branchesDeffered.await()
+                sysConfigs = settings.getSettings()
+            } catch (e: Exception) {
+                error = "Error: ${e.message}"
+            } finally {
+                isLoading = false
+            }
+
+            for((key, value) in sysConfigs) {
+                if (key == "active_package") sysPackage = value
+            }
+        }
+
+    }
+
+    fun locationDataFun() {
+        val locationId = localStorage.getItem("system_location")
+        if (locationId != null) {
+            val branchItemData = branchData.firstOrNull { it.id == locationId.toInt() }
+            systemLocation = if (branchItemData != null) {
+                "${branchItemData.name} - ${branchItemData.address}"
+            } else "Não definido"
+        }
+    }
+
+    normalBranchPage(
+        showBackButton = true,
+        onBackFunc = { router.navigate("/basicSettingsPage") },
+        userRole = user.userRole,
+        hasMain = true, hasNavBar = true, titleDivScope = {
+        }, navButtons = {
+
+            val canAddBranch = (sysPackage == "Lite" && branchData.isEmpty()) ||
+                    (sysPackage == "Plus" && branchData.size < 5) ||
+                    (sysPackage == "Pro")
+
+            if (canAddBranch) {
+                button("btnSolid", "+ Sucursal") {
+                    modalTitle = "Adicionar Sucursal"
+                    modalState = "open-min-modal"
+                    submitBtnText = "Submeter"
+                    cleanVarFields()
+                }
+            }
+        },
+        topContent = {
+            Div(attrs = {
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                }
+            }) {
+                if (branchData.isNotEmpty()) {
+                    locationDataFun()
+                    Label { Text("Localização actual: $systemLocation") }
+                    Select(attrs = {
+                        style { height(33.px) }
+                        id("selectLocation")
+                        classes("formTextInput")
+                        onChange {
+                            val inputValue = it.value
+                            if (inputValue == "0") {
+                                //                                categoryError = "Por favor, selecione uma categoria"
+                                return@onChange
+                            }
+
+                            inputValue?.let { option ->
+                                //                                categoryError = ""
+                                localStorage["system_location"] = option
+                                locationDataFun()
+                            }
+                        }
+                    }) {
+
+                        Option("0") {
+                            Text("")
+                        }
+                        branchData.forEach {
+                            Option("${it.id}") {
+                                Text("${it.name} - ${it.address}")
+                            }
+                        }
+                    }
+                    Label(attrs = { classes("errorText") }) { Text("") }
+                }
+
+            }
+        }
+    ) {
+        if (error == null) {
+            if (branchData.isEmpty()) {
+                Div(attrs = { classes("centerDiv") }) {
+                    Text("Nenhuma sucursal encontrada. ")
+                }
+            } else {
+
+                branchData.forEach { item ->
+                    cardWG(
+                        title = "",
+                        cardButtons = {
+                            cardButtons(
+                                onEditButton = {
+                                    branchId = item.id
+                                    branchName = item.name
+                                    branchAddress = item.address
+                                    modalState = "open-min-modal"
+                                    submitBtnText = "Editar"
+                                },
+                                showDeleteBtn = false
+                            )
+                        }) {
+                        CardPitem("Nome", item.name)
+                        CardPitem("Endereço", item.address)
+                    }
+                }
+            }
+
+        } else if (error != null) {
+            Div { Text(error!!) }
+        } else {
+            Div { Text("Loading...") }
+        }
+
+        minModal(modalState, modalTitle) {
+            Form(
+                attrs = {
+                    classes("modalform")
+                    onSubmit { event ->
+                        event.preventDefault()
+
+                        branchNameError = if (branchName.isBlank()) "O nome é obrigatório" else ""
+                        branchAddressError = if (branchAddress.isBlank()) "O endere é obrigatório" else ""
+
+                        if (branchNameError == "" && branchAddressError == "") {
+                            coroutineScope.launch {
+                                if (branchId != 0) {
+                                    val updateStatus =
+                                        branches.updateBranch(BranchItem(branchId, branchName, branchAddress))
+                                    if (updateStatus == 201) {
+                                        alertTimer("Sucursal actualizada com sucesso.")
+                                    } else unknownErrorAlert()
+                                    modalState = "closed"
+                                } else {
+                                    val (status, message) = branches.createBranch(
+                                        BranchItem(
+                                            branchId,
+                                            branchName,
+                                            branchAddress
+                                        )
+                                    )
+
+                                    when (status) {
+                                        101, 102, 103 -> alert("error", "Sucursal não adicionado", message)
+                                        201 -> alertTimer(message)
+                                        else -> unknownErrorAlert()
+                                    }
+
+                                    if (status == 201) {
+                                        alertTimer("Sucursal adicionada com sucesso.")
+                                    } else unknownErrorAlert()
+                                }
+                                cleanVarFields()
+                            }
+                        }
+                    }
+                }
+            ) {
+                Input(type = InputType.Hidden, attrs = {
+                    value(branchId)
+                    onInput { event -> branchId = event.value.toInt() }
+                })
+
+                formDiv(
+                    "Nome da sucursal",
+                    branchName,
+                    InputType.Text,
+                    { event -> branchName = event.value },
+                    branchNameError
+                )
+
+                formDiv("Endereço da sucursal", branchAddress, InputType.Text, { event ->
+                    branchAddress = event.value
+                }, branchAddressError)
+
+                Div(attrs = { classes("min-submit-buttons") }) {
+                    button("closeButton", "Fechar") {
+                        modalState = "u"
+                        coroutineScope.launch {
+                            branchData = branches.allBranches()
+                        }
+                    }
+                    button("submitButton", submitBtnText, ButtonType.Submit)
+                }
+                Br()
+            }
+        }
+
+    }
+
+}
