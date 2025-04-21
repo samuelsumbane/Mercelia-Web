@@ -42,24 +42,9 @@
                 // background: red;
                 font-weight: 500;
 
-                .inputTipoLabel, .inputTipoLabelBig{
-                    width:49% !important;
-                    border:none !important;
-                    background:transparent;
-                    font-weight: bold;
-                    text-align: right;
-                    outline: none !important;
-                    margin-left:auto !important;
-                }
-                .inputTipoLabelBig{
-                    width:auto !important;
-                    text-align: center;
-                }
-
                 & > select{
                     width:100%;
                 }
-
 
             }
 
@@ -177,7 +162,7 @@
                 }
                 &-title {
                     text-align:center;
-                    padding-bottom:3%;
+                    padding-bottom:2.5%;
                 }
             }
 
@@ -285,9 +270,13 @@
                 border-radius: 10px;
                 border: 1px solid #021b36;
 
-                &-title{
+
+                &-title {
                     text-align:center;
-                    padding-top:6px;
+                    padding-bottom:2.5%;
+                    & > h3 {
+                        padding-top:9px;
+                    }
                 }
 
                 &-body{

@@ -9,14 +9,18 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.jetbrains.compose.web.attributes.*
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.attributes.ButtonType
+import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.onSubmit
+import org.jetbrains.compose.web.attributes.width
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.*
 import repository.*
 
 
 @Composable
-fun reportsPage() {
+fun reportsPage(userRole: String, toFilterId: Int = 0) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -24,11 +28,11 @@ fun reportsPage() {
         }
     }
 
-//    val token = localStorage.getItem("jwt_token") ?: ""
     val reports = ReportsRepository(httpClient)
     val users = UserRepository(httpClient)
 
-    var reportsData by mutableStateOf(listOf<SaleReportItem>())
+    var allReportsData by mutableStateOf(listOf<SaleReportItem>())
+//    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
 //    var filteredReports by mutableStateOf(listOf<saleReportItem>())
@@ -48,48 +52,35 @@ fun reportsPage() {
     var finalTime by remember { mutableStateOf("") }
     var initialDateError by remember { mutableStateOf("") }
     var finalDateError by remember { mutableStateOf("") }
-    var showDialog by remember { mutableStateOf(true) }
-    var isLoggedIn by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var user by remember { mutableStateOf(emptyLoggedUser) }
 
 
     LaunchedEffect(Unit) {
-//        isLoggedIn = users.checkSession()
-        val session = users.checkSession()
-        if (session != null) {
-            if (session.isLogged) {
-                isLoggedIn = true
-                user = session
-            } else {
-                isLoggedIn = false
+        try {
+            isLoading = true
+            val reportsDeffered = async { reports.fetchSaleReports() }
+            allReportsData = reportsDeffered.await()
+        } catch (e: Exception) {
+            error = "Error: ${e.message}"
+        } finally {
+            initializeDataTable()
+            isLoading = false
+        }
+    }
+
+        val filteredReporsData = if (toFilterId != 0) {
+            allReportsData.filter {
+                it.userId == toFilterId
             }
         } else {
-            console.log("session expired")
+            allReportsData
         }
-    }
 
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            try {
-                isLoading = true
-                val reportsDeffered = async { reports.fetchSaleReports() }
-                reportsData = reportsDeffered.await()
-                initializeDataTable()
-            } catch (e: Exception) {
-                error = "Error: ${e.message}"
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-
-    if (isLoggedIn) {
         NormalPage(
             showBackButton = true,
             onBackFunc = { router.navigate("/basicReportsPage") },
             title = "Relatórios de Vendas", pageActivePath = "sidebar-btn-reports",
-            userRole = user.userRole,
+            userRole = userRole,
             hasNavBar = true, navButtons = {
             button("btnSolid", "Gerar Inventário") {
                 modalTitle = "Inventário de Vendas"
@@ -102,7 +93,7 @@ fun reportsPage() {
                 }
             } else {
                 if (error == null) {
-                    if (reportsData.isEmpty()) {
+                    if (filteredReporsData.isEmpty()) {
                         Div(attrs = { classes("centerDiv") }) {
                             Text("Nenhum registro de vendas efectuadas.")
                         }
@@ -123,12 +114,12 @@ fun reportsPage() {
                                 }
                             }
                             Tbody {
-                                reportsData.map {
+                                filteredReporsData.map {
                                     Tr {
                                         Td { Text(it.productName) }
                                         Td { Text(it.quantity.toString()) }
-                                        Td { Text(it.subTotal.twoDigits()) }
-                                        Td { Text(it.profit.twoDigits()) }
+                                        Td { Text(moneyFormat(it.subTotal)) }
+                                        Td { Text(moneyFormat(it.profit)) }
                                         Td { Text(it.status) }
                                         Td { Text(it.userName) }
                                         Td { Text(it.datetime.toString()) }
@@ -143,6 +134,7 @@ fun reportsPage() {
                     Div { Text("Loading...") }
                 }
             }
+
             minModal(modalState, "Selecionar Intervalo de Datas") {
                 Form(
                     attrs = {
@@ -295,6 +287,6 @@ fun reportsPage() {
                 Div(attrs = { classes("max-modal-footer") })
             }
         }
-    } else userNotLoggedScreen()
+
 }
 

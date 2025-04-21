@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import repository.StockItem
+import repository.moneyFormat
 import repository.twoDigits
 
 
@@ -110,8 +111,8 @@ fun stockPaper(
                                 Td { Text(stock.quantity.toString()) }
                                 Td { Text(stock.beforeQty.toString()) }
                                 Td { Text(stock.afterQty.toString()) }
-                                Td { Text(stock.cost.twoDigits()) }
-                                Td { Text(stock.price.twoDigits()) }
+                                Td { Text(moneyFormat(stock.cost)) }
+                                Td { Text(moneyFormat(stock.price)) }
                                 Td { Text(stock.reason) }
                                 Td { Text(stock.datetime) }
                                 Td { Text(stock.userName) }

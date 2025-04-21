@@ -5,6 +5,7 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import repository.ActivityItemGrupped
 import repository.SaleReportItem
+import repository.moneyFormat
 import repository.twoDigits
 
 
@@ -108,8 +109,8 @@ fun reportPaper(
                             Tr {
                                 Td { Text(saleItem.productName) }
                                 Td { Text(saleItem.quantity.toString()) }
-                                Td { Text(saleItem.subTotal.twoDigits()) }
-                                Td { Text(saleItem.profit.twoDigits()) }
+                                Td { Text(moneyFormat(saleItem.subTotal)) }
+                                Td { Text(moneyFormat(saleItem.profit)) }
                                 Td { Text(saleItem.status) }
                                 Td { Text(saleItem.userName) }
                                 Td { Text(saleItem.datetime!!) }

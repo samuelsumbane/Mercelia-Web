@@ -57,13 +57,23 @@ fun salesPage(userId: Int, userRole: String) {
             isLoading = true
             val fetched = orders.fetchOrders()
             ordersData = fetched
+            initializeDataTable()
         } catch (e: Exception) {
             error = "Erro: ${e.message}"
         }
         isLoading = false
     }
 
+//    SearchableSelect(
+//        options = listOf("Moçambique", "Angola", "Brasil", "Portugal"),
+//        onOptionSelected = { selected ->
+//            println("Selecionado: $selected")
+//        }
+//    )
+
     NormalPage(
+//        showBackButton = true,
+//        onBackFunc = { router.navigate("/basicSellPage") },
         title = "Vendas", pageActivePath = "sidebar-btn-sales", hasNavBar = true,
         userRole = userRole,
         navButtons = {
@@ -73,7 +83,7 @@ fun salesPage(userId: Int, userRole: String) {
                 submitBtnText = "Submeter"
                 saleMode = true
             }
-        }, onBackFunc = { router.navigate("/management") }
+        }
     ) {
 
         //
@@ -106,7 +116,7 @@ fun salesPage(userId: Int, userRole: String) {
                         ordersData.forEach {
                             Tr {
                                 Td { Text(it.clientName ?: "Sem cliente") }
-                                Td { Text(it.total.twoDigits()) }
+                                Td { Text(moneyFormat(it.total)) }
                                 Td { Text(it.orderDateTime.toString()) }
                                 Td { Text(it.status) }
                                 Td { Text(it.branchName) }

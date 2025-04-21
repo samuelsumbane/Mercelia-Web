@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import components.button
 import org.jetbrains.compose.web.dom.*
 import repository.OrderItemsItem
+import repository.moneyFormat
 import repository.twoDigits
 
 @Composable
@@ -41,8 +42,8 @@ fun saleItemsModal(
                         Tr {
                             Td { Text(it.productName.toString()) }
                             Td { Text(it.quantity.toString()) }
-                            Td { Text(it.subTotal.twoDigits()) }
-                            Td { Text(it.profit.twoDigits()) }
+                            Td { Text(moneyFormat(it.subTotal)) }
+                            Td { Text(moneyFormat(it.profit)) }
                         }
                     }
                 }

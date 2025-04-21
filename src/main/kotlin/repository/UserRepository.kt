@@ -68,10 +68,10 @@ class UserRepository(private val httpClient: HttpClient) {
             localStorage.removeItem("jwt_token")
             localStorage.removeItem("refreshToken")
             console.log("Sessão expirada, redirecionando para login...")
-            // 🔥 Redireciona para a página de login
 //            window.location.href = "/"
             null
         } else {
+//            console.log(response.status)
             if (response.status == HttpStatusCode.Accepted) {
                 val jsonResponse = Json.parseToJsonElement(response.bodyAsText()) as JsonObject
                 val userid = jsonResponse["userid"]?.jsonPrimitive?.content?.toInt()
@@ -130,7 +130,6 @@ class UserRepository(private val httpClient: HttpClient) {
         localStorage.removeItem("jwt_token")
         localStorage.removeItem("refreshToken")
     }
-
 
 
     suspend fun apiRequest(apitpath: String): HttpResponse? {

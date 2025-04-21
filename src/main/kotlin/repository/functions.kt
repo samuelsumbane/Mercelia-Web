@@ -16,3 +16,15 @@ enum class Role(val desc: String) { // desc -> description
     A("Admin"),
     G("Gerente"),
 }
+
+enum class sysPackages(val desc: String) { // desc -> description
+    L("Lite"),
+    PL("Plus"),
+    PO("Pro"),
+}
+
+
+
+fun moneyFormat(money: Double): String {
+    return js("money.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })") as String
+}

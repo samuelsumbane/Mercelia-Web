@@ -156,7 +156,6 @@ body{
                 margin: 10px 0 0 5px;
                 transition:0.8s;
 
-
                 &:hover{
                     color: white;
                     background-color: #031331;
@@ -164,30 +163,24 @@ body{
 
                 :is(&-header, &-body){ margin:8px; }
 
-
                 &-header{
                     width:90%;
-//                     height:10%;
                     border-radius: 3px;
 //                     background:red;
                     & > p{
-                        text-transform: uppercase;
-//                         padding-left: 5px;
-                        color: black;
+                        font-weight: bold;
+                        border-bottom:1px solid darkgray;
                     }
                 }
 
                 &-body{
                     height: 80%;
-                    // margin-top:-10px;
 //                     background: orangered;
                     & > div{
                         /* background: blue; */
                         height: 32px;
                         display: flex;
                         justify-content: space-between;
-                        // background:red;
-                        /* padding: 4px; */
                     }
 
                     &-valueP{

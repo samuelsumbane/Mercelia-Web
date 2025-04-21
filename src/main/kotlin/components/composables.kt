@@ -259,7 +259,7 @@ fun <K> formDiv(
     inputValue: String,
     inputType: InputType<K>,
     oninput: (SyntheticInputEvent<K, HTMLInputElement>) -> Unit,
-    spanError: String
+    spanError: String,
 ) {
     Div {
         Label { Text(label) }
@@ -273,25 +273,6 @@ fun <K> formDiv(
     }
 }
 
-//@Composable
-//fun formDiv(
-//    label: String,
-//    inputValue: String,
-//    inputType: InputType.Email,
-//    oninput: (SyntheticInputEvent<String, HTMLInputElement>) -> Unit,
-//    spanError: String
-//) {
-//    Div {
-//        Label { Text(label) }
-//        Input(type = inputType, attrs = {
-//            classes("formTextInput")
-//            value(inputValue)
-//            min("0")
-//            onInput { event -> oninput(event) }
-//        })
-//        Span(attrs = { classes("errorText") }) { Text(spanError) }
-//    }
-//}
 
 @Composable
 fun formDivReadOnly(
@@ -345,22 +326,6 @@ fun afStatusIndicator(spanText: String, id: String, labelText: Int) {
         Label(attrs = { id("") }) {
             Text("$labelText")
         }
-    }
-}
-
-@Composable
-fun PageNotFound() {
-    Div({
-        style {
-            textAlign("center")
-            fontSize(24.px)
-            color(Color.red)
-            margin(50.px)
-        }
-    }) {
-        Text("Erro 404 - Página não encontrada!")
-        Br()
-        A("#/") { Text("Voltar para a página inicial") }
     }
 }
 

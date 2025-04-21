@@ -10,6 +10,7 @@ import components.pageNotFoundScreen
 import components.userNotLoggedScreen
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -90,14 +91,17 @@ fun main() {
 
 
 
-            route("/") {
-                loginPage()
-            }
+//            route("/") {
+//                loginPage()
+//            }
 
             if (user.isLogged) {
-
                 noMatch {
                     pageNotFoundScreen()
+                }
+
+                route("/") {
+                    loginPage()
                 }
 
                 if (user.userRole == Role.V.desc) {
@@ -110,7 +114,7 @@ fun main() {
                     }
 
                     route("/reports") {
-                        reportsPage()
+                        reportsPage(user.userRole)
                     }
 
                     route("/stockPage") {
@@ -119,6 +123,8 @@ fun main() {
 
                 } else if (user.userRole == Role.G.desc
                     || user.userRole == Role.A.desc) {
+
+
                     route("/categories") {
                         categoriesPage(user.userRole)
                     }
@@ -132,7 +138,7 @@ fun main() {
                     }
 
                     route("/reports") {
-                        reportsPage()
+                        reportsPage(user.userRole)
                     }
 
                     route("/stockPage") {
@@ -140,7 +146,7 @@ fun main() {
                     }
 
                     route("/dashboard") {
-                        homeScreen()
+                        homeScreen(user.userRole)
                     }
 
 
@@ -159,7 +165,7 @@ fun main() {
 
 
                     route("/reports") {
-                        reportsPage()
+                        reportsPage(user.userRole)
                     }
 
 
@@ -203,7 +209,10 @@ fun main() {
                     basicSettingsPage()
                 }
             } else {
-                userNotLoggedScreen()
+                route("/") {
+                    loginPage()
+                }
+//                userNotLoggedScreen()
             }
 
 

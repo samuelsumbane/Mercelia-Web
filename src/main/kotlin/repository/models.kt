@@ -184,6 +184,7 @@ data class SaleReportItem(
     val subTotal: Double,
     val profit: Double,
     val status: String,
+    val userId: Int,
     val userName: String,
     val datetime: String?,
 )

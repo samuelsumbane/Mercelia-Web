@@ -248,16 +248,7 @@ fun UsersPage(userRole: String) {
                 Hr()
                 Br()
                 modalPItem("Histórico de vendas", value = {
-                    if (userStatus == "Activo") {
-                        button("btn", "Ver") {
-                            coroutineScope.launch {
-                                val (status, message) = users.changeUserStatus(
-                                    ChangeStatusDC(2, userId)
-                                )
-                                alertStatusAndMessageResponse(status, message)
-                            }
-                        }
-                    }
+
                 })
 
                 modalPItem("Papel", value = {

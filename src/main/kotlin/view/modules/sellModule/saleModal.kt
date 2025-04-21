@@ -5,16 +5,27 @@ import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.*
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLFormElement
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventListener
 import org.w3c.dom.events.KeyboardEvent
 import repository.*
+import kotlin.collections.listOf
+
+data class proItem(
+    val proId: String,
+    val proName: String,
+)
 
 @Composable
 fun saleModal(
@@ -29,13 +40,17 @@ fun saleModal(
     val products = ProductRepository(httpClient)
     val categories = CategoryRepository(httpClient)
     val clients = ClientRepository(httpClient)
+    val settings = SettingsRepository(httpClient)
 
 
     val coroutineScope = rememberCoroutineScope()
-    var productList by mutableStateOf(listOf<SellTableItem>())
+//    var productList by mutableStateOf(listOf<SellTableItem>())
+    var productList by remember { mutableStateOf(listOf<SellTableItem>()) }
+
     var clientId by remember { mutableStateOf<Int?>(null) }
     var orderItemsList by remember { mutableStateOf(mutableListOf<OrderItemsItemDraft>()) }
     var paymentMethod by remember { mutableStateOf("") }
+
     // Product quantity before it be sold ---------->>
     val totalProQuantityList = mutableMapOf<String, Int>()
     var totalRequest by remember { mutableDoubleStateOf(0.0) }
@@ -50,34 +65,32 @@ fun saleModal(
     var categoryData by remember { mutableStateOf(emptyList<CategoryItem>()) }
     var clientData by remember { mutableStateOf(emptyList<ClientItem>()) }
     var sysLocationId by remember { mutableStateOf("") }
-
+    var sysPackage by remember { mutableStateOf("") }
 
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var productId by remember { mutableStateOf(0) }
-
+    var proSelectedItem = emptyList<proItem>()
     // Product quantity after add product in card ---------->>
     var availabelQuantity by remember { mutableIntStateOf(0) } //For each product -------->>
     var filterCategoryId by remember { mutableStateOf(0) }
-    val toFilterData = productData
+//    val toFilterData = productData
+    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
+    var query by remember { mutableStateOf("") }
 
-    var filterProducts = remember(productData, filterCategoryId) {
-        if (filterCategoryId != 0) {
-            toFilterData.filter { it.categoryId == filterCategoryId }
-        } else {
-            toFilterData // Aqui, não há necessidade de chamar `.toList()`
-        }
-    }
-//    var formElement: org.w3c.dom.HTMLFormElement? = null
+
+
     var formElement by remember { mutableStateOf<HTMLFormElement?>(null) }
     var submitButton by remember { mutableStateOf<HTMLButtonElement?>(null) }
+    val inputRef = remember { mutableStateOf<HTMLInputElement?>(null) }
+
 
     fun clearFields() {
         productList = emptyList()
-        filterCategoryId = 0
         descont = 0.0
         charge = 0.0
         totalRequest = 0.0
         receivedValue = 0.0
+        query = ""
     }
 
     val router = Router.current
@@ -88,49 +101,6 @@ fun saleModal(
         }
     }
 
-    LaunchedEffect(saleMode) {
-        if (saleMode) {
-            productData = products.fetchProducts()
-            categoryData = categories.getCategories()
-            clientData = clients.getClients()
-            clearFields()
-            //
-            val branchDeffered = BranchRepository(httpClient).sysLocationId()
-            if (branchDeffered == "404" || branchDeffered == "405") branchIdNotFoundAlert() else  sysLocationId = branchDeffered
-        }
-    }
-
-
-        val listener = remember {
-            EventListener { event ->
-                if ((event as? KeyboardEvent)?.key == "Escape") {
-                console.log("Você pressionou ESC!")
-//                    filterCategoryId = 40
-//                    productList = emptyList()
-                    clearFields()
-//                    formElement?.submit()
-                }
-
-
-//                if ((event as? KeyboardEvent)?.key == "Enter") {
-////                    console.log("Você pressionou enter!")
-//                    // Can be used to finish the sale.
-//
-//                }
-            }
-
-        }
-
-
-
-        DisposableEffect(Unit) {
-            document.addEventListener("keydown", listener)
-            onDispose {
-                document.removeEventListener("keydown", listener)
-            }
-        }
-
-
     fun calcCharge(value: Double) {
         receivedValue = value
         charge = if (value != 0.0 && value >= totalRequest) {
@@ -138,6 +108,69 @@ fun saleModal(
         }
         else 0.00
     }
+
+    LaunchedEffect(Unit) {
+        document.addEventListener("keydown", { event ->
+            if (event is KeyboardEvent && event.key == "/") {
+                event.preventDefault()
+                document.getElementById("searchInput")?.let {
+                    (it as? HTMLInputElement)?.focus()
+                }
+            }
+
+            if (event is KeyboardEvent && event.key == "Escape") {
+                clearFields()
+            }
+
+            if (event is KeyboardEvent && event.key in listOf("1", "2", "3", "4", "5")) {
+                val activeElement = document.activeElement
+
+                if (activeElement?.tagName == "INPUT" && activeElement.id != "receivedValueInput") return@addEventListener
+
+                event.preventDefault()
+                document.getElementById("receivedValueInput")?.let {
+                    (it as? HTMLInputElement)?.focus()
+                }
+                receivedValue = (receivedValue.toString() + event.key).toDouble()
+                coroutineScope.launch {
+                    calcCharge(receivedValue)
+                }
+            }
+
+        })
+    }
+
+
+
+
+    LaunchedEffect(saleMode) {
+        if (saleMode) {
+            productData = products.fetchProducts()
+            categoryData = categories.getCategories()
+            clientData = clients.getClients()
+            clearFields()
+            val branchDeffered = BranchRepository(httpClient).sysLocationId()
+            if (branchDeffered == "404" || branchDeffered == "405") branchIdNotFoundAlert() else  sysLocationId = branchDeffered
+            sysConfigs = settings.getSettings().also {
+                for((k, v) in it) {
+                    if (k == "active_package") {
+                        sysPackage = v
+                    }
+                }
+            }
+        }
+    }
+
+
+    var filterProducts = remember(productData, query) {
+        if (query.isNotBlank()) {
+            productData.filter { it.name.startsWith(query, ignoreCase = true) }
+        } else {
+            productData
+        }
+    }
+
+
 
     Div(attrs = { classes("scrolled", "max-modal", maxModalState) }) {
 
@@ -148,11 +181,6 @@ fun saleModal(
         Div(attrs = { classes("max-modal-body") }) {
             Form(attrs = {
                 classes("max-modal-body-sellForm")
-                ref {
-                    formElement = it
-                    onDispose { formElement = null } // Corrige o erro
-                }
-//                method(Method.Post)
 
                 onSubmit { event ->
                     event.preventDefault()
@@ -198,7 +226,6 @@ fun saleModal(
                                 clearFields()
                                 productData = products.fetchProducts()
                             }
-
                         }
                     }
                 }
@@ -217,38 +244,21 @@ fun saleModal(
                     Div(attrs = { id("leftPart-title") }) {
                         H3{ Text("Lista de productos") }
                     }
+                    Hr()
+                    Br()
 
                     Div(attrs = {
                     }) {
-                        Label { Text("Filtrar por categoria") }
-                        Select(attrs = {
-                            style { height(33.px) }
+                        Input(type = InputType.Text, attrs = {
+                            id("searchInput")
                             classes("formTextInput")
-                            id("selectCategory")
-                            onChange {
-                                val inputValue = it.value
-                                inputValue?.let {
-                                    filterCategoryId = inputValue.toInt()
-                                }
-                            }
-                        }) {
-                            Option("0") { Text("Todas") }
-                            categoryData.forEach {
-                                if (it.name.isNotBlank()) {
-                                    Option("${it.id}") { Text(it.name) }
-                                }
-                            }
-                        }
-
-                        Label(attrs = { classes("errorText") }) { Text(productError) }
+                            placeholder("Pesquisar...")
+                            value(query)
+                            onInput { event -> query = event.value }
+                        })
                     }
-
-                    Br()
-                    H4 { Text("Productos") }
-                    Hr()
                     Br()
                     Div(attrs = { id("leftPart-center") }) {
-
                         filterProducts.forEach { pro ->
                             if (pro.stock > 0) {
                                 Div(attrs = { classes("productToSaleItem") }) {
@@ -277,7 +287,6 @@ fun saleModal(
                             }
                         }
                     }
-
                 }
 
                 // Center (horizontally)
@@ -295,28 +304,28 @@ fun saleModal(
                             H4 { Text("Ações") }
                         }
 
-                        productList.forEach { pro ->
+                        productList.forEach { sellItem ->
                             Div(attrs = { classes("center-div-item") }) {
-                                P { Text(pro.name) }
-                                P { Text(pro.quantity.toString()) }
-                                P { Text(pro.productCost.toString()) }
-                                P { Text(pro.productPrice.toString()) }
-                                P { Text(pro.subTotal.toString()) }
-                                P { Text(pro.availableProQuantity.toString()) }
+                                P { Text(sellItem.name) }
+                                P { Text(sellItem.quantity.toString()) }
+                                P { Text(moneyFormat(sellItem.productCost!!)) }
+                                P { Text(moneyFormat(sellItem.productPrice)) }
+                                P { Text(moneyFormat(sellItem.subTotal)) }
+                                P { Text(sellItem.availableProQuantity.toString()) }
                                 Div(attrs = { classes("productListBtns")}) {
                                     button("deleteButton", "") {
-                                        productList = productList.filter { it.id != pro.id }
-                                        totalRequest -= pro.subTotal
+                                        productList = productList.filter { it.id != sellItem.id }
+                                        totalRequest -= sellItem.subTotal
                                     }
 
                                     button("addButton", "") {
                                         productList = productList.map { item ->
-                                            if (item.id == pro.id && item.quantity < pro.availableProQuantity!!) {
+                                            if (item.id == sellItem.id && item.quantity < sellItem.availableProQuantity!!) {
                                                 item.copy(
                                                     quantity =  item.quantity + 1,
-                                                    subTotal = item.subTotal + item.productPrice, // Atualiza o subtotal
+                                                    subTotal = item.subTotal + sellItem.productPrice,
                                                 ).also {
-                                                    totalRequest += item.productPrice
+                                                    totalRequest += sellItem.productPrice
                                                 }
                                             } else item
                                         }
@@ -324,12 +333,12 @@ fun saleModal(
 
                                     button("removeButton", "") {
                                         productList = productList.map { item ->
-                                            if (item.id == pro.id && item.quantity > 1) {
+                                            if (item.id == sellItem.id && item.quantity > 1) {
                                                 item.copy(
                                                     quantity = item.quantity - 1,
-                                                    subTotal = item.subTotal - item.productPrice // Atualiza o subtotal
+                                                    subTotal = item.subTotal - sellItem.productPrice // Atualiza o subtotal
                                                 ).also {
-                                                    totalRequest -= item.productPrice
+                                                    totalRequest -= sellItem.productPrice
                                                 }
                                             } else item
                                         }
@@ -343,20 +352,26 @@ fun saleModal(
                         P()
                         formDiv("Desconto", descont.toString(),
                             InputType.Number, { event ->
-                                descont = event.value!!.toDouble()
+                                val inputValue = (event.value as? String)?.toDoubleOrNull()
+                                if (inputValue != null && inputValue >= 0) {
+                                    descont = inputValue
+                                }
                             }, ""
                         )
 
-                        formDiv("Valor recebido (do comprador)", receivedValue.toString(),
-                            InputType.Number, { event -> calcCharge(event.value!!.toDouble())},
-                            "")
-
-                        Div(attrs = { id("") }) {
-                            Label { Text("Troco (apenas leitura)") }
+                        Div {
+                            Label { Text("Valor recebido (do comprador)") }
                             Input(type = InputType.Number, attrs = {
-                                id("chargeValue")
-                                classes("formTextMediumInput"); value(charge)
-                                readOnly()
+                                id("receivedValueInput")
+                                classes("formTextInput")
+                                value(receivedValue)
+                                min("0")
+                                onInput { event ->
+                                    val inputValue = (event.value as? String)?.toDoubleOrNull()
+                                    if (inputValue != null && inputValue >= 0) {
+                                        calcCharge(inputValue)
+                                    }
+                                }
                             })
                         }
                         P()
@@ -374,7 +389,8 @@ fun saleModal(
                             Text("Resumo e Pagamento")
                         }
                     }
-
+                    Hr()
+                    Br()
                     Div(attrs = { id("rightPart-body") }) {
                         Div(attrs = { id("rightPartInputs") }) {
                             Div {
@@ -405,20 +421,21 @@ fun saleModal(
                             Div {
                                 Label { Text("Metôdo de pagamento") }
                                 Br()
-                                Select(attrs = {
-                                    style { height(33.px) }
-                                    classes("formTextMediumInput")
-                                    id("selectPaymentMethod")
-                                    onChange {
-                                        val inputValue = it.value
-                                        inputValue?.let { paymentMethod = it }
-                                    }
-                                }) {
-                                    Option("0") {
-                                        Text("Dinheiro")
-                                    }
-                                    Option("1") {
-                                        Text("Cartão")
+                                if (sysPackage == sysPackages.L.desc) {
+                                    formDivReadOnly("Dinheiro", "")
+                                } else {
+                                    Select(attrs = {
+                                        style { height(33.px) }
+                                        classes("formTextMediumInput")
+                                        id("selectPaymentMethod")
+                                        onChange {
+                                            val inputValue = it.value
+                                            inputValue?.let { paymentMethod = it }
+                                        }
+                                    }) {
+                                        Option("0") {
+                                            Text("Dinheiro")
+                                        }
                                     }
                                 }
                             }
@@ -426,9 +443,17 @@ fun saleModal(
 
                         Hr()
                         Div(attrs = { id("sale-summary") }) {
-                            summaryDivItem("SubTotal do pedido", "$totalRequest MT")
-                            summaryDivItem("Desconto", "$descont MT")
-                            summaryDivItem("Total do pedido", "${totalRequest - descont} MT")
+                            summaryDivItem("SubTotal do pedido", "${moneyFormat(totalRequest)} MT")
+                            summaryDivItem("Desconto", "${moneyFormat(descont)} MT")
+                            summaryDivItem("Troco", "${moneyFormat(charge)} MT")
+                            Br()
+
+                            Hr()
+                            Br()
+                            Div {
+                                H4 { Text("Total do pedido (MT):") }
+                                H2(attrs = {style { color(Color.green) }}) { Text("${moneyFormat(totalRequest - descont)}") }
+                            }
                         }
                         Hr()
 

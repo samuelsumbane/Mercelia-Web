@@ -129,8 +129,8 @@ fun stockPage() {
                             }
                             Tbody {
                                 stockData.forEach {
-                                    val cost = it.cost.twoDigits() ?: 0.0
-                                    val price = it.price.twoDigits() ?: 0.0
+                                    val cost = moneyFormat(it.cost) ?: 0.0
+                                    val price = moneyFormat(it.price) ?: 0.0
                                     Tr {
                                         Td { Text(it.productName) }
                                         Td { Text(it.type) }

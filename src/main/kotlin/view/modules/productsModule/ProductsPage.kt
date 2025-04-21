@@ -121,16 +121,10 @@ fun productsPage(userRole: String) {
                 }
             } else {
                 productsData!!.forEach { item ->
-                    cardWG(title = "",
+                    cardWG(title = item.name,
                         cardButtons = {
                             if (userRole != Role.V.desc) {
                                 cardButtons(
-                                    //                            onEditButton = {
-                                    //                                proId = item.id!!
-                                    //                                proName = item.name
-                                    //                                modalState = "open-min-modal"
-                                    //                                submitBtnText = "Ver"
-                                    //                            },
                                     showDetailsButton = true,
                                     onSeeDetails = {
                                         modalMoreDetailsState = "open-min-modal"
@@ -149,8 +143,10 @@ fun productsPage(userRole: String) {
                             }
 
                         }) {
-                        CardPitem("Nome", item.name)
-                        CardPitem("Preço", item.price.twoDigits())
+                        if (userRole != Role.V.desc) {
+                            CardPitem("Custo", moneyFormat(item.cost))
+                        }
+                        CardPitem("Preço", moneyFormat(item.price))
                         CardPitem("Estoque", item.stock.toString())
                         CardPitem("Categoria", item.categoryName.toString())
                         CardPitem("C. Barras", item.barcode)
@@ -387,11 +383,11 @@ fun productsPage(userRole: String) {
                 Hr()
 
                 modalPItem("Custo", value = {
-                    P { Text(costValue.twoDigits()) }
+                    P { Text(moneyFormat(costValue)) }
                 })
 
                 modalPItem("Preço", value = {
-                    P { Text(proPrice.twoDigits()) }
+                    P { Text(moneyFormat(proPrice)) }
                 })
 
                 modalPItem("", value = {

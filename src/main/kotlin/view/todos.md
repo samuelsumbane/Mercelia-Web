@@ -23,17 +23,25 @@
 - aplicar descontos (se permitido pelo gerente)
 
 
+# Funcionalities
+## Shortcuts
+### On Sales
+- Esc: Cancel sale e clear fields
+
 # Lite
 - usuarios: 3
 - sucursais: 1
+- M. Pagamento: Dinheiro
 
 
 # Plus
 - usuarios: 10 
 - sucursais: 5
+- M. Pagamento: Dinheiro, Cartao, E-mola ...
 
 
 
 # Pro
 - usuarios: ilimitado
 - sucursais: ilimitado
+- M. Pagamento: Dinheiro, Cartao, E-mola ...

@@ -13,3 +13,8 @@ build/
 /captures
 .externalNativeBuild
 .cxx
+js/
+dist/
+*.class
+*.js.map
+*.css.map
