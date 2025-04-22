@@ -1,6 +1,6 @@
 :root{--inativeColor:rgba(3, 66, 87, 0.466);--semiColor:#013b5c;--ativeColor:#09ceff;}
 
-.content-container{display:none}
+/*.content-container{display:none}*/
 
 #flashingModal{position:fixed;width:100%;bottom:0;height:100%;background:rgba(255, 255, 255, 0);backdrop-filter: blur(8px);z-index:1;display:flex}
 /* .hideflashingModal{bottom:100%}

@@ -2,6 +2,7 @@ package components
 
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
+import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -24,6 +25,7 @@ fun Menu(activePath: String, userRole: String) {
                 BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
                 BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
                 BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
+                BtnDetails("sidebar-btn-user", "/eachUser", "Perfil"),
             )
         }
         Role.G.desc, Role.A.desc -> {
@@ -40,7 +42,6 @@ fun Menu(activePath: String, userRole: String) {
     }
 
     var sideBarState by remember { mutableStateOf("-") }
-
 
     Div(attrs = { classes("sidebar-container") }) {
         Div(attrs = { classes("sidebar", "sidebar-item", sideBarState) }) {
@@ -78,19 +79,14 @@ fun Menu(activePath: String, userRole: String) {
                         }
                     }
                 }
+
+
+
+
             }
 
-            Div(attrs = { classes("sidebar-footer-div") }) {
-//                Button(
-//                    attrs = {
-//                        classes("l")
-//                        onClick {
-//                            router.navigate("/afiliatePage")
-//                        }
-//                    }
-//                ) {
-//                  Text("My p")
-//                }
+            Div(attrs = { classes("sidebar-footr-div") }) {
+
             }
         }
     }

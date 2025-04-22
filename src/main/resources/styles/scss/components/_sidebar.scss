@@ -104,62 +104,6 @@ body{
         #first-a{
             margin-top:10px;
         }
-      
-
-        & > div{
-
-            .sidebar-perfil{
-                width:34px;
-                height:34px;
-                background-color:transparent;
-                // background-color:blue;
-                border-radius: 50%;
-                border:1.5px solid gray;
-                margin-left:5px;
-                font-size: 18px;
-                text-align: center;
-                color:$bg-primary;
-            }
-
-
-            &:hover{
-                & > div{
-                    position:relative;
-                    width: 150px;
-                    height: 80px;
-                    // background-color:#bb2f2f;
-                    right:-40px;
-                    top:-20px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-around;
-                    border-radius: 10px;
-                    z-index: 2;
-    
-                    &  button{
-                        height:32px;
-                        width:93%;
-                        // margin:0 auto 0 auto;
-                        margin-left:5px !important;
-                        background:#cadee7;
-                        color: black;
-                        border:none;
-                        border-radius: 6px;
-
-                        &:hover{
-                         background:#83c0dd !important;
-                         color:white;
-                        }
-                    } 
-                }
-               
-            }
-
-            & > div{
-               display: none;
-            }
-            
-        }
     }
 
 
@@ -176,17 +120,12 @@ body{
         // border-radius: $btn-radius;
 
         &-home{background-image:url('/media/icons/bar-chart.svg');}
-
         &-partners{background-image:url('/media/icons/clients.svg'); }
-
         &-products{background-image:url("/media/icons/products.svg");}
-
         &-reports{background-image:url("/media/icons/report.svg");}
-
         &-settings{background-image:url("/media/icons/gear.svg")}
-
         &-sales{background-image:url("/media/icons/shop.svg");}
-
+        &-user{background-image:url("/media/icons/user.svg");}
         &-logout{background-image:url("/media/icons/door-open.svg")
             ;margin-bottom:50px
         }

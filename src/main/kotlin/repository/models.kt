@@ -255,6 +255,13 @@ data class BranchItem(
     val address: String,
 )
 
+data class SaleConfirmationItem(
+    val taxa: Int,
+    val base: Double,
+    val iva: String,
+    val Total: Double,
+)
+
 val emptyConfigItem =
     SysConfigItem("", "", "", 0)
 

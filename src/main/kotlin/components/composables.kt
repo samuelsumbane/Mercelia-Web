@@ -44,41 +44,33 @@ fun userCardButtons(
     button("eyeBtn", "", hoverText = "Ver Detalhes", onClick = onSeeMoreDetailsButton)
 }
 
+@Composable
+fun loadingModal() {
+//    <div id="flashingModal">
+//        <div class="dotsdiv">
+//            <div class="snippet" data-title="dot-flashing">
+//                <div class="stage">
+//                    <div class="dot-flashing"></div>
+//            </div>
+//            </div>
+//        </div>
+//    </div>
 
+    Div(attrs = { id("flashingModal") }) {
+        Div(attrs = { classes("dotsdiv") }) {
+            Div(attrs = { classes("snippet") }) {
+                Div(attrs = {
+                    classes("stage")
+                }) {
+                    Div(attrs = { classes("dot-flashing") }) {
 
+                    }
+                }
 
-//Input(type = InputType.Text, attrs = {
-//    classes("formTextInput")
-//    value(quantity)
-//    onInput { event -> quantity = event.value.toInt() }
-//})
-
-//@Composable
-//fun input(
-//    value: String,
-//    onChange: () -> Unit
-//) {
-//    Input(type = InputType.Text, attrs = {
-//        classes("formTextInput")
-//        value(value)
-//        onInput{ event ->
-//            onChange()
-//        }
-//
-//    })
-//}
-
-//@Composable
-//fun alert() {
-//    js("""
-//           swal({
-//                icon:"success",
-//                title:"ti",
-//                text:"te"
-//            })
-//        """
-//    )
-//}
+            }
+        }
+    }
+}
 
 @JsName("showAlert")
 external fun showAlert(icon: String, title: String, text: String)

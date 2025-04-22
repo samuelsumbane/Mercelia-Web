@@ -7,6 +7,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.*
@@ -48,56 +49,47 @@ fun salesPage(userId: Int, userRole: String) {
 
 
     val router = Router.current
-    var isLoading by remember { mutableStateOf(false) }
+//    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf<Boolean?>(null) }
     var isLoggedIn by remember { mutableStateOf(false) }
-
 
     LaunchedEffect(Unit) {
         try {
             isLoading = true
-            val fetched = orders.fetchOrders()
-            ordersData = fetched
-            initializeDataTable()
+            val fetched = async { orders.fetchOrders() }
+            ordersData = fetched.await()
         } catch (e: Exception) {
             error = "Erro: ${e.message}"
+        } finally {
+            isLoading = false
         }
-        isLoading = false
     }
 
-//    SearchableSelect(
-//        options = listOf("Moçambique", "Angola", "Brasil", "Portugal"),
-//        onOptionSelected = { selected ->
-//            println("Selecionado: $selected")
-//        }
-//    )
 
-    NormalPage(
+//    if (isLoading == true) {
+//        loadingModal()
+//    } else if (isLoading == false) {
+        NormalPage(
 //        showBackButton = true,
 //        onBackFunc = { router.navigate("/basicSellPage") },
-        title = "Vendas", pageActivePath = "sidebar-btn-sales", hasNavBar = true,
-        userRole = userRole,
-        navButtons = {
-            button("btnSolid", "Nova Venda") {
-                modalTitle = "Adicionar Producto"
-                modalState = "open-min-modal"
-                submitBtnText = "Submeter"
-                saleMode = true
+            title = "Vendas", pageActivePath = "sidebar-btn-sales", hasNavBar = true,
+            userRole = userRole,
+            navButtons = {
+                button("btnSolid", "Nova Venda") {
+                    modalTitle = "Adicionar Producto"
+                    modalState = "open-min-modal"
+                    submitBtnText = "Submeter"
+                    saleMode = true
+                }
             }
-        }
-    ) {
-
-        //
-        //        if (error == null) {
-        if (isLoading) {
-            Div(attrs = { classes("centerDiv") }) {
-                Text("Carregando...")
-            }
-        } else {
+        ) {
             if (ordersData.isEmpty()) {
                 Div(attrs = { classes("centerDiv") }) {
                     Text("Nenhum registro de vendas efectuadas.")
                 }
             } else {
+                initializeDataTable()
+
                 Table(attrs = {
                     classes("display", "myTable")
                 }) {
@@ -122,7 +114,7 @@ fun salesPage(userId: Int, userRole: String) {
                                 Td { Text(it.branchName) }
                                 Td { Text(it.userName) }
                                 Td {
-                                    button("eyeBtn", "", ButtonType.Button) {
+                                    button("smallEyeBtn", "", ButtonType.Button, hoverText = "Ver Itens") {
                                         mediumModalState = "open-medium-modal"
                                         coroutineScope.launch {
                                             ordersItemsData = orders.fetchOrderItems(it.id!!)
@@ -135,25 +127,22 @@ fun salesPage(userId: Int, userRole: String) {
                     }
                 }
             }
-        }
 
-        //        } else if (error != null) {
-        //            Div { Text(error!!) }
-        //        }
-//
 
-        saleModal(httpClient, saleMode, orders, userId, modalState) {
-            modalState = "closed"
-            coroutineScope.launch {
-                ordersData = orders.fetchOrders()
+            saleModal(httpClient, saleMode, orders, userId, modalState) {
+                modalState = "closed"
+                coroutineScope.launch {
+                    ordersData = orders.fetchOrders()
+                }
+                saleMode = false
             }
-            saleMode = false
-        }
 
-        saleItemsModal(orderId, ordersItemsData, mediumModalState) {
-            mediumModalState = "closed"
+            saleItemsModal(orderId, ordersItemsData, mediumModalState) {
+                mediumModalState = "closed"
+            }
         }
-    }
+//    }
+
 }
 
 @Composable

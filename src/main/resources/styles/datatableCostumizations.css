@@ -14,7 +14,11 @@
 
 
 .myTable tbody tr:nth-child(even) {
-    background-color: #E9ECEF; /* Cinza claro */
+    background-color: aliceblue;
+}
+
+.myTable tbody tr .sorting_1 {
+    background:rgba(aliceblue, 0.1) !important;
 }
 
 .myTable tbody tr:hover {

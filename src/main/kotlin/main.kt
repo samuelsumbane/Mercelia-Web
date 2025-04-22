@@ -2,21 +2,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.softwork.routingcompose.HashRouter
 import app.softwork.routingcompose.Router
 import components.pageNotFoundScreen
+import components.userHasNotAccessScreen
 import components.userNotLoggedScreen
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
-import org.w3c.dom.mediacapture.Settings
 import repository.Role
 import repository.UserRepository
 import repository.emptyLoggedUser
@@ -105,6 +101,11 @@ fun main() {
                 }
 
                 if (user.userRole == Role.V.desc) {
+
+                    route("/eachUser") {
+                        eachUserPage(user.userId)
+                    }
+
                     route("/products") {
                         productsPage(user.userRole)
                     }
@@ -119,6 +120,12 @@ fun main() {
 
                     route("/stockPage") {
                         stockPage()
+                    }
+
+                    for (uRoute in norForSellerUserRoutes) {
+                        route(uRoute) {
+                            userHasNotAccessScreen()
+                        }
                     }
 
                 } else if (user.userRole == Role.G.desc
@@ -160,22 +167,13 @@ fun main() {
                     }
 
                     route("/eachUser") {
-                        eachUserPage(user.userId, user.userRole)
+                        eachUserPage(user.userId)
                     }
-
-
-                    route("/reports") {
-                        reportsPage(user.userRole)
-                    }
-
 
                     route("/suppliers") {
                         suppliersPage(user.userRole)
                     }
 
-                    route("/stockPage") {
-                        stockPage()
-                    }
 
                     route("/settings") {
                         settingsPage()
@@ -219,4 +217,48 @@ fun main() {
         }
     }
 }
+
+
+val routesList = listOf(
+    "/",
+    "/basicSettingsPage",
+    "/categories",
+    "/products",
+    "/sales",
+    "/reports",
+    "/stockPage",
+    "/dashboard",
+    "/clients",
+    "/users",
+    "/eachUser",
+    "/suppliers",
+    "/settings",
+    "/branches",
+    "/basicPartnersPage",
+    "/basicProductsPage",
+    "/basicReportsPage",
+    "/basicSellPage",
+)
+
+val norForSellerUserRoutes = listOf(
+    "/",
+    "/basicSettingsPage",
+    "/categories",
+    "/dashboard",
+    "/clients",
+    "/users",
+    "/suppliers",
+    "/settings",
+    "/branches",
+    "/basicPartnersPage",
+)
+
+
+
+
+
+
+
+
+
 

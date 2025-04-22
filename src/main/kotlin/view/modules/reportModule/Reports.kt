@@ -68,14 +68,6 @@ fun reportsPage(userRole: String, toFilterId: Int = 0) {
         }
     }
 
-        val filteredReporsData = if (toFilterId != 0) {
-            allReportsData.filter {
-                it.userId == toFilterId
-            }
-        } else {
-            allReportsData
-        }
-
         NormalPage(
             showBackButton = true,
             onBackFunc = { router.navigate("/basicReportsPage") },
@@ -92,6 +84,13 @@ fun reportsPage(userRole: String, toFilterId: Int = 0) {
                     Text("Carregando...")
                 }
             } else {
+                val filteredReporsData = if (toFilterId != 0) {
+                    allReportsData.filter {
+                        it.userId == toFilterId
+                    }
+                } else {
+                    allReportsData
+                }
                 if (error == null) {
                     if (filteredReporsData.isEmpty()) {
                         Div(attrs = { classes("centerDiv") }) {

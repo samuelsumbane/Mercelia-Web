@@ -62,7 +62,7 @@
     }
 }
 
-:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .card-editButton){
+:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .smallEyeBtn, .card-editButton){
     @extend .btn;
     min-width:30px !important;
     height:30px;
@@ -81,9 +81,15 @@
 }
 
 
-:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .card-editButton):hover{
+:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .smallEyeBtn, .card-editButton):hover{
     background-color:lightgray;
 }
+
+.smallEyeBtn{
+    padding: 1px !important;
+    height:20px !important;
+}
+
 
 // to Text button
 .toGoReports{
@@ -98,7 +104,7 @@
     background-image:url("/media/icons/pen-fill.svg");
 }
 
-.eyeBtn{
+.eyeBtn, .smallEyeBtn{
     background-image:url("/media/icons/eye-fill.svg");
 }
 

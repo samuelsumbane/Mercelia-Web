@@ -66,7 +66,6 @@ fun loginPage() {
 
                                 if (status) {
                                     val userData = users.getUserById(userId)
-                                    console.log(userData)
 
                                     if (userData.role == "Vendedor/Caixa") {
                                         router.navigate("/sales")

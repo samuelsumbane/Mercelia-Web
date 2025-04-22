@@ -18,7 +18,7 @@ typealias AfMap = Map<String, String>
 
 
 @Composable
-fun eachUserPage(userId: Int, userRole: String) {
+fun eachUserPage(userId: Int) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -63,8 +63,8 @@ fun eachUserPage(userId: Int, userRole: String) {
     NormalPage(
         title = "Perfil", showBackButton = true,
         onBackFunc = { router.navigate("/") },
-        pageActivePath = "products",
-        userRole = userRole,
+        pageActivePath = "sidebar-btn-user",
+        userRole = role,
         navButtons = {}
     ) {
 
