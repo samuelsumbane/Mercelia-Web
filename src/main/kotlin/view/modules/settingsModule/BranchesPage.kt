@@ -54,6 +54,7 @@ fun brancesPage() {
     var isLoading by remember { mutableStateOf(false) }
     var user by remember { mutableStateOf(emptyLoggedUser) }
 
+    var appropriateName by remember { mutableStateOf("") }
 
     fun cleanVarFields() {
         branchId = 0
@@ -88,7 +89,10 @@ fun brancesPage() {
             }
 
             for((key, value) in sysConfigs) {
-                if (key == "active_package") sysPackage = value
+                if (key == "active_package") {
+                    sysPackage = value
+                    appropriateName = if (value == SysPackages.L.desc) "Sede" else "Sucursal"
+                }
             }
         }
 
@@ -116,8 +120,8 @@ fun brancesPage() {
                     (sysPackage == "Pro")
 
             if (canAddBranch) {
-                button("btnSolid", "+ Sucursal") {
-                    modalTitle = "Adicionar Sucursal"
+                button("btnSolid", "+ $appropriateName") {
+                    modalTitle = "Adicionar $appropriateName"
                     modalState = "open-min-modal"
                     submitBtnText = "Submeter"
                     cleanVarFields()
@@ -171,7 +175,7 @@ fun brancesPage() {
         if (error == null) {
             if (branchData.isEmpty()) {
                 Div(attrs = { classes("centerDiv") }) {
-                    Text("Nenhuma sucursal encontrada. ")
+                    Text("Nenhuma sucursal/sede encontrada. ")
                 }
             } else {
 
@@ -218,7 +222,7 @@ fun brancesPage() {
                                     val updateStatus =
                                         branches.updateBranch(BranchItem(branchId, branchName, branchAddress))
                                     if (updateStatus == 201) {
-                                        alertTimer("Sucursal actualizada com sucesso.")
+                                        alertTimer("$appropriateName actualizada com sucesso.")
                                     } else unknownErrorAlert()
                                     modalState = "closed"
                                 } else {
@@ -231,13 +235,13 @@ fun brancesPage() {
                                     )
 
                                     when (status) {
-                                        101, 102, 103 -> alert("error", "Sucursal não adicionado", message)
+                                        101, 102, 103 -> alert("error", "$appropriateName não adicionada", message)
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()
                                     }
 
                                     if (status == 201) {
-                                        alertTimer("Sucursal adicionada com sucesso.")
+                                        alertTimer("$appropriateName adicionada com sucesso.")
                                     } else unknownErrorAlert()
                                 }
                                 cleanVarFields()
@@ -252,14 +256,14 @@ fun brancesPage() {
                 })
 
                 formDiv(
-                    "Nome da sucursal",
+                    "Nome da $appropriateName",
                     branchName,
                     InputType.Text,
                     { event -> branchName = event.value },
                     branchNameError
                 )
 
-                formDiv("Endereço da sucursal", branchAddress, InputType.Text, { event ->
+                formDiv("Endereço da $appropriateName", branchAddress, InputType.Text, { event ->
                     branchAddress = event.value
                 }, branchAddressError)
 

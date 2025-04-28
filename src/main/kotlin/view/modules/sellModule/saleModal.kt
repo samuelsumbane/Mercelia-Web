@@ -5,7 +5,6 @@ import app.softwork.routingcompose.Router
 import components.*
 import io.ktor.client.*
 import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.*
 import org.jetbrains.compose.web.css.Color
@@ -16,13 +15,11 @@ import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.HTMLInputElement
-import org.w3c.dom.events.Event
-import org.w3c.dom.events.EventListener
 import org.w3c.dom.events.KeyboardEvent
 import repository.*
 import kotlin.collections.listOf
 
-data class proItem(
+data class ProItem(
     val proId: String,
     val proName: String,
 )
@@ -69,12 +66,10 @@ fun saleModal(
 
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var productId by remember { mutableStateOf(0) }
-    var proSelectedItem = emptyList<proItem>()
+    var proSelectedItem = emptyList<ProItem>()
     // Product quantity after add product in card ---------->>
     var availabelQuantity by remember { mutableIntStateOf(0) } //For each product -------->>
     var filterCategoryId by remember { mutableStateOf(0) }
-//    val toFilterData = productData
-    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
     var query by remember { mutableStateOf("") }
 
 
@@ -83,6 +78,8 @@ fun saleModal(
     var submitButton by remember { mutableStateOf<HTMLButtonElement?>(null) }
     val inputRef = remember { mutableStateOf<HTMLInputElement?>(null) }
 
+    val branches = BranchRepository(httpClient)
+    var branchDeffered by remember { mutableStateOf("") }
 
     fun clearFields() {
         productList = emptyList()
@@ -122,7 +119,7 @@ fun saleModal(
                 clearFields()
             }
 
-            if (event is KeyboardEvent && event.key in listOf("1", "2", "3", "4", "5")) {
+            if (event is KeyboardEvent && event.key in listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")) {
                 val activeElement = document.activeElement
 
                 if (activeElement?.tagName == "INPUT" && activeElement.id != "receivedValueInput") return@addEventListener
@@ -136,11 +133,8 @@ fun saleModal(
                     calcCharge(receivedValue)
                 }
             }
-
         })
     }
-
-
 
 
     LaunchedEffect(saleMode) {
@@ -149,12 +143,15 @@ fun saleModal(
             categoryData = categories.getCategories()
             clientData = clients.getClients()
             clearFields()
-            val branchDeffered = BranchRepository(httpClient).sysLocationId()
-            if (branchDeffered == "404" || branchDeffered == "405") branchIdNotFoundAlert() else  sysLocationId = branchDeffered
-            sysConfigs = settings.getSettings().also {
-                for((k, v) in it) {
-                    if (k == "active_package") {
-                        sysPackage = v
+            branchDeffered = branches.sysLocationId()
+//            if (branchDeffered == "404" || branchDeffered == "405") branchIdNotFoundAlert() else  sysLocationId = branchDeffered
+            if (branchDeffered != "404" && branchDeffered != "405") {
+                sysLocationId = branchDeffered
+                settings.getSettings().also {
+                    for((k, v) in it) {
+                        if (k == "active_package") {
+                            sysPackage = v
+                        }
                     }
                 }
             }
@@ -162,124 +159,124 @@ fun saleModal(
     }
 
 
-    var filterProducts = remember(productData, query) {
-        if (query.isNotBlank()) {
-            productData.filter { it.name.startsWith(query, ignoreCase = true) }
-        } else {
-            productData
-        }
-    }
-
-
-
-    Div(attrs = { classes("scrolled", "max-modal", maxModalState) }) {
-
-        Div(attrs = { classes("max-modal-header") }) {
-            H3(attrs = { classes("max-modal-title") }) { Text("Vender Productos") }
+    if (branchDeffered != "404" && branchDeffered != "405") {
+        val filterProducts = remember(productData, query) {
+            if (query.isNotBlank()) {
+                productData.filter { it.name.startsWith(query, ignoreCase = true) }
+            } else {
+                productData
+            }
         }
 
-        Div(attrs = { classes("max-modal-body") }) {
-            Form(attrs = {
-                classes("max-modal-body-sellForm")
+        Div(attrs = { classes("scrolled", "max-modal", maxModalState) }) {
 
-                onSubmit { event ->
-                    event.preventDefault()
-                    coroutineScope.launch {
+            Div(attrs = { classes("max-modal-header") }) {
+                H3(attrs = { classes("max-modal-title") }) { Text("Vender Productos") }
+            }
 
-                        if (productList.isEmpty()) {
-                            alert("info", "Venda não realizada", "Nenhum producto foi encontrado.")
-                        } else {
-                            var totalPaidValue = 0.0
-                            for (pro in productList) {
-                                val profit = (pro.productPrice - pro.productCost!!) * pro.quantity
-                                orderItemsList.add(
-                                    OrderItemsItemDraft(
-                                        pro.id, pro.quantity, pro.productCost,
-                                        pro.productPrice, pro.subTotal, profit
-                                    )
-                                )
-                                totalPaidValue += pro.subTotal
-                            }
+            Div(attrs = { classes("max-modal-body") }) {
+                Form(attrs = {
+                    classes("max-modal-body-sellForm")
 
-                            val resoan = if (descont == 0.0) "Venda Normal" else "Venda com desconto"
+                    onSubmit { event ->
+                        event.preventDefault()
+                        coroutineScope.launch {
 
-                            if (sysLocationId.isBlank()) {
-                                branchIdNotFoundAlert()
+                            if (productList.isEmpty()) {
+                                alert("info", "Venda não realizada", "Nenhum producto foi encontrado.")
                             } else {
-                                val saleStatus = orders.saleProduct(
-                                    SaleItem(
-                                        order = OrderItemDraft(
-                                            clientId = clientId,
-                                            total = totalPaidValue,
-                                            status = "Completo",
-                                            reason = resoan,
-                                            userId = userId,
-                                            branchId = sysLocationId.toInt()
-                                        ),
-                                        o_items = orderItemsList
+                                var totalPaidValue = 0.0
+                                for (pro in productList) {
+                                    val profit = (pro.productPrice - pro.productCost!!) * pro.quantity
+                                    orderItemsList.add(
+                                        OrderItemsItemDraft(
+                                            pro.id, pro.quantity, pro.productCost,
+                                            pro.productPrice, pro.subTotal, profit
+                                        )
                                     )
-                                )
+                                    totalPaidValue += pro.subTotal
+                                }
 
-                                if (saleStatus == 201) alertTimer("Venda feita com sucesso.")
-                                else unknownErrorAlert()
+                                val resoan = if (descont == 0.0) "Venda Normal" else "Venda com desconto"
 
-                                clearFields()
-                                productData = products.fetchProducts()
+                                if (sysLocationId.isBlank()) {
+                                    branchIdNotFoundAlert()
+                                } else {
+                                    val saleStatus = orders.saleProduct(
+                                        SaleItem(
+                                            order = OrderItemDraft(
+                                                clientId = clientId,
+                                                total = totalPaidValue,
+                                                status = "Completo",
+                                                reason = resoan,
+                                                userId = userId,
+                                                branchId = sysLocationId.toInt()
+                                            ),
+                                            o_items = orderItemsList
+                                        )
+                                    )
+
+                                    if (saleStatus == 201) alertTimer("Venda feita com sucesso.")
+                                    else unknownErrorAlert()
+
+                                    clearFields()
+                                    productData = products.fetchProducts()
+                                }
                             }
                         }
                     }
-                }
-            }) {
+                }) {
 
-                Div(attrs = { id("leftPart") }) {
-                    Input(type = InputType.Hidden, attrs = {
-                        value(productId)
-                        onInput { event -> productId = event.value.toInt() }
-                    })
-                    //
-                    totalProQuantityList.forEach {
-                        Label(attrs = { classes("") }) { Text("${it.key} - ${it.value}") }
-                    }
-                    //
-                    Div(attrs = { id("leftPart-title") }) {
-                        H3{ Text("Lista de productos") }
-                    }
-                    Hr()
-                    Br()
-
-                    Div(attrs = {
-                    }) {
-                        Input(type = InputType.Text, attrs = {
-                            id("searchInput")
-                            classes("formTextInput")
-                            placeholder("Pesquisar...")
-                            value(query)
-                            onInput { event -> query = event.value }
+                    Div(attrs = { id("leftPart") }) {
+                        Input(type = InputType.Hidden, attrs = {
+                            value(productId)
+                            onInput { event -> productId = event.value.toInt() }
                         })
-                    }
-                    Br()
-                    Div(attrs = { id("leftPart-center") }) {
-                        filterProducts.forEach { pro ->
-                            if (pro.stock > 0) {
-                                Div(attrs = { classes("productToSaleItem") }) {
-                                    P { Text(pro.name) }
-                                    Div {
-                                        button("throwRight", "") {
-                                            val productExists = productList.firstOrNull() { it.id == pro.id!! }
-                                            if (productExists != null) {
-                                                alert("info", "Producto adicionado", "O producto já foi adicionado")
-                                            } else {
-                                                val product = SellTableItem(
-                                                    id = pro.id!!,
-                                                    name = pro.name,
-                                                    quantity = 1,
-                                                    productCost = pro.cost,
-                                                    productPrice = pro.price,
-                                                    formatToTwoDecimalPlaces(pro.price),
-                                                    availableProQuantity = pro.stock,
-                                                )
-                                                productList = productList + product
-                                                totalRequest += pro.price
+                        //
+                        totalProQuantityList.forEach {
+                            Label(attrs = { classes("") }) { Text("${it.key} - ${it.value}") }
+                        }
+                        //
+                        Div(attrs = { id("leftPart-title") }) {
+                            H3{ Text("Lista de productos") }
+                        }
+                        Hr()
+                        Br()
+
+                        Div(attrs = {
+                        }) {
+                            Input(type = InputType.Text, attrs = {
+                                id("searchInput")
+                                classes("formTextInput")
+                                placeholder("Pesquisar...")
+                                value(query)
+                                onInput { event -> query = event.value }
+                            })
+                        }
+                        Br()
+                        Div(attrs = { id("leftPart-center") }) {
+                            filterProducts.forEach { pro ->
+                                if (pro.stock > 0) {
+                                    Div(attrs = { classes("productToSaleItem") }) {
+                                        P { Text(pro.name) }
+                                        Div {
+                                            button("throwRight", "") {
+                                                val productExists = productList.firstOrNull() { it.id == pro.id!! }
+                                                if (productExists != null) {
+                                                    alert("info", "Producto adicionado", "O producto já foi adicionado")
+                                                } else {
+                                                    val product = SellTableItem(
+                                                        id = pro.id!!,
+                                                        name = pro.name,
+                                                        quantity = 1,
+                                                        productCost = pro.cost,
+                                                        productPrice = pro.price,
+                                                        formatToTwoDecimalPlaces(pro.price),
+                                                        availableProQuantity = pro.stock,
+                                                    )
+                                                    productList = productList + product
+                                                    totalRequest += pro.price
+                                                }
                                             }
                                         }
                                     }
@@ -287,180 +284,179 @@ fun saleModal(
                             }
                         }
                     }
-                }
 
-                // Center (horizontally)
-                Div(attrs = { id("center") }) {
-                    Div(attrs = {
-                        classes("scolled", "sellTable")
-                    }) {
-                        Div(attrs = { classes("center-div-item", "center-div-item-title") }) {
-                            H4 { Text("Nome") }
-                            H4 { Text("Quantidade") }
-                            H4 { Text("Custo") }
-                            H4 { Text("Preço") }
-                            H4 { Text("Sub-Total") }
-                            H4 { Text("Qtd. Disponível") }
-                            H4 { Text("Ações") }
-                        }
+                    // Center (horizontally)
+                    Div(attrs = { id("center") }) {
+                        Div(attrs = {
+                            classes("scolled", "sellTable")
+                        }) {
+                            Div(attrs = { classes("center-div-item", "center-div-item-title") }) {
+                                H4 { Text("Nome") }
+                                H4 { Text("Quantidade") }
+                                H4 { Text("Custo") }
+                                H4 { Text("Preço") }
+                                H4 { Text("Sub-Total") }
+                                H4 { Text("Qtd. Disponível") }
+                                H4 { Text("Ações") }
+                            }
 
-                        productList.forEach { sellItem ->
-                            Div(attrs = { classes("center-div-item") }) {
-                                P { Text(sellItem.name) }
-                                P { Text(sellItem.quantity.toString()) }
-                                P { Text(moneyFormat(sellItem.productCost!!)) }
-                                P { Text(moneyFormat(sellItem.productPrice)) }
-                                P { Text(moneyFormat(sellItem.subTotal)) }
-                                P { Text(sellItem.availableProQuantity.toString()) }
-                                Div(attrs = { classes("productListBtns")}) {
-                                    button("deleteButton", "") {
-                                        productList = productList.filter { it.id != sellItem.id }
-                                        totalRequest -= sellItem.subTotal
-                                    }
-
-                                    button("addButton", "") {
-                                        productList = productList.map { item ->
-                                            if (item.id == sellItem.id && item.quantity < sellItem.availableProQuantity!!) {
-                                                item.copy(
-                                                    quantity =  item.quantity + 1,
-                                                    subTotal = item.subTotal + sellItem.productPrice,
-                                                ).also {
-                                                    totalRequest += sellItem.productPrice
-                                                }
-                                            } else item
+                            productList.forEach { sellItem ->
+                                Div(attrs = { classes("center-div-item") }) {
+                                    P { Text(sellItem.name) }
+                                    P { Text(sellItem.quantity.toString()) }
+                                    P { Text(moneyFormat(sellItem.productCost!!)) }
+                                    P { Text(moneyFormat(sellItem.productPrice)) }
+                                    P { Text(moneyFormat(sellItem.subTotal)) }
+                                    P { Text(sellItem.availableProQuantity.toString()) }
+                                    Div(attrs = { classes("productListBtns")}) {
+                                        button("deleteButton", "") {
+                                            productList = productList.filter { it.id != sellItem.id }
+                                            totalRequest -= sellItem.subTotal
                                         }
-                                    }
 
-                                    button("removeButton", "") {
-                                        productList = productList.map { item ->
-                                            if (item.id == sellItem.id && item.quantity > 1) {
-                                                item.copy(
-                                                    quantity = item.quantity - 1,
-                                                    subTotal = item.subTotal - sellItem.productPrice // Atualiza o subtotal
-                                                ).also {
-                                                    totalRequest -= sellItem.productPrice
-                                                }
-                                            } else item
+                                        button("addButton", "") {
+                                            productList = productList.map { item ->
+                                                if (item.id == sellItem.id && item.quantity < sellItem.availableProQuantity!!) {
+                                                    item.copy(
+                                                        quantity =  item.quantity + 1,
+                                                        subTotal = item.subTotal + sellItem.productPrice,
+                                                    ).also {
+                                                        totalRequest += sellItem.productPrice
+                                                    }
+                                                } else item
+                                            }
+                                        }
+
+                                        button("removeButton", "") {
+                                            productList = productList.map { item ->
+                                                if (item.id == sellItem.id && item.quantity > 1) {
+                                                    item.copy(
+                                                        quantity = item.quantity - 1,
+                                                        subTotal = item.subTotal - sellItem.productPrice // Atualiza o subtotal
+                                                    ).also {
+                                                        totalRequest -= sellItem.productPrice
+                                                    }
+                                                } else item
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 //                            Div(attrs = { id("sellControl")}) {
-                    Div(attrs = { classes("chargeAndDiscont")}) {
-                        P()
-                        formDiv("Desconto", descont.toString(),
-                            InputType.Number, { event ->
-                                val inputValue = (event.value as? String)?.toDoubleOrNull()
-                                if (inputValue != null && inputValue >= 0) {
-                                    descont = inputValue
-                                }
-                            }, ""
-                        )
-
-                        Div {
-                            Label { Text("Valor recebido (do comprador)") }
-                            Input(type = InputType.Number, attrs = {
-                                id("receivedValueInput")
-                                classes("formTextInput")
-                                value(receivedValue)
-                                min("0")
-                                onInput { event ->
+                        Div(attrs = { classes("chargeAndDiscont")}) {
+                            P()
+                            formDiv("Desconto", descont.toString(),
+                                InputType.Number, { event ->
                                     val inputValue = (event.value as? String)?.toDoubleOrNull()
                                     if (inputValue != null && inputValue >= 0) {
-                                        calcCharge(inputValue)
+                                        descont = inputValue
                                     }
-                                }
-                            })
-                        }
-                        P()
-                    }
-                }
+                                }, ""
+                            )
 
-                //Right
-                Div(
-                    attrs = { id("rightPart")
-                        classes("scrolled")
-                    }
-                ) {
-                    Div(attrs = { id("rightPart-title") }) {
-                        H3{
-                            Text("Resumo e Pagamento")
+                            Div {
+                                Label { Text("Valor recebido (do comprador)") }
+                                Input(type = InputType.Number, attrs = {
+                                    id("receivedValueInput")
+                                    classes("formTextInput")
+                                    value(receivedValue)
+                                    min("0")
+                                    onInput { event ->
+                                        val inputValue = (event.value as? String)?.toDoubleOrNull()
+                                        if (inputValue != null && inputValue >= 0) {
+                                            calcCharge(inputValue)
+                                        }
+                                    }
+                                })
+                            }
+                            P()
                         }
                     }
-                    Hr()
-                    Br()
-                    Div(attrs = { id("rightPart-body") }) {
-                        Div(attrs = { id("rightPartInputs") }) {
-                            Div {
-                                Label { Text("Cliente") }
-                                Br()
-                                Select(attrs = {
-                                    style { height(33.px) }
-                                    classes("formTextMediumInput")
-                                    id("selectPaymentMethod")
-                                    onChange {
-                                        val inputValue = it.value
-                                        inputValue?.let { option ->
-                                            clientId = if (option.toInt() == 0) null else option.toInt()
-                                        }
-                                    }
-                                }) {
-                                    Option("0") {
-                                        Text("Sem Cliente")
-                                    }
-                                    clientData.forEach { client ->
-                                        Option("${client.id}") {
-                                            Text(client.name)
-                                        }
-                                    }
-                                }
+
+                    //Right
+                    Div(
+                        attrs = { id("rightPart")
+                            classes("scrolled")
+                        }
+                    ) {
+                        Div(attrs = { id("rightPart-title") }) {
+                            H3{
+                                Text("Resumo e Pagamento")
                             }
-                            Br()
-                            Div {
-                                Label { Text("Metôdo de pagamento") }
-                                Br()
-                                if (sysPackage == sysPackages.L.desc) {
-                                    formDivReadOnly("Dinheiro", "")
-                                } else {
+                        }
+                        Hr()
+                        Br()
+                        Div(attrs = { id("rightPart-body") }) {
+                            Div(attrs = { id("rightPartInputs") }) {
+                                Div {
+                                    Label { Text("Cliente") }
+                                    Br()
                                     Select(attrs = {
                                         style { height(33.px) }
                                         classes("formTextMediumInput")
                                         id("selectPaymentMethod")
                                         onChange {
                                             val inputValue = it.value
-                                            inputValue?.let { paymentMethod = it }
+                                            inputValue?.let { option ->
+                                                clientId = if (option.toInt() == 0) null else option.toInt()
+                                            }
                                         }
                                     }) {
                                         Option("0") {
-                                            Text("Dinheiro")
+                                            Text("Sem Cliente")
+                                        }
+                                        clientData.forEach { client ->
+                                            Option("${client.id}") {
+                                                Text(client.name)
+                                            }
+                                        }
+                                    }
+                                }
+                                Br()
+                                Div {
+                                    Label { Text("Metôdo de pagamento") }
+                                    Br()
+                                    if (sysPackage == SysPackages.L.desc) {
+                                        formDivReadOnly("Dinheiro", "")
+                                    } else {
+                                        Select(attrs = {
+                                            style { height(33.px) }
+                                            classes("formTextMediumInput")
+                                            id("selectPaymentMethod")
+                                            onChange {
+                                                val inputValue = it.value
+                                                inputValue?.let { paymentMethod = it }
+                                            }
+                                        }) {
+                                            Option("0") {
+                                                Text("Dinheiro")
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-
-                        Hr()
-                        Div(attrs = { id("sale-summary") }) {
-                            summaryDivItem("SubTotal do pedido", "${moneyFormat(totalRequest)} MT")
-                            summaryDivItem("Desconto", "${moneyFormat(descont)} MT")
-                            summaryDivItem("Troco", "${moneyFormat(charge)} MT")
-                            Br()
 
                             Hr()
-                            Br()
-                            Div {
-                                H4 { Text("Total do pedido (MT):") }
-                                H2(attrs = {style { color(Color.green) }}) { Text("${moneyFormat(totalRequest - descont)}") }
+                            Div(attrs = { id("sale-summary") }) {
+                                summaryDivItem("SubTotal do pedido", "${moneyFormat(totalRequest)} MT")
+                                summaryDivItem("Desconto", "${moneyFormat(descont)} MT")
+                                summaryDivItem("Troco", "${moneyFormat(charge)} MT")
+                                Br()
+
+                                Hr()
+                                Br()
+                                Div {
+                                    H4 { Text("Total do pedido (MT):") }
+                                    H2(attrs = {style { color(Color.green) }}) { Text("${moneyFormat(totalRequest - descont)}") }
+                                }
                             }
-                        }
-                        Hr()
+                            Hr()
 
-                        Div(attrs = { id("sellButtonsControl") }) {
-                            button("closeButton", "Fechar") { onCloseModal() }
+                            Div(attrs = { id("sellButtonsControl") }) {
+                                button("closeButton", "Fechar") { onCloseModal() }
 
-                            button("submitButton", btnText = "Finalizar", ButtonType.Submit)
+                                button("submitButton", btnText = "Finalizar", ButtonType.Submit)
 //                            Button(
 //                                attrs = {
 //                                    ref {
@@ -475,12 +471,14 @@ fun saleModal(
 //                            ) {
 //                                Text("Finalizar")
 //                            }
+                            }
                         }
                     }
                 }
             }
+            Div(attrs = { classes("max-modal-footer") })
         }
-        Div(attrs = { classes("max-modal-footer") })
-    }
+    } else branchIdNotFoundAlert()
+
 
 }

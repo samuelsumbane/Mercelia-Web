@@ -32,6 +32,8 @@ fun productsPage(userRole: String) {
 
     var productsData by remember { mutableStateOf<List<ProductItem>?>(null) }
     var categoriesData by remember { mutableStateOf<List<CategoryItem>?>(null) }
+    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
+    var sysPackage by remember { mutableStateOf("") }
 
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -94,6 +96,12 @@ fun productsPage(userRole: String) {
             categoriesData = categories.getCategories()
         } catch (e: Exception) {
             error = "Error: ${e.message}"
+        } finally {
+            val settings = SettingsRepository(httpClient)
+            sysConfigs = settings.getSettings()
+            for((key, value) in sysConfigs) {
+                if (key == "active_package") sysPackage = value
+            }
         }
     }
 
@@ -121,36 +129,74 @@ fun productsPage(userRole: String) {
                 }
             } else {
                 productsData!!.forEach { item ->
-                    cardWG(title = item.name,
-                        cardButtons = {
+                    if (sysPackage == SysPackages.L.desc) {
+                        cardWG(title = item.name,
+                            warningClass = "empty",
+                            cardButtons = {
+                                if (userRole != Role.V.desc) {
+                                    cardButtons(
+                                        showDetailsButton = true,
+                                        onSeeDetails = {
+                                            modalMoreDetailsState = "open-min-modal"
+                                            proId = item.id!!
+                                            proName = item.name
+                                            proQuantity = item.stock
+                                            costValue = item.cost
+                                            proPrice = item.price
+                                            proQuantity = item.stock
+                                            minProQuantity = item.minStock ?: 0
+                                            categoryName = item.categoryName.toString()
+                                            proBarcode = item.barcode
+                                        },
+                                        showDeleteBtn = false
+                                    )
+                                }
+                            }) {
                             if (userRole != Role.V.desc) {
-                                cardButtons(
-                                    showDetailsButton = true,
-                                    onSeeDetails = {
-                                        modalMoreDetailsState = "open-min-modal"
-                                        proId = item.id!!
-                                        proName = item.name
-                                        proQuantity = item.stock
-                                        costValue = item.cost
-                                        proPrice = item.price
-                                        proQuantity = item.stock
-                                        minProQuantity = item.minStock ?: 0
-                                        categoryName = item.categoryName.toString()
-                                        proBarcode = item.barcode
-                                    },
-                                    showDeleteBtn = false
-                                )
+                                CardPitem("Custo", moneyFormat(item.cost))
                             }
-
-                        }) {
-                        if (userRole != Role.V.desc) {
-                            CardPitem("Custo", moneyFormat(item.cost))
+                            CardPitem("Preço", moneyFormat(item.price))
+                            CardPitem("Estoque", item.stock.toString())
+                            CardPitem("Categoria", item.categoryName.toString())
+                            CardPitem("C. Barras", item.barcode)
                         }
-                        CardPitem("Preço", moneyFormat(item.price))
-                        CardPitem("Estoque", item.stock.toString())
-                        CardPitem("Categoria", item.categoryName.toString())
-                        CardPitem("C. Barras", item.barcode)
+                    } else {
+                        val minProStock = item.minStock ?: -1
+                        val warningClass = if (minProStock != -1 && item.stock < minProStock) "redCard" else "empty"
+
+                        cardWG(title = item.name,
+                            warningClass,
+                            cardButtons = {
+                                if (userRole != Role.V.desc) {
+                                    cardButtons(
+                                        showDetailsButton = true,
+                                        onSeeDetails = {
+                                            modalMoreDetailsState = "open-min-modal"
+                                            proId = item.id!!
+                                            proName = item.name
+                                            proQuantity = item.stock
+                                            costValue = item.cost
+                                            proPrice = item.price
+                                            proQuantity = item.stock
+                                            minProQuantity = item.minStock ?: 0
+                                            categoryName = item.categoryName.toString()
+                                            proBarcode = item.barcode
+                                        },
+                                        showDeleteBtn = false
+                                    )
+                                }
+
+                            }) {
+                            if (userRole != Role.V.desc) {
+                                CardPitem("Custo", moneyFormat(item.cost))
+                            }
+                            CardPitem("Preço", moneyFormat(item.price))
+                            CardPitem("Estoque", item.stock.toString())
+                            CardPitem("Categoria", item.categoryName.toString())
+                            CardPitem("C. Barras", item.barcode)
+                        }
                     }
+
                 }
             }
 
@@ -175,9 +221,10 @@ fun productsPage(userRole: String) {
 
                         if (proNameError == "" && proCostError == "" && proPriceError == "" && categoryError == "") {
                             coroutineScope.launch {
+                                val minProQuantityChecker = if (minProQuantity == 0) null else minProQuantity
                                 val status = products.createProduct(
                                     ProductItem(
-                                        id = null, proName, costValue, proPrice, proQuantity, minProQuantity, categoryId, categoryName = null, proBarcode
+                                        id = null, proName, costValue, proPrice, proQuantity, minProQuantityChecker, categoryId, categoryName = null, proBarcode
                                     )
                                 )
                                 if (status == 201) {
@@ -213,9 +260,11 @@ fun productsPage(userRole: String) {
                     }
                 }, proQuantityError)
 
-                formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
-                    minProQuantity = event.value!!.toInt()
-                }, minProQuantityError)
+                if (sysPackage != SysPackages.L.desc) {
+                    formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
+                        minProQuantity = event.value!!.toInt()
+                    }, minProQuantityError)
+                } else minProQuantity = 0
 
                 formDiv("Custo", costValue.toString(), InputType.Number, { event ->
                     costValue = event.value!!.toDouble()
@@ -296,6 +345,8 @@ fun productsPage(userRole: String) {
 
                         if (proCostError == "" && proPriceError == "") {
                             coroutineScope.launch {
+//                                val minProQuantityChecker = if (minProQuantity == 0) null else minProQuantity
+
                                 if (proId != 0) { //Have to edit ------------>>
                                     val status = products.increaseProductStock(
                                         IncreaseProductStockDraft(
@@ -318,17 +369,19 @@ fun productsPage(userRole: String) {
                     onInput { event -> proId = event.value.toInt() }
                 })
 
-                formDiv("Quantidade Adicional", proQuantity.toString(), InputType.Number, { event ->
-                    proQuantity = if (event.value.toString() != "") {
-                        event.value!!.toInt()
-                    } else {
-                        0
-                    }
-                }, proQuantityError)
-
-                formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
-                    minProQuantity = event.value!!.toInt()
-                }, minProQuantityError)
+//                formDiv("Quantidade Adicional", proQuantity.toString(), InputType.Number, { event ->
+//                    proQuantity = if (event.value.toString() != "") {
+//                        event.value!!.toInt()
+//                    } else {
+//                        0
+//                    }
+//                }, proQuantityError)
+//
+                if (sysPackage != SysPackages.L.desc) {
+                    formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
+                        minProQuantity = event.value!!.toInt()
+                    }, minProQuantityError)
+                } else minProQuantity = 0
 
                 formDiv("Custo", costValue.toString(), InputType.Number, { event ->
                     costValue = event.value!!.toDouble()

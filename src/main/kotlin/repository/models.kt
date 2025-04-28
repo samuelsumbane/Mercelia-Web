@@ -278,6 +278,8 @@ val emptyConfigItem =
 //    val data: UserItem
 //)
 
+
+
 @Serializable
 data class LoggedUserDC(
     val isLogged: Boolean,
@@ -304,4 +306,55 @@ val emptyLoggedUser = LoggedUserDC(
 
 val emptyUserItem = UserItem (
     0, "", "", "", "", "", ""
+)
+
+
+// Finance
+
+@Serializable
+data class PayableDraft(
+    val fornecedor: String,
+    val description: String,
+    val value: Double,
+    val expiration_date: String,
+    val payment_method: String,
+)
+
+@Serializable
+data class PayableItem(
+    val id: String,
+    val fornecedor: String,
+    val description: String,
+    val value: Double,
+    val expiration_date: String,
+    val payment_date: String,
+    val payment_method: String,
+    val status: String,
+)
+
+@Serializable
+data class ReceivableDraft(
+    val client: String,
+    val description: String,
+    val value: Double,
+    val expiration_date: String,
+    val received_method: String,
+)
+
+@Serializable
+data class ReceivableItem(
+    val id: String,
+    val client: String,
+    val description: String,
+    val value: Double,
+    val expiration_data: String,
+    val received_data: String,
+    val received_method: String,
+    val status: String,
+)
+
+@Serializable
+data class IdAndStatus(
+    val id: Int,
+    val status: Int,
 )

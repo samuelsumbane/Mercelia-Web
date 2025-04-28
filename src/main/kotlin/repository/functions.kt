@@ -9,6 +9,8 @@ const val apiReportPath = "$apiPath/reports"
 const val apiSupplierPath = "$apiPath/suppliers"
 const val apiStockPath = "$apiPath/stocks"
 const val apiBranchesPath = "$apiPath/branches"
+const val apiPayablesPath = "$apiPath/payables"
+const val apiReceivablesPath = "$apiPath/receivables"
 
 
 enum class Role(val desc: String) { // desc -> description
@@ -17,7 +19,7 @@ enum class Role(val desc: String) { // desc -> description
     G("Gerente"),
 }
 
-enum class sysPackages(val desc: String) { // desc -> description
+enum class SysPackages(val desc: String) { // desc -> description
     L("Lite"),
     PL("Plus"),
     PO("Pro"),

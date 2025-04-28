@@ -7,7 +7,6 @@ import app.softwork.routingcompose.HashRouter
 import app.softwork.routingcompose.Router
 import components.pageNotFoundScreen
 import components.userHasNotAccessScreen
-import components.userNotLoggedScreen
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -21,6 +20,9 @@ import view.Afiliates.clientsPage
 import view.Afiliates.eachUserPage
 //import view.Afiliates.eachUserPage
 import view.Afiliates.suppliersPage
+import view.modules.financeModule.basicFinances
+import view.modules.financeModule.payablesPage
+import view.modules.financeModule.receivablesPage
 import view.modules.partnersModule.basicPartners
 import view.modules.productsModule.basicProductsPage
 import view.modules.productsModule.categoriesPage
@@ -70,6 +72,10 @@ fun main() {
                 } else {
                     console.log("session expired")
                 }
+//                console.log(session)
+//                if (!isLoggedIn) {
+//                    router.navigate("/")
+//                }
             }
 
 
@@ -92,9 +98,9 @@ fun main() {
 //            }
 
             if (user.isLogged) {
-                noMatch {
-                    pageNotFoundScreen()
-                }
+//                noMatch {
+//                    pageNotFoundScreen()
+//                }
 
                 route("/") {
                     loginPage()
@@ -182,6 +188,18 @@ fun main() {
                     route("/branches") {
                         brancesPage()
                     }
+//                    val onlyForProPackage = listOf("/payables", "/receivables", "/finance-history")
+
+                    route("/payables") {
+                        payablesPage(user.userRole)
+                    }
+
+                    route("/receivables") {
+                        receivablesPage(user.userRole)
+                    }
+
+//                    route("/finance-history") {
+//                    }
                 }
 
 
@@ -193,6 +211,10 @@ fun main() {
 
                 route("/basicProductsPage") {
                     basicProductsPage()
+                }
+
+                route("/basicFinancePage") {
+                    basicFinances()
                 }
 
                 route("/basicReportsPage") {
@@ -210,7 +232,7 @@ fun main() {
                 route("/") {
                     loginPage()
                 }
-//                userNotLoggedScreen()
+
             }
 
 
@@ -254,10 +276,7 @@ val norForSellerUserRoutes = listOf(
 )
 
 
-
-
-
-
+val onlyForProPackage = listOf("/payables", "/receivables", "/finance-history")
 
 
 

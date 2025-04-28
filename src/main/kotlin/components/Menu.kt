@@ -34,6 +34,7 @@ fun Menu(activePath: String, userRole: String) {
                 BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
                 BtnDetails("sidebar-btn-partners","/basicPartnersPage", "Parceiros"),
                 BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
+                BtnDetails("sidebar-btn-finance", "/basicFinancePage", "Finanças"),
                 BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
                 BtnDetails("sidebar-btn-settings", "/basicSettingsPage", "Definições"),
             )

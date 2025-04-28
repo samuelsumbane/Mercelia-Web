@@ -11,4 +11,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "merceliaWeb"
+rootProject.name = "SSPT_Web"

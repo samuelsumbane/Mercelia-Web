@@ -33,6 +33,7 @@ fun settingsPage() {
     var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var user by remember { mutableStateOf(emptyLoggedUser) }
+    var activeSysPackage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val session = users.checkSession()
@@ -84,11 +85,6 @@ fun settingsPage() {
 
                         Div(attrs = { classes("def-page-body-main-right") }) {
 
-//                    val defaultConfigs = mapOf(
-//                        "active_package" to SysPackage.PLUS.description,
-//                        "users_limit" to "10",
-//                        "percentual_iva" to "17"
-//                    )
 
                             var configsList = mutableListOf<ConfigDetailsDc>()
 
@@ -97,11 +93,19 @@ fun settingsPage() {
                                     "percentual_iva" -> configsList.add(ConfigDetailsDc("Percentagem de IVA", "Será calculada nas vendas", v)
                                     )
 
-                                    "active_package" -> configsList.add(ConfigDetailsDc("Pacote do sistema (Apenas leitura)", "Sistema executa as funcionalidades do pacote $v", v, true)
-                                    )
+                                    "active_package" -> {
+                                        configsList.add(ConfigDetailsDc("Pacote do sistema (Apenas leitura)", "Sistema executa as funcionalidades do pacote $v", v, true)
+                                        )
+                                        activeSysPackage = v
+                                    }
 
-                                    "users_limit" -> configsList.add(ConfigDetailsDc("Limite de  (Apenas leitura)", "O número do usuários que aquele senhor suporta", v, true)
-                                    )
+                                    "alert_min_pro_quantity" -> {
+                                        if (activeSysPackage != SysPackages.L.desc) {
+                                            configsList.add(ConfigDetailsDc("Alerta de productos", "Alertar quando o producto atingir a sua quantidade minima", v)
+                                            )
+                                        }
+                                    }
+
 
                                 }
 

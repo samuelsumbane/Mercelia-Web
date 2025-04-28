@@ -103,7 +103,7 @@ class UserRepository(private val httpClient: HttpClient) {
         }
     }
 
-    suspend fun login(data: LoginRequest): Pair<Boolean, Int> {
+    suspend fun login(data: LoginRequest): Pair<Boolean, String> {
         val encodedRegion = "Africa/Harare"
         val response = httpClient.post("$apiPath/user/login?timezoneid=$encodedRegion") {
             contentType(ContentType.Application.Json)
@@ -113,17 +113,16 @@ class UserRepository(private val httpClient: HttpClient) {
         if (response.status == HttpStatusCode.Accepted) {
             val jsonResponse = Json.parseToJsonElement(response.bodyAsText()) as JsonObject
             val token = jsonResponse["token"]?.jsonPrimitive?.content
-            val userId = jsonResponse["userId"]?.jsonPrimitive?.content?.toInt()
+            val userRole = jsonResponse["userRole"]?.jsonPrimitive?.content
 
             if (token != null) {
                 localStorage.setItem("jwt_token", token)
 //                val us = response.bodyAsText()
-//                println(us)
-                return Pair(true, userId!!)
+                return Pair(true, userRole!!)
             }
         }
 
-        return Pair(false, 0)
+        return Pair(false, "")
     }
 
     fun logout() {

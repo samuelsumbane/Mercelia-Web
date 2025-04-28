@@ -13,6 +13,7 @@ import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.onSubmit
 import org.jetbrains.compose.web.dom.*
 import repository.LoginRequest
+import repository.Role
 import repository.UserRepository
 
 @Composable
@@ -62,17 +63,19 @@ fun loginPage() {
                         if (errorText.isBlank()) {
                             coroutineScope.launch {
                                 val loginRequest = LoginRequest(email,password)
-                                val (status, userId) = users.login(loginRequest)
+                                val (status, userRole) = users.login(loginRequest)
 
                                 if (status) {
-                                    val userData = users.getUserById(userId)
-
-                                    if (userData.role == "Vendedor/Caixa") {
-                                        router.navigate("/sales")
+                                    if (userRole.isNotBlank()) {
+                                        if (userRole == Role.V.desc) {
+                                            router.navigate("/sales")
+                                        } else {
+                                            router.navigate("/dashboard")
+                                        }
                                     } else {
-                                        router.navigate("/dashboard")
-//                                        console.log("devia ter id")
+                                        console.error("Login failed.")
                                     }
+
                                 } else {
                                     errorText = "Usuário ou senha invalida"
                                 }

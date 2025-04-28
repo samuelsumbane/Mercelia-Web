@@ -40,8 +40,16 @@
 - M. Pagamento: Dinheiro, Cartao, E-mola ...
 
 
-
 # Pro
 - usuarios: ilimitado
 - sucursais: ilimitado
 - M. Pagamento: Dinheiro, Cartao, E-mola ...
+- Notificar quando o producto atingir a quantidade minima
+- > mandar email ?
+- logs no sistema
+
+
+
+
+
+./gradlew jsBrowserRun --continuous
