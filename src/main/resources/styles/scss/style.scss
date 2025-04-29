@@ -145,8 +145,8 @@ body{
 
             .card{
 //                 position: relative;
-                min-width: 160px;
-                max-width: 210px;
+//                 min-width: 160px;
+                width: 210px;
                 min-height: 130px;
                 border-radius: 10px;
                 background: white;
@@ -211,9 +211,12 @@ body{
                         margin:0 auto;
                     }
                 }
-
             }
 
+            .card-warning{
+                background: red;
+                color:white;
+            }
 
             .page-card-div{
                 // width:70%;

@@ -16,7 +16,7 @@ import repository.*
 
 
 @Composable
-fun stockPage() {
+fun stockPage(sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -25,7 +25,6 @@ fun stockPage() {
     }
 
     val stocks = StockRepository(httpClient)
-    val users = UserRepository(httpClient)
 
     var isLoggedIn by remember { mutableStateOf(false) }
 
@@ -55,44 +54,25 @@ fun stockPage() {
     val router = Router.current
     var user by remember { mutableStateOf(emptyLoggedUser) }
 
-
     LaunchedEffect(Unit) {
-        val session = users.checkSession()
-        if (session != null) {
-            if (session.isLogged) {
-                isLoggedIn = true
-                user = session
-            } else {
-                isLoggedIn = false
-            }
-        } else {
-            console.log("session expired")
+        try {
+            isLoading = true
+            val stockdataDeffered = async { stocks.getAllStock() }
+            stockData = stockdataDeffered.await()
+            initializeDataTable()
+
+        } catch (e: Exception) {
+            error = "Error: ${e.message}"
+        } finally {
+            isLoading = false
         }
     }
-
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            try {
-                isLoading = true
-                val stockdataDeffered = async { stocks.getAllStock() }
-                stockData = stockdataDeffered.await()
-                initializeDataTable()
-
-            } catch (e: Exception) {
-                error = "Error: ${e.message}"
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-
-    if (isLoggedIn) {
-//        console.log(isLoggedIn)
 
             NormalPage(
                 showBackButton = true,
                 onBackFunc = { router.navigate("/basicReportsPage") },
                 title = "Movimentos de Estoque", pageActivePath = "sidebar-btn-reports",
+                sysPackage = sysPackage,
                 userRole = user.userRole,
                 hasNavBar = true, navButtons = {
                 button("btnSolid", "Gerar Inventário") {
@@ -315,8 +295,6 @@ fun stockPage() {
                     Div(attrs = { classes("max-modal-footer") })
                 }
             }
-
-    } else userNotLoggedScreen()
 }
 
 

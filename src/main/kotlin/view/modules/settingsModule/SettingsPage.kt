@@ -20,7 +20,7 @@ data class ConfigDetailsDc( // Dc (Data class) ------->>
 
 
 @Composable
-fun settingsPage() {
+fun settingsPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -36,28 +36,13 @@ fun settingsPage() {
     var activeSysPackage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        val session = users.checkSession()
-        if (session != null) {
-            if (session.isLogged) {
-                isLoggedIn = true
-                user = session
-            } else {
-                isLoggedIn = false
-            }
-        } else {
-            console.log("session expired")
-        }
-
-        if (isLoggedIn) {
-            sysConfigs = settings.getSettings()
-        }
+       sysConfigs = settings.getSettings()
     }
 
-    if (isLoggedIn) {
-        if (user.userRole != Role.A.desc) {
+        if (userRole != Role.A.desc) {
             userHasNotAccessScreen("dashboard")
         } else {
-            Menu(activePath = "sidebar-btn-settings", user.userRole)
+            Menu(activePath = "sidebar-btn-settings", userRole, sysPackage)
 
             Div(attrs = { classes("content-container", "def-page") }) {
                 Div(attrs = { classes("def-page-header")}) {
@@ -151,7 +136,4 @@ fun settingsPage() {
                 }
             }
         }
-
-    } else userNotLoggedScreen()
-
 }

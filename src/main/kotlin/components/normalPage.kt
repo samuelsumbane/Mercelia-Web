@@ -17,10 +17,11 @@ fun NormalPage(
     hasNavBar: Boolean = false,
     navButtons: @Composable () -> Unit = {},
     pageActivePath: String,
+    sysPackage: String,
     userRole: String,
     content: @Composable () -> Unit
 ) {
-    Menu(activePath = pageActivePath, userRole )
+    Menu(activePath = pageActivePath, userRole,  sysPackage)
     Div(attrs = { classes("content-container") }) {
         Div(attrs = { classes("normal-page") }) {
             Div(
@@ -59,13 +60,14 @@ fun normalBranchPage(
     onBackFunc: () -> Unit = { console.log("onThis") },
     hasMain: Boolean = false,
     hasNavBar: Boolean = false,
+    sysPackage: String,
     userRole: String,
     titleDivScope: @Composable () -> Unit = {},
     topContent: @Composable () -> Unit = {},
     navButtons: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
-    Menu(activePath = "sidebar-btn-products", userRole)
+    Menu(activePath = "sidebar-btn-products", userRole, sysPackage)
     Div(attrs = { classes("content-container") }) {
         Div(attrs = { classes("normal-page") }) {
             Div(

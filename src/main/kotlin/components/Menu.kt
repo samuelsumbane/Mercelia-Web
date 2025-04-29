@@ -8,6 +8,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import repository.Role
+import repository.SysPackages
 
 data class BtnDetails(
     val btnClass: String,
@@ -16,9 +17,21 @@ data class BtnDetails(
 )
 
 @Composable
-fun Menu(activePath: String, userRole: String) {
+fun Menu(activePath: String, userRole: String, sysPackage: String) {
 
     val router = Router.current
+    val activeSysPackage by remember { mutableStateOf(sysPackage) }
+
+    val baseBtns = listOf(
+        BtnDetails("sidebar-btn-home", "/dashboard", "Home"),
+        BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
+        BtnDetails("sidebar-btn-partners","/basicPartnersPage", "Parceiros"),
+        BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
+        BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
+        BtnDetails("sidebar-btn-settings", "/basicSettingsPage", "Definições"),
+    )
+
+
     val btnsListClasses = when (userRole) {
         Role.V.desc -> {
             listOf(
@@ -29,15 +42,13 @@ fun Menu(activePath: String, userRole: String) {
             )
         }
         Role.G.desc, Role.A.desc -> {
-            listOf(
-                BtnDetails("sidebar-btn-home", "/dashboard", "Home"),
-                BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
-                BtnDetails("sidebar-btn-partners","/basicPartnersPage", "Parceiros"),
-                BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
-                BtnDetails("sidebar-btn-finance", "/basicFinancePage", "Finanças"),
-                BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
-                BtnDetails("sidebar-btn-settings", "/basicSettingsPage", "Definições"),
-            )
+            if (activeSysPackage == SysPackages.PO.desc) {
+                baseBtns.toMutableList().apply {
+                    add(4, BtnDetails("sidebar-btn-finance", "/basicFinancePage", "Finanças"))
+                }
+            } else {
+                baseBtns
+            }
         }
         else -> { emptyList<BtnDetails>() }
     }

@@ -2,6 +2,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.softwork.routingcompose.HashRouter
 import app.softwork.routingcompose.Router
@@ -10,9 +11,14 @@ import components.userHasNotAccessScreen
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.renderComposable
 import repository.Role
+import repository.SettingsRepository
+import repository.SysConfigItem
+import repository.SysPackages
 import repository.UserRepository
 import repository.emptyLoggedUser
 import view.*
@@ -54,10 +60,14 @@ fun main() {
     renderComposable(rootElementId = "root") {
         HashRouter(initPath = "/") {
             val router = Router.current
+            val settings = SettingsRepository(httpClient)
             val users = UserRepository(httpClient)
             var isLoggedIn by remember { mutableStateOf(false) }
             var isLoading by remember { mutableStateOf(false) }
             var hasLoading by remember { mutableStateOf(false) }
+            var sysPackage by remember { mutableStateOf("") }
+            val coroutine = rememberCoroutineScope()
+
             var user by remember { mutableStateOf(emptyLoggedUser) }
 
             LaunchedEffect(Unit) {
@@ -72,24 +82,16 @@ fun main() {
                 } else {
                     console.log("session expired")
                 }
-//                console.log(session)
-//                if (!isLoggedIn) {
-//                    router.navigate("/")
-//                }
+                //
+                val (status, activePackage) = settings.getPackageName()
+                sysPackage = if (status == 200) {
+                    activePackage
+                } else {
+                    "Lite"
+                }
+
             }
 
-
-//            val currentPath = rememberHashPath()
-//
-//            if (currentPath in validRoutes) {
-//                when (currentPath) {
-//                    "/" -> loginPage()
-//                    "/categories" -> categoriesPage()
-//                    "/users" -> usersPage()
-//                }
-//            } else {
-//                PageNotFound()
-//            }
 
 
 
@@ -109,23 +111,23 @@ fun main() {
                 if (user.userRole == Role.V.desc) {
 
                     route("/eachUser") {
-                        eachUserPage(user.userId)
+                        eachUserPage(user.userId, sysPackage)
                     }
 
                     route("/products") {
-                        productsPage(user.userRole)
+                        productsPage(user.userRole, sysPackage)
                     }
 
                     route("/sales") {
-                        salesPage(user.userId, user.userRole)
+                        salesPage(user.userId, user.userRole, sysPackage)
                     }
 
                     route("/reports") {
-                        reportsPage(user.userRole)
+                        reportsPage(user.userRole, sysPackage)
                     }
 
                     route("/stockPage") {
-                        stockPage()
+                        stockPage(sysPackage)
                     }
 
                     for (uRoute in norForSellerUserRoutes) {
@@ -137,96 +139,95 @@ fun main() {
                 } else if (user.userRole == Role.G.desc
                     || user.userRole == Role.A.desc) {
 
-
                     route("/categories") {
-                        categoriesPage(user.userRole)
+                        categoriesPage(user.userRole, sysPackage)
                     }
 
                     route("/products") {
-                        productsPage(user.userRole)
+                        productsPage(user.userRole, sysPackage)
                     }
 
                     route("/sales") {
-                        salesPage(user.userId, user.userRole)
+                        salesPage(user.userId, user.userRole, sysPackage)
                     }
 
                     route("/reports") {
-                        reportsPage(user.userRole)
+                        reportsPage(user.userRole, sysPackage)
                     }
 
                     route("/stockPage") {
-                        stockPage()
+                        stockPage(sysPackage)
                     }
 
                     route("/dashboard") {
-                        homeScreen(user.userRole)
+                        homeScreen(user.userRole, sysPackage)
                     }
 
-
                     route("/clients") {
-                        clientsPage(user.userRole)
+                        clientsPage(user.userRole, sysPackage)
                     }
 
 
                     route("/users") {
-                        UsersPage(user.userRole)
+                        UsersPage(user.userRole, sysPackage)
                     }
 
                     route("/eachUser") {
-                        eachUserPage(user.userId)
+                        eachUserPage(user.userId, sysPackage)
                     }
 
                     route("/suppliers") {
-                        suppliersPage(user.userRole)
+                        suppliersPage(user.userRole, sysPackage)
                     }
 
-
                     route("/settings") {
-                        settingsPage()
+                        settingsPage(user.userRole, sysPackage)
                     }
 
                     route("/branches") {
-                        brancesPage()
-                    }
-//                    val onlyForProPackage = listOf("/payables", "/receivables", "/finance-history")
-
-                    route("/payables") {
-                        payablesPage(user.userRole)
+                        brancesPage(user.userRole, sysPackage)
                     }
 
-                    route("/receivables") {
-                        receivablesPage(user.userRole)
-                    }
+                    if (sysPackage == SysPackages.PO.desc) {
+                        route("/payables") {
+                            payablesPage(user.userRole, sysPackage)
+                        }
+
+                        route("/receivables") {
+                            receivablesPage(user.userRole, sysPackage)
+                        }
 
 //                    route("/finance-history") {
 //                    }
+                    }
+
                 }
 
 
                 // -------->>
 
                 route("/basicPartnersPage") {
-                    basicPartners()
+                    basicPartners(user.userRole, sysPackage)
                 }
 
                 route("/basicProductsPage") {
-                    basicProductsPage()
+                    basicProductsPage(user.userRole, sysPackage)
                 }
 
                 route("/basicFinancePage") {
-                    basicFinances()
+                    basicFinances(user.userRole, sysPackage)
                 }
 
                 route("/basicReportsPage") {
-                    basicReportsPage()
+                    basicReportsPage(user.userRole, sysPackage)
                 }
 
                 route("/basicSellPage") {
-                    basicSalePage()
+                    basicSalePage(user.userRole, sysPackage)
                 }
 
                 route("/basicSettingsPage") {
-                    basicSettingsPage()
+                    basicSettingsPage(user.userRole, sysPackage)
                 }
             } else {
                 route("/") {

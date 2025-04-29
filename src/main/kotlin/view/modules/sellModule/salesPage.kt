@@ -17,7 +17,7 @@ import repository.*
 
 
 @Composable
-fun salesPage(userId: Int, userRole: String) {
+fun salesPage(userId: Int, userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -29,6 +29,7 @@ fun salesPage(userId: Int, userRole: String) {
 
     var ordersData by remember { mutableStateOf(listOf<OrderItem>()) }
     var ordersItemsData by mutableStateOf(listOf<OrderItemsItem>())
+    val toSaleSysPackage by remember { mutableStateOf(sysPackage) }
 
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -68,7 +69,7 @@ fun salesPage(userId: Int, userRole: String) {
 
 
     NormalPage(
-        title = "Vendas", pageActivePath = "sidebar-btn-sales", hasNavBar = true,
+        title = "Vendas", pageActivePath = "sidebar-btn-sales", sysPackage = sysPackage, hasNavBar = true,
         userRole = userRole,
         navButtons = {
             button("btnSolid", "Nova Venda") {
@@ -128,7 +129,7 @@ fun salesPage(userId: Int, userRole: String) {
         }
     }
 
-    saleModal(httpClient, saleMode, orders, userId, modalState) {
+    saleModal(httpClient, toSaleSysPackage, saleMode, orders, userId, modalState) {
         modalState = "closed"
         coroutineScope.launch {
             ordersData = orders.fetchOrders()

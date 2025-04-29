@@ -27,6 +27,7 @@ data class ProItem(
 @Composable
 fun saleModal(
     httpClient: HttpClient,
+    sysPackage: String,
     saleMode: Boolean,
     orders: SaleRepository,
     userId: Int,
@@ -37,7 +38,6 @@ fun saleModal(
     val products = ProductRepository(httpClient)
     val categories = CategoryRepository(httpClient)
     val clients = ClientRepository(httpClient)
-    val settings = SettingsRepository(httpClient)
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -62,7 +62,6 @@ fun saleModal(
     var categoryData by remember { mutableStateOf(emptyList<CategoryItem>()) }
     var clientData by remember { mutableStateOf(emptyList<ClientItem>()) }
     var sysLocationId by remember { mutableStateOf("") }
-    var sysPackage by remember { mutableStateOf("") }
 
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var productId by remember { mutableStateOf(0) }
@@ -71,8 +70,6 @@ fun saleModal(
     var availabelQuantity by remember { mutableIntStateOf(0) } //For each product -------->>
     var filterCategoryId by remember { mutableStateOf(0) }
     var query by remember { mutableStateOf("") }
-
-
 
     var formElement by remember { mutableStateOf<HTMLFormElement?>(null) }
     var submitButton by remember { mutableStateOf<HTMLButtonElement?>(null) }
@@ -147,13 +144,6 @@ fun saleModal(
 //            if (branchDeffered == "404" || branchDeffered == "405") branchIdNotFoundAlert() else  sysLocationId = branchDeffered
             if (branchDeffered != "404" && branchDeffered != "405") {
                 sysLocationId = branchDeffered
-                settings.getSettings().also {
-                    for((k, v) in it) {
-                        if (k == "active_package") {
-                            sysPackage = v
-                        }
-                    }
-                }
             }
         }
     }

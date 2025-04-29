@@ -41,7 +41,7 @@ data class MonthlyQuantityDC(
 
 
 @Composable
-fun homeScreen(userRole: String) {
+fun homeScreen(userRole: String, sysPackage: String) {
     val httpClient = HttpClient {
         install(ContentNegotiation) {
             json(Json { isLenient = true })
@@ -50,8 +50,13 @@ fun homeScreen(userRole: String) {
 
     val reports = ReportsRepository(httpClient)
     val users = UserRepository(httpClient)
+    val products = ProductRepository(httpClient)
 //    var checkSession by remember { mutableStateOf(false) }
 
+    var productsData by remember { mutableStateOf<List<ProductItem>?>(null) }
+
+    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
+    var activeSysPackage by remember { mutableStateOf(sysPackage) }
 
     var totalProfit by remember { mutableDoubleStateOf(0.0) }
     var totalSales by remember { mutableDoubleStateOf(0.0)}
@@ -85,6 +90,10 @@ fun homeScreen(userRole: String) {
 
 
     LaunchedEffect(Unit) {
+
+        if (activeSysPackage != SysPackages.L.desc) {
+            productsData = products.fetchProducts().filter { it.stock <= it.minStock!! }
+        }
 
         if (userRole != Role.V.desc) {
             try {
@@ -142,37 +151,66 @@ fun homeScreen(userRole: String) {
     }
 
 
-    Menu(activePath = "sidebar-btn-home", userRole)
+    Menu(activePath = "sidebar-btn-home", userRole, activeSysPackage)
     //
     Div(attrs = { classes("content-container", "dash-container") }) {
         Header {
-//                Div(attrs = { id("header-top") }) {
-//                    H3() {
-//                        val letter = user.userName[0]
-//                        Text(letter.toString())
-//                    }
-//                }
-            Button(attrs = {
-                id("header-top")
+                Div(attrs = { id("header-top") }) {
 
-            }) {
-                H3 {
-//                    val letter = user.userName[0]
-                    val letter = "A"
-                    Text(letter.toString())
-                }
-                Div(attrs = { id("user-perfil-options") }) {
-                    button("bt", "Perfil") {
-                        router.navigate("/eachUser")
-                    }
+                    productsData?.let { pro ->
+                        console.log(pro)
+                        if (pro.isNotEmpty()) {
+                            console.log("not empty")
+                            Div(attrs = { id("notificationAlertDiv") }) {
+                                Div(attrs = { id("notificationAlertDiv-content") }) {
+                                    P(attrs = { id("notificationAlertDiv-content-title") }) { Text("Productos com estoque baixo") }
 
-                    button("bt", "Sair") {
-                        users.logout().also {
-                            router.navigate("/")
+                                    Hr()
+
+                                    Div(attrs = { classes("p-content") }) {
+                                        pro.take(4).forEach {
+                                            P() { Text(it.name) }
+                                        }
+                                    }
+
+                                    Br()
+                                    if (pro.size > 4) {
+                                        button("btn", "Ver mais") {
+                                            router.navigate("/products")
+                                        }
+                                    }
+
+                                }
+
+                            }
                         }
                     }
+
+
+
+                    Button(attrs = {
+                        id("header-top-perfil-div")
+
+                    }) {
+                        H3 {
+//                    val letter = user.userName[0]
+                            val letter = "A"
+                            Text(letter.toString())
+                        }
+                        Div(attrs = { id("user-perfil-options") }) {
+                            button("bt", "Perfil") {
+                                router.navigate("/eachUser")
+                            }
+
+                            button("bt", "Sair") {
+                                users.logout().also {
+                                    router.navigate("/")
+                                }
+                            }
+                        }
+                    }
+
                 }
-            }
 
 
             Div(attrs = { id("header-bottom") }) {

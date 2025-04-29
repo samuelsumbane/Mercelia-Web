@@ -5,11 +5,11 @@ import components.BtnDetails
 import view.basicGruppedPages
 
 @Composable
-fun basicPartners() {
+fun basicPartners(userRole: String, sysPackage: String) {
     val partnersPages = listOf(
         BtnDetails("clientsBtn", "/clients", "Clientes"),
         BtnDetails("suppliersBtn", "/suppliers", "Fornecedores"),
     )
 
-    basicGruppedPages("Parceiros", partnersPages)
+    basicGruppedPages("Parceiros", partnersPages, userRole, sysPackage)
 }

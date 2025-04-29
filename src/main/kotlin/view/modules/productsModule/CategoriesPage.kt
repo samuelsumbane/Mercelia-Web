@@ -16,7 +16,7 @@ import repository.*
 
 
 @Composable
-fun categoriesPage(userRole: String) {
+fun categoriesPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -61,6 +61,7 @@ fun categoriesPage(userRole: String) {
         onBackFunc = { router.navigate("/basicProductsPage") },
         title = "Categorias",
         pageActivePath = "sidebar-btn-products",
+        sysPackage = sysPackage,
         hasMain = true,
         hasNavBar = true,
         userRole = userRole,

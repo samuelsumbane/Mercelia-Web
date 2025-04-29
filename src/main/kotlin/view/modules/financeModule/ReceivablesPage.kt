@@ -19,7 +19,7 @@ import repository.*
 
 
 @Composable
-fun receivablesPage(userRole: String) {
+fun receivablesPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -27,7 +27,6 @@ fun receivablesPage(userRole: String) {
         }
     }
 
-    val users = UserRepository(httpClient)
     val receivables = FinanceRepository(httpClient)
 
     var allReceivablesData by mutableStateOf(listOf<ReceivableItem>())
@@ -78,6 +77,7 @@ fun receivablesPage(userRole: String) {
             showBackButton = true,
             onBackFunc = { router.navigate("/basicFinancePage") },
             title = "Contas a receber", pageActivePath = "sidebar-btn-reports",
+            sysPackage = sysPackage,
             userRole = userRole,
             hasNavBar = true, navButtons = {
             button("btnSolid", "+ C. Receber") {

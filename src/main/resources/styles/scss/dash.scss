@@ -25,43 +25,96 @@ header {
     width: 100%;
     height: 25vh;
     display: flex;
-
+    flex-direction: column;
+//     background:green;
 }
 
 #header-top{
-    position: absolute;
-    left:92%;
-    top:3%;
-    width:40px;
-    height:40px;
-    border-radius: 50%;
-    background:darkgray;
-    z-index:2;
+    width: 100%;
+    height: 50px;
+    margin-top:10px;
     display: flex;
-    border:none;
+    justify-content: flex-end;
+    gap: 30px;
+//     background:blue;
 
-    & > h3 {
-        text-align:center;
-    }
-}
-
-#header-top:hover #user-perfil-options{
-    display: flex;
-    flex-direction:column;
-    padding:5px;
-    width: 200px;
-    transition:0.8s;
-    border-radius:8px;
-    box-shadow:0 0 8px rgba(black, 0.5);
-
-    & > button {
-        width:110px;
-        height:33px !important;
-        border:none;
-        gap: 10px;
+    #notificationAlertDiv{
+        position:relative;
+        width: 230px;
+        min-height: 140px;
         background:white;
+        border-radius:10px;
+        background:#e92427;
+        box-shadow:0 0 18px 3px rgba(#212121, 0.3);
+        display: flex;
+        overflow: auto;
+
+        &-content {
+            width: 90%;
+            height:90%;
+//             background:red;
+            margin:auto;
+            display:flex;
+            flex-direction: column;
+
+            &-title{
+                margin: 0 auto;
+                font-weight: bold;
+                padding-bottom:5px;
+            }
+//             hr {padding:7px 0}
+
+            .p-content{
+                padding: 6px 0;
+                & > p {
+                    font-size: 14px;
+                    padding: 4px 0;
+                }
+            }
+
+            & > button {margin:auto;}
+        }
     }
+
+    &-perfil-div {
+//         position: absolute;
+//         left:92%;
+//         top:3%;
+        margin-right:10px;
+        width:40px;
+        height:40px;
+        border-radius: 50%;
+    //     background:darkgray;
+        background:gray;
+        z-index:2;
+        display: flex;
+        border:none;
+
+        & > h3 {
+            text-align:center;
+        }
+    }
+
+    #header-top-perfil-div:hover #user-perfil-options{
+        display: flex;
+        flex-direction:column;
+        padding:5px;
+        width: 200px;
+        transition:0.8s;
+        border-radius:8px;
+        box-shadow:0 0 8px rgba(black, 0.5);
+
+        & > button {
+            width:110px;
+            height:33px !important;
+            border:none;
+            gap: 10px;
+            background:white;
+        }
+    }
+
 }
+
 
 #user-perfil-options {
     display:none;
@@ -84,7 +137,7 @@ header {
     width: 50%;
     height: 130px;
     background: var(--secondaryBg);
-    // background: blue;
+//     background: blue;
     display: flex;
     margin: auto auto 0 auto;
     justify-content: space-around;
@@ -145,8 +198,6 @@ header {
 }
 
 
-
-
 #afiliatesInfo > div {
     display: flex;
     justify-content: space-between;
@@ -168,6 +219,7 @@ header {
 .dash-container main {
     width: 100%;
     display: flex;
+    margin-top:2%;
     overflow-y: auto !important;
 
     #divCharts {

@@ -17,14 +17,13 @@ import repository.*
 
 
 @Composable
-fun clientsPage(userRole: String) {
+fun clientsPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
             json(Json { isLenient = true })
         }
     }
-    val users = UserRepository(httpClient)
 
     val clients = ClientRepository(httpClient)
     var clientData by remember { mutableStateOf<List<ClientItem>?>(null) }
@@ -54,7 +53,9 @@ fun clientsPage(userRole: String) {
     NormalPage(
         showBackButton = true,
         onBackFunc = { router.navigate("/basicPartnersPage") },
-        title = "Clientes", pageActivePath = "sidebar-btn-partners", userRole = userRole, hasMain = true, hasNavBar = true, navButtons = {
+        title = "Clientes", pageActivePath = "sidebar-btn-partners",
+        sysPackage = sysPackage,
+        userRole = userRole, hasMain = true, hasNavBar = true, navButtons = {
             button("btnSolid", "+ Cliente") {
                 modalTitle = "Adicionar Cliente"
                 modalState = "open-min-modal"

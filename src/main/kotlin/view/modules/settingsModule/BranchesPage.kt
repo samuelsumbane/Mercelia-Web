@@ -22,7 +22,7 @@ import repository.*
 
 
 @Composable
-fun brancesPage() {
+fun brancesPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -30,8 +30,6 @@ fun brancesPage() {
         }
     }
     val router = Router.current
-    val users = UserRepository(httpClient)
-    var usersData by remember { mutableStateOf<List<UserItem>?>(null) }
     val settings = SettingsRepository(httpClient)
     var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
     var sysPackage by remember { mutableStateOf("") }
@@ -50,9 +48,7 @@ fun brancesPage() {
     var branchNameError by remember { mutableStateOf("") }
     var branchAddressError by remember { mutableStateOf("") }
     var submitBtnText by remember { mutableStateOf("Submeter") }
-    var isLoggedIn by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var user by remember { mutableStateOf(emptyLoggedUser) }
 
     var appropriateName by remember { mutableStateOf("") }
 
@@ -64,19 +60,7 @@ fun brancesPage() {
 
     LaunchedEffect(Unit) {
 
-        val session = users.checkSession()
-        if (session != null) {
-            if (session.isLogged) {
-                isLoggedIn = true
-                user = session
-            } else {
-                isLoggedIn = false
-            }
-        } else {
-            console.log("session expired")
-        }
-
-        if (user.userRole != Role.V.desc) {
+        if (userRole != Role.V.desc) {
             try {
                 isLoading = true
                 val branchesDeffered = async { branches.allBranches() }
@@ -111,7 +95,7 @@ fun brancesPage() {
     normalBranchPage(
         showBackButton = true,
         onBackFunc = { router.navigate("/basicSettingsPage") },
-        userRole = user.userRole,
+        userRole = userRole,
         hasMain = true, hasNavBar = true, titleDivScope = {
         }, navButtons = {
 
@@ -127,7 +111,7 @@ fun brancesPage() {
                     cleanVarFields()
                 }
             }
-        },
+        }, sysPackage = sysPackage,
         topContent = {
             Div(attrs = {
                 style {

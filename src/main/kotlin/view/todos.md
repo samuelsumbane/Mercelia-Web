@@ -45,7 +45,7 @@
 - sucursais: ilimitado
 - M. Pagamento: Dinheiro, Cartao, E-mola ...
 - Notificar quando o producto atingir a quantidade minima
-- > mandar email ?
+- > mandar email?
 - logs no sistema
 
 

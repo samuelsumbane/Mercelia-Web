@@ -20,7 +20,7 @@ import repository.*
 
 
 @Composable
-fun reportsPage(userRole: String, toFilterId: Int = 0) {
+fun reportsPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -29,13 +29,11 @@ fun reportsPage(userRole: String, toFilterId: Int = 0) {
     }
 
     val reports = ReportsRepository(httpClient)
-    val users = UserRepository(httpClient)
 
     var allReportsData by mutableStateOf(listOf<SaleReportItem>())
 //    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
-//    var filteredReports by mutableStateOf(listOf<saleReportItem>())
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     var modalTitle by remember { mutableStateOf("") }
@@ -72,6 +70,7 @@ fun reportsPage(userRole: String, toFilterId: Int = 0) {
             showBackButton = true,
             onBackFunc = { router.navigate("/basicReportsPage") },
             title = "Relatórios de Vendas", pageActivePath = "sidebar-btn-reports",
+            sysPackage = sysPackage,
             userRole = userRole,
             hasNavBar = true, navButtons = {
             button("btnSolid", "Gerar Inventário") {
@@ -84,13 +83,7 @@ fun reportsPage(userRole: String, toFilterId: Int = 0) {
                     Text("Carregando...")
                 }
             } else {
-                val filteredReporsData = if (toFilterId != 0) {
-                    allReportsData.filter {
-                        it.userId == toFilterId
-                    }
-                } else {
-                    allReportsData
-                }
+                val filteredReporsData = allReportsData
                 if (error == null) {
                     if (filteredReporsData.isEmpty()) {
                         Div(attrs = { classes("centerDiv") }) {

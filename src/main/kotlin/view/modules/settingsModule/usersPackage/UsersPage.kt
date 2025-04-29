@@ -15,7 +15,7 @@ import org.jetbrains.compose.web.dom.*
 import repository.*
 
 @Composable
-fun UsersPage(userRole: String) {
+fun UsersPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -84,6 +84,7 @@ fun UsersPage(userRole: String) {
         onBackFunc = { router.navigate("/basicSettingsPage") },
         title = "Usuários",
         pageActivePath = "sidebar-btn-settings",
+        sysPackage = sysPackage,
         hasMain = true,
         hasNavBar = true,
         userRole = userRole,

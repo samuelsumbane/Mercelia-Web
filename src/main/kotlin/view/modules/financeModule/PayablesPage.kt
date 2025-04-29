@@ -23,7 +23,7 @@ import view.modules.reportModule.reportPaper
 
 
 @Composable
-fun payablesPage(userRole: String) {
+fun payablesPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -82,6 +82,7 @@ fun payablesPage(userRole: String) {
             showBackButton = true,
             onBackFunc = { router.navigate("/basicFinancePage") },
             title = "Contas a pagar", pageActivePath = "sidebar-btn-reports",
+            sysPackage = sysPackage,
             userRole = userRole,
             hasNavBar = true, navButtons = {
             button("btnSolid", "+ C. Pagar") {

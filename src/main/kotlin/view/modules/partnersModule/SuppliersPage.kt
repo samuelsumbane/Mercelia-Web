@@ -16,7 +16,7 @@ import repository.*
 
 
 @Composable
-fun suppliersPage(userRole: String) {
+fun suppliersPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -56,6 +56,7 @@ fun suppliersPage(userRole: String) {
         onBackFunc = { router.navigate("/basicPartnersPage") },
         title = "Fornecedores",
         pageActivePath = "sidebar-btn-partners",
+        sysPackage = sysPackage,
         userRole = userRole,
         hasMain = true,
         hasNavBar = true,

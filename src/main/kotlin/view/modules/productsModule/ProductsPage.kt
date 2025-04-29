@@ -19,7 +19,7 @@ import repository.*
 
 
 @Composable
-fun productsPage(userRole: String) {
+fun productsPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -109,6 +109,7 @@ fun productsPage(userRole: String) {
         showBackButton = true,
         onBackFunc = { router.navigate("/basicProductsPage") },
         pageActivePath = "sidebar-btn-products",
+        sysPackage = sysPackage,
         userRole = userRole,
         hasMain = true, hasNavBar = true, navButtons = {
             if (userRole != Role.V.desc) {
@@ -138,6 +139,7 @@ fun productsPage(userRole: String) {
                                         showDetailsButton = true,
                                         onSeeDetails = {
                                             modalMoreDetailsState = "open-min-modal"
+                                            modalMoreDetailsTitle = "Detalhes do producto"
                                             proId = item.id!!
                                             proName = item.name
                                             proQuantity = item.stock
@@ -162,7 +164,7 @@ fun productsPage(userRole: String) {
                         }
                     } else {
                         val minProStock = item.minStock ?: -1
-                        val warningClass = if (minProStock != -1 && item.stock < minProStock) "redCard" else "empty"
+                        val warningClass = if (minProStock != -1 && item.stock <= minProStock) "card-warning" else "empty"
 
                         cardWG(title = item.name,
                             warningClass,
@@ -172,6 +174,7 @@ fun productsPage(userRole: String) {
                                         showDetailsButton = true,
                                         onSeeDetails = {
                                             modalMoreDetailsState = "open-min-modal"
+                                            modalMoreDetailsTitle = "Detalhes do producto"
                                             proId = item.id!!
                                             proName = item.name
                                             proQuantity = item.stock
@@ -473,9 +476,11 @@ fun productsPage(userRole: String) {
 
                 Hr()
 
-                modalPItem("Estoque Min", value = {
-                    P { Text(minProQuantity.toString()) }
-                })
+                if (sysPackage != SysPackages.L.desc) {
+                    modalPItem("Estoque Min", value = {
+                        P { Text(minProQuantity.toString()) }
+                    })
+                }
 
 
                 submitButtons(submitBtnText) {
