@@ -7,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.browser.localStorage
+import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -16,7 +17,7 @@ import org.w3c.dom.set
 
 
 class UserRepository(private val httpClient: HttpClient) {
-    private val token = localStorage.getItem("jwt_token") ?: ""
+    private val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend fun fetchUsers(): List<UserItem> {
         return httpClient.get("$apiPath/users") {
@@ -63,45 +64,21 @@ class UserRepository(private val httpClient: HttpClient) {
     }
 
     suspend fun checkSession(): LoggedUserDC? {
-        val response = apiRequest("$apiPath/user/check-session")
-        return if (response == null) {
-            localStorage.removeItem("jwt_token")
-            localStorage.removeItem("refreshToken")
-            console.log("Sessão expirada, redirecionando para login...")
-//            window.location.href = "/"
-            null
+        val response = httpClient.get("$apiPath/user/check-session") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+        println(response.status)
+        return if (response.status == HttpStatusCode.Accepted) {
+            val jsonResponse = Json.parseToJsonElement(response.bodyAsText()) as JsonObject
+            val userid = jsonResponse["userid"]?.jsonPrimitive?.content?.toInt()
+            val username = jsonResponse["username"]?.jsonPrimitive?.content
+            val userrole = jsonResponse["userrole"]?.jsonPrimitive?.content
+            LoggedUserDC(true, userid!!, username!!, userrole!!)
         } else {
-//            console.log(response.status)
-            if (response.status == HttpStatusCode.Accepted) {
-                val jsonResponse = Json.parseToJsonElement(response.bodyAsText()) as JsonObject
-                val userid = jsonResponse["userid"]?.jsonPrimitive?.content?.toInt()
-                val username = jsonResponse["username"]?.jsonPrimitive?.content
-                val userrole = jsonResponse["userrole"]?.jsonPrimitive?.content
-                LoggedUserDC(true, userid!!, username!!, userrole!!)
-            } else {
-                LoggedUserDC(false, 0, "", "")
-            }
-        }
-
-
-//        return response?.status == HttpStatusCode.Accepted
-    }
-
-
-    suspend fun refreshAccessToken(): String? {
-        val refreshToken = localStorage["refreshToken"]
-
-        return try {
-            val response: HttpResponse = httpClient.post("$apiPath/refresh-token") {
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("refreshToken" to refreshToken))
-            }
-            val jsonResponse = response.body<Map<String, String>>()
-            jsonResponse["jwt_token"]
-        } catch (e: Exception) {
-            null
+            LoggedUserDC(false, 0, "", "")
         }
     }
+
 
     suspend fun login(data: LoginRequest): Pair<Boolean, String> {
         val encodedRegion = "Africa/Harare"
@@ -116,8 +93,7 @@ class UserRepository(private val httpClient: HttpClient) {
             val userRole = jsonResponse["userRole"]?.jsonPrimitive?.content
 
             if (token != null) {
-                localStorage.setItem("jwt_token", token)
-//                val us = response.bodyAsText()
+                sessionStorage.setItem("jwt_token", token)
                 return Pair(true, userRole!!)
             }
         }
@@ -125,31 +101,20 @@ class UserRepository(private val httpClient: HttpClient) {
         return Pair(false, "")
     }
 
-    fun logout() {
-        localStorage.removeItem("jwt_token")
-        localStorage.removeItem("refreshToken")
-    }
-
-
-    suspend fun apiRequest(apitpath: String): HttpResponse? {
-        val token = localStorage["jwt_token"] // 🔥 Pegando o token armazenado
-
+    suspend fun logout(): Pair<Int, String> {
+//        localStorage.removeItem("jwt_token")
         return try {
-            httpClient.get(apitpath) {
-                header("Authorization", "Bearer $token")
+            val response = httpClient.post("$apiPath/user/") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+//                setBody(data)
             }
-        } catch (e: ClientRequestException) {
-            if (e.response.status == HttpStatusCode.Unauthorized) {
-                // 🔥 Token expirou, tenta renovar
-                val newToken = refreshAccessToken()
-                if (newToken != null) {
-                    localStorage["jwt_token"] = newToken
-                    return apiRequest(apitpath) // 🔄 Tenta de novo com o novo token
-                }
-            }
-            null
+            Pair(response.status.value, response.bodyAsText())
+        } catch (e: Exception) {
+            Pair(-1, "Error: ${e.message}")
         }
     }
+
 
     suspend fun changeUserStatus(data: ChangeStatusDC): Pair<Int, String> {
         val response = httpClient.post("$apiPath/user/change-status") {

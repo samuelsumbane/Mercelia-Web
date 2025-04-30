@@ -6,6 +6,7 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.window
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -58,6 +59,7 @@ fun reportsPage(userRole: String, sysPackage: String) {
             isLoading = true
             val reportsDeffered = async { reports.fetchSaleReports() }
             allReportsData = reportsDeffered.await()
+//            console.log(allReportsData)
         } catch (e: Exception) {
             error = "Error: ${e.message}"
         } finally {
@@ -73,16 +75,38 @@ fun reportsPage(userRole: String, sysPackage: String) {
             sysPackage = sysPackage,
             userRole = userRole,
             hasNavBar = true, navButtons = {
-            button("btnSolid", "Gerar Inventário") {
-                modalTitle = "Inventário de Vendas"
-                modalState = "open-min-modal"
-            }
-        }) {
-            if (isLoading) {
-                Div(attrs = { classes("centerDiv") }) {
-                    Text("Carregando...")
+                if (sysPackage != SysPackages.L.desc) {
+                    multiFilesExportButton {
+                        if (sysPackage == SysPackages.PO.desc) {
+                            P(attrs = {
+                                onClick {
+                                    window.open("http://0.0.0.0:2000/order/export/orders", "_blank")
+                                }
+                            }) {
+                                Text("Para Excel")
+                            }
+                        }
+
+                        P(attrs = {
+                            onClick { window.open("http://0.0.0.0:2000/order/export/orders/csv", "_blank") }
+                        }) {
+                            Text("Para CSV")
+                        }
+                        P(attrs = {
+                            onClick { window.open("http://0.0.0.0:2000/order/export/orders/json", "_blank") }
+                        }) {
+                            Text("Para Json")
+                        }
+                    }
                 }
-            } else {
+
+
+                button("btnSolid", "Gerar Inventário") {
+                    modalTitle = "Inventário de Vendas"
+                    modalState = "open-min-modal"
+                }
+        }) {
+
                 val filteredReporsData = allReportsData
                 if (error == null) {
                     if (filteredReporsData.isEmpty()) {
@@ -125,7 +149,7 @@ fun reportsPage(userRole: String, sysPackage: String) {
                 } else {
                     Div { Text("Loading...") }
                 }
-            }
+
 
             minModal(modalState, "Selecionar Intervalo de Datas") {
                 Form(

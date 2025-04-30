@@ -6,6 +6,7 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.window
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -75,10 +76,34 @@ fun stockPage(sysPackage: String) {
                 sysPackage = sysPackage,
                 userRole = user.userRole,
                 hasNavBar = true, navButtons = {
-                button("btnSolid", "Gerar Inventário") {
-                    modalTitle = "Inventário de Estoque"
-                    modalState = "open-min-modal"
-                }
+                    if (sysPackage != SysPackages.L.desc) {
+                        multiFilesExportButton {
+                            if (sysPackage == SysPackages.PO.desc) {
+                                P(attrs = {
+                                    onClick {
+                                        window.open("http://0.0.0.0:2000/stocks/export/stocks/excel", "_blank")
+                                    }
+                                }) {
+                                    Text("Para Excel")
+                                }
+                            }
+
+                            P(attrs = {
+                                onClick { window.open("http://0.0.0.0:2000/stocks/export/stocks/csv", "_blank") }
+                            }) {
+                                Text("Para CSV")
+                            }
+                            P(attrs = {
+                                onClick { window.open("http://0.0.0.0:2000/stocks/export/stocks/json", "_blank") }
+                            }) {
+                                Text("Para Json")
+                            }
+                        }
+                    }
+                    button("btnSolid", "Gerar Inventário") {
+                        modalTitle = "Inventário de Estoque"
+                        modalState = "open-min-modal"
+                    }
             }) {
 //                if (error == null) {
                 if (isLoading) {

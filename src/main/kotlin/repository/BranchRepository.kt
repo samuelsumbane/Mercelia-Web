@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.browser.localStorage
+import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
 import kotlinx.html.MetaHttpEquiv.contentType
 
@@ -14,23 +15,14 @@ class BranchRepository(private val httpClient: HttpClient) {
     // all-brances, create-branch, update-branch, delete-branch
 
     val users = UserRepository(httpClient)
-    private val token = localStorage.getItem("jwt_token") ?: ""
+    private val token = sessionStorage.getItem("jwt_token") ?: ""
 
 
     suspend fun allBranches(): List<BranchItem> {
-        try {
-            val response: HttpResponse? = users.apiRequest("$apiBranchesPath/all-branches")
-
-            if (response?.status == HttpStatusCode.Unauthorized) {
-                // 🔥 Se o usuário não estiver autenticado, remove os tokens e redireciona
-                localStorage.removeItem("token")
-                localStorage.removeItem("refreshToken")
-                console.log("Sessão expirada, redirecionando para login...")
-                window.location.href = "/"
-                return emptyList()
-            }
-            return response!!.body()
-
+        return try {
+            httpClient.get("$apiBranchesPath/all-branches") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.body()
         } catch (e: Exception) {
             console.error("Erro ao buscar pedidos: ${e.message}")
             return emptyList()

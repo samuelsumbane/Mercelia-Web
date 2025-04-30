@@ -5,11 +5,12 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.browser.localStorage
+import kotlinx.browser.sessionStorage
 
 
 class StockRepository(private val httpClient: HttpClient) {
 
-    private val token = localStorage.getItem("jwt_token") ?: ""
+    private val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend fun getAllStock(): List<StockItem> {
         return httpClient.get("$apiStockPath/all-stocks") {

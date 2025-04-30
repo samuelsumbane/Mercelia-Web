@@ -38,6 +38,7 @@
 - usuarios: 10 
 - sucursais: 5
 - M. Pagamento: Dinheiro, Cartao, E-mola ...
+- Exportar vendas e estoques em (CSV e Json)
 
 
 # Pro
@@ -47,6 +48,7 @@
 - Notificar quando o producto atingir a quantidade minima
 - > mandar email?
 - logs no sistema
+- Exportar vendas e estoques em (Excel, CSV e Json)
 
 
 

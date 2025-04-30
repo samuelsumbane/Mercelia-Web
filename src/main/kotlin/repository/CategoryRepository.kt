@@ -5,9 +5,10 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.browser.localStorage
+import kotlinx.browser.sessionStorage
 
 class CategoryRepository(private val httpClient: HttpClient) {
-    val token = localStorage.getItem("jwt_token") ?: ""
+    val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend fun getCategories(): List<CategoryItem> {
         return httpClient.get("$apiCategoriesPath/all-categories") {

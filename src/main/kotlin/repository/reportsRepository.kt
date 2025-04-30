@@ -5,13 +5,14 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.browser.localStorage
+import kotlinx.browser.sessionStorage
 import kotlinx.serialization.json.JsonObject
 
 class ReportsRepository(
     private val httpClient: HttpClient,
 //    val token: String,
 ) {
-    val token = localStorage.getItem("jwt_token") ?: ""
+    val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend fun fetchSaleReports(): List<SaleReportItem> {
         val encodedRegion = "Africa/Harare"

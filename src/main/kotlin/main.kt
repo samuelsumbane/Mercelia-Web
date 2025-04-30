@@ -72,7 +72,15 @@ fun main() {
 
             LaunchedEffect(Unit) {
                 val session = users.checkSession()
+                console.log(session)
                 if (session != null) {
+                    val (status, activePackage) = settings.getPackageName()
+                    sysPackage = if (status == 200) {
+                        activePackage
+                    } else {
+                        "Lite"
+                    }
+
                     if (session.isLogged) {
                         isLoggedIn = true
                         user = session
@@ -83,14 +91,11 @@ fun main() {
                     console.log("session expired")
                 }
                 //
-                val (status, activePackage) = settings.getPackageName()
-                sysPackage = if (status == 200) {
-                    activePackage
-                } else {
-                    "Lite"
-                }
+
 
             }
+//            var sysPackage by remember { mutableStateOf(sysPackageC) }
+
 
 
 
@@ -160,7 +165,7 @@ fun main() {
                     }
 
                     route("/dashboard") {
-                        homeScreen(user.userRole, sysPackage)
+                        homeScreen(user.userRole, user.userName, sysPackage)
                     }
 
                     route("/clients") {

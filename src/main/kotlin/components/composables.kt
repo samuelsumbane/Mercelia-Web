@@ -45,6 +45,20 @@ fun userCardButtons(
 }
 
 @Composable
+fun multiFilesExportButton(
+    divContent: @Composable () -> Unit
+) {
+    Div(attrs = {classes("multiFilesExportButton")}) {
+        Button(attrs = { classes("multiFilesExportButton-btn") }) {
+            Text("Exportar Todos")
+        }
+        Div(attrs = { classes("multiFilesExportButton-child")}) {
+            divContent()
+        }
+    }
+}
+
+@Composable
 fun loadingModal() {
 //    <div id="flashingModal">
 //        <div class="dotsdiv">

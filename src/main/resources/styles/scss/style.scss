@@ -73,7 +73,8 @@ body{
 //         background:greenyellow;
         margin-bottom: 1%;
         .titleDiv{
-            width:85%;
+            width:65%;
+//             background:yellow;
             display: flex;
             & > h2{
                 padding:20px;
@@ -87,11 +88,13 @@ body{
             }
         }
         .navDiv{
-            width:14%;
+            width:34%;
+            height: 40px;
             display: flex;
             justify-content:flex-end;
             align-items:center;
             margin-top:auto;
+            gap: 4%;
 //             padding-top:auto;
         }
     }

@@ -25,20 +25,6 @@ fun loginPage() {
     }
 
     val users = UserRepository(httpClient)
-    var isLoggedIn by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        val session = users.checkSession()
-        if (session != null) {
-            if (session.isLogged) {
-                isLoggedIn = true
-            } else {
-                isLoggedIn = false
-            }
-        } else {
-            console.log("session expired")
-        }
-    }
 
     // admin@gmain : 1111 -> admin
     // sam@gmail.com : 8262 -> gerente
@@ -50,9 +36,6 @@ fun loginPage() {
     var errorText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    if (isLoggedIn) {
-        router.navigate("/dashboard")
-    } else {
         Div(attrs = { classes("login-page")}) {
             Div(attrs = { classes("loginDiv")}) {
                 Form(attrs = {
@@ -66,15 +49,16 @@ fun loginPage() {
                                 val (status, userRole) = users.login(loginRequest)
 
                                 if (status) {
-                                    if (userRole.isNotBlank()) {
-                                        if (userRole == Role.V.desc) {
-                                            router.navigate("/sales")
-                                        } else {
+//                                    if (userRole.isNotBlank()) {
+//                                        if (userRole == Role.V.desc) {
+//                                            router.navigate("/sales")
+//                                        } else {
+//                                            router.navigate("/dashboard")
+//                                        }
+//                                    } else {
+//                                        console.error("Login failed.")
+//                                    }
                                             router.navigate("/dashboard")
-                                        }
-                                    } else {
-                                        console.error("Login failed.")
-                                    }
 
                                 } else {
                                     errorText = "Usuário ou senha invalida"
@@ -111,5 +95,5 @@ fun loginPage() {
                 }
             }
         }
-    }
+
 }

@@ -6,6 +6,9 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.sessionStorage
+import kotlinx.browser.window
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -41,7 +44,7 @@ data class MonthlyQuantityDC(
 
 
 @Composable
-fun homeScreen(userRole: String, sysPackage: String) {
+fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     val httpClient = HttpClient {
         install(ContentNegotiation) {
             json(Json { isLenient = true })
@@ -51,7 +54,6 @@ fun homeScreen(userRole: String, sysPackage: String) {
     val reports = ReportsRepository(httpClient)
     val users = UserRepository(httpClient)
     val products = ProductRepository(httpClient)
-//    var checkSession by remember { mutableStateOf(false) }
 
     var productsData by remember { mutableStateOf<List<ProductItem>?>(null) }
 
@@ -84,22 +86,21 @@ fun homeScreen(userRole: String, sysPackage: String) {
 
     var salesProfitsMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
-    var isLoggedIn by remember { mutableStateOf(false) }
+    var showNotificationAlert by remember { mutableStateOf(true)}
+
     val router = Router.current
     val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(true)}
 
 
     LaunchedEffect(Unit) {
-
-        if (activeSysPackage != SysPackages.L.desc) {
-            productsData = products.fetchProducts().filter { it.stock <= it.minStock!! }
-        }
 
         if (userRole != Role.V.desc) {
             try {
                 val userStates = users.getUserStatus()
                 allAfiliatesCount = userStates.second
                 activeAfiliates = userStates.first
+
                 suspendedAfiliates = allAfiliatesCount - activeAfiliates
                 //
                 val (clientsValue, suppliersValue) = reports.getTotalClientsAndSuppliers()
@@ -107,7 +108,6 @@ fun homeScreen(userRole: String, sysPackage: String) {
                 totalSuppliers = suppliersValue
 
                 val (profitValue, salesValue) = reports.getTotalProfitAndSales()
-
                 totalProfit = profitValue
                 totalSales = salesValue
 
@@ -143,6 +143,13 @@ fun homeScreen(userRole: String, sysPackage: String) {
                 soldProductsLabels = productsSoldData.map { it.productname }.toTypedArray()
                 soldProductsQtdsLabels = productsSoldData.map { it.quantity }.toTypedArray()
                 showSoldProductChart(soldProductsLabels, soldProductsQtdsLabels)
+                //
+                isLoading = false
+
+                if (activeSysPackage != SysPackages.L.desc) {
+                    productsData = products.fetchProducts()
+                        .filter { it.minStock != null && it.stock < it.minStock }
+                }
 
             } catch (e: Exception) {
                 console.log("Error: ${e.message}")
@@ -151,60 +158,76 @@ fun homeScreen(userRole: String, sysPackage: String) {
     }
 
 
-    Menu(activePath = "sidebar-btn-home", userRole, activeSysPackage)
-    //
-    Div(attrs = { classes("content-container", "dash-container") }) {
-        Header {
+    if (isLoading) {
+        loadingModal()
+    } else {
+        Menu(activePath = "sidebar-btn-home", userRole, activeSysPackage)
+        //
+        Div(attrs = { classes("content-container", "dash-container") }) {
+            Header {
                 Div(attrs = { id("header-top") }) {
 
                     productsData?.let { pro ->
-                        console.log(pro)
                         if (pro.isNotEmpty()) {
-                            console.log("not empty")
-                            Div(attrs = { id("notificationAlertDiv") }) {
-                                Div(attrs = { id("notificationAlertDiv-content") }) {
-                                    P(attrs = { id("notificationAlertDiv-content-title") }) { Text("Productos com estoque baixo") }
-
-                                    Hr()
-
-                                    Div(attrs = { classes("p-content") }) {
-                                        pro.take(4).forEach {
-                                            P() { Text(it.name) }
-                                        }
-                                    }
-
-                                    Br()
-                                    if (pro.size > 4) {
-                                        button("btn", "Ver mais") {
-                                            router.navigate("/products")
-                                        }
-                                    }
-
+                            if (showNotificationAlert) {
+                                Button(attrs = {
+                                    id("closeNotificationAlertButton")
+                                    onClick { showNotificationAlert = false }
+                                }) {
+                                    Text("X")
                                 }
+                                Div(attrs = { id("notificationAlertDiv") }) {
 
+                                    Div(attrs = { id("notificationAlertDiv-content") }) {
+
+                                        P(attrs = { id("notificationAlertDiv-content-title") }) { Text("Productos com estoque baixo") }
+
+                                        Hr()
+
+                                        Div(attrs = { classes("p-content") }) {
+                                            pro.take(4).forEach {
+                                                P() { Text(it.name) }
+                                            }
+                                        }
+
+                                        Br()
+                                        if (pro.size > 4) {
+                                            button("btn", "Ver mais") {
+                                                router.navigate("/products")
+                                            }
+                                        }
+                                    }
+                                }
                             }
+
                         }
                     }
 
-
-
                     Button(attrs = {
                         id("header-top-perfil-div")
-
                     }) {
                         H3 {
-//                    val letter = user.userName[0]
-                            val letter = "A"
+                            val letter = userName[0]
                             Text(letter.toString())
                         }
                         Div(attrs = { id("user-perfil-options") }) {
+                            P(attrs = { id("userNameLabel") }) {
+                                Text(userName)
+                            }
+
                             button("bt", "Perfil") {
                                 router.navigate("/eachUser")
                             }
 
                             button("bt", "Sair") {
-                                users.logout().also {
-                                    router.navigate("/")
+                                coroutineScope.launch {
+                                    val (status, message) = users.logout()
+                                    if (status == 200) {
+                                        sessionStorage.removeItem("jwt_token")
+                                        router.navigate("/")
+                                    } else {
+                                        alert("error", "Erro", message)
+                                    }
                                 }
                             }
                         }
@@ -213,53 +236,56 @@ fun homeScreen(userRole: String, sysPackage: String) {
                 }
 
 
-            Div(attrs = { id("header-bottom") }) {
-                Div(attrs = { id("afiliatesInfo") }) {
-                    Div {
-                        H4(attrs = { id("allUsersP") }) {
-                            Text("Usuários")
+                Div(attrs = { id("header-bottom") }) {
+                    Div(attrs = { id("afiliatesInfo") }) {
+                        Div {
+                            H4(attrs = { id("allUsersP") }) {
+                                Text("Usuários")
+                            }
+                        }
+
+                        Div(attrs = { id("afiliatesInfo-divs") }) {
+                            afStatusIndicator("Usuários Activos", "active-Status", activeAfiliates)
+                            afStatusIndicator("Usuários Bloqueados", "suspended-Status", suspendedAfiliates)
+                            afStatusIndicator("Todos Usuários", "allUsers-Status", allAfiliatesCount)
                         }
                     }
 
-                    Div(attrs = { id("afiliatesInfo-divs") }) {
-                        afStatusIndicator("Usuários Activos", "active-Status", activeAfiliates)
-                        afStatusIndicator("Usuários Bloqueados", "suspended-Status", suspendedAfiliates)
-                        afStatusIndicator("Todos Usuários", "allUsers-Status", allAfiliatesCount)
-                    }
+                    homeDivMinResume("expensesInfo", "Parceiros", "Clientes",
+                        "$totalClients", "Fornecedores", "$totalSuppliers")
+
+                    homeDivMinResume("profits", "Ganhos Totais", "Vendas",
+                        "${moneyFormat(totalSales)} MT", "Lucros", "${moneyFormat(totalProfit)} MT")
                 }
-
-                homeDivMinResume("expensesInfo", "Parceiros", "Clientes",
-                    "$totalClients", "Fornecedores", "$totalSuppliers")
-
-                homeDivMinResume("profits", "Ganhos Totais", "Vendas",
-                    "${moneyFormat(totalSales)} MT", "Lucros", "${moneyFormat(totalProfit)} MT")
             }
-        }
 
-        Br()
+            Br()
 
-        Main {
-            Div(attrs = { id("divCharts") }) {
-                Div(attrs = { id("fChartsDiv") }) {
-                    Div(attrs = { id("chart1") }) {
-                        Canvas(attrs = { id("monthlySalesQuantities") })
+            Main {
+                Div(attrs = { id("divCharts") }) {
+                    Div(attrs = { id("fChartsDiv") }) {
+                        Div(attrs = { id("chart1") }) {
+                            Canvas(attrs = { id("monthlySalesQuantities") })
+                        }
+
+                        Div(attrs = { id("chart2") }) {
+                            Canvas(attrs = { id("topSales") })
+                        }
                     }
 
-                    Div(attrs = { id("chart2") }) {
-                        Canvas(attrs = { id("topSales") })
-                    }
-                }
+                    Div(attrs = { id("sChartsDiv") }) {
+                        Div(attrs = { id("chart3") }) {
+                            Canvas(attrs = { id("topUsers") })
+                        }
 
-                Div(attrs = { id("sChartsDiv") }) {
-                    Div(attrs = { id("chart3") }) {
-                        Canvas(attrs = { id("topUsers") })
-                    }
-
-                    Div(attrs = { id("chart4") }) {
-                        Canvas(attrs = { id("monthlyProfits") })
+                        Div(attrs = { id("chart4") }) {
+                            Canvas(attrs = { id("monthlyProfits") })
+                        }
                     }
                 }
             }
         }
     }
+
+
 }

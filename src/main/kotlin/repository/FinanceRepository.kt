@@ -5,31 +5,20 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.browser.localStorage
-import kotlinx.browser.window
-import kotlinx.html.MetaHttpEquiv.contentType
+import kotlinx.browser.sessionStorage
 
 class FinanceRepository(private val httpClient: HttpClient) {
 
     // all-brances, create-branch, update-branch, delete-branch
-
     val users = UserRepository(httpClient)
-    private val token = localStorage.getItem("jwt_token") ?: ""
+    private val token = sessionStorage.getItem("jwt_token") ?: ""
 
 
     suspend fun allPayables(): List<PayableItem> {
-        try {
-            val response: HttpResponse? = users.apiRequest("$apiPayablesPath/all-payables")
-
-            if (response?.status == HttpStatusCode.Unauthorized) {
-                // 🔥 Se o usuário não estiver autenticado, remove os tokens e redireciona
-                localStorage.removeItem("token")
-                localStorage.removeItem("refreshToken")
-                console.log("Sessão expirada, redirecionando para login...")
-                return emptyList()
-            }
-            return response!!.body()
-
+        return try {
+            httpClient.get("$apiPayablesPath/all-payables") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.body()
         } catch (e: Exception) {
             console.error("Erro ao buscar pedidos: ${e.message}")
             return emptyList()
@@ -37,18 +26,10 @@ class FinanceRepository(private val httpClient: HttpClient) {
     }
 
     suspend fun allReceivables(): List<ReceivableItem> {
-        try {
-            val response: HttpResponse? = users.apiRequest("$apiReceivablesPath/all-receivables")
-
-            if (response?.status == HttpStatusCode.Unauthorized) {
-                // 🔥 Se o usuário não estiver autenticado, remove os tokens e redireciona
-                localStorage.removeItem("token")
-                localStorage.removeItem("refreshToken")
-                console.log("Sessão expirada, redirecionando para login...")
-                return emptyList()
-            }
-            return response!!.body()
-
+        return try {
+            httpClient.post("$apiPayablesPath/all-receivables") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.body()
         } catch (e: Exception) {
             console.error("Erro ao buscar pedidos: ${e.message}")
             return emptyList()

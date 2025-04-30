@@ -15,7 +15,7 @@ const val apiReceivablesPath = "$apiPath/receivables"
 
 enum class Role(val desc: String) { // desc -> description
     V("Vendedor/Caixa"),
-    A("Admin"),
+    A("Administrador"),
     G("Gerente"),
 }
 
