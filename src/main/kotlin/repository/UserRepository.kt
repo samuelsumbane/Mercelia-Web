@@ -134,5 +134,34 @@ class UserRepository(private val httpClient: HttpClient) {
         return Pair(response.status.value, response.bodyAsText())
     }
 
+    suspend fun updateUserPassword(data: PasswordDraft): Pair<Int, String> {
+        val response = httpClient.post("$apiPath/user/update-user-password") {
+            header("Authorization", "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(data)
+        }
+        return Pair(response.status.value, response.bodyAsText())
+    }
+
+    suspend fun verifyPassord(data: VerifyPasswordDC): Pair<Int, String> {
+        val response = httpClient.post("$apiPath/user/verify-password") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(data)
+        }
+        return Pair(response.status.value, response.bodyAsText())
+    }
+
+//    suspend fun <T: Number> basicPostRequest(data: T, path: String): Pair<Int, String> {
+//        val response = httpClient.post(path) {
+//            header(HttpHeaders.Authorization, "Bearer $token")
+//            contentType(ContentType.Application.Json)
+//            setBody(data)
+//        }
+//        return Pair(response.status.value, response.bodyAsText())
+//    }
+
+
+
 
 }

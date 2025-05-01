@@ -23,9 +23,8 @@ import repository.UserRepository
 import repository.emptyLoggedUser
 import view.*
 import view.Afiliates.clientsPage
-import view.Afiliates.eachUserPage
-//import view.Afiliates.eachUserPage
 import view.Afiliates.suppliersPage
+import view.eachUsers.eachUserPage
 import view.modules.financeModule.basicFinances
 import view.modules.financeModule.payablesPage
 import view.modules.financeModule.receivablesPage
@@ -116,7 +115,7 @@ fun main() {
                 if (user.userRole == Role.V.desc) {
 
                     route("/eachUser") {
-                        eachUserPage(user.userId, sysPackage)
+                        eachUserPage(user.userId, user.userRole, sysPackage)
                     }
 
                     route("/products") {
@@ -178,7 +177,7 @@ fun main() {
                     }
 
                     route("/eachUser") {
-                        eachUserPage(user.userId, sysPackage)
+                        eachUserPage(user.userId, user.userRole, sysPackage)
                     }
 
                     route("/suppliers") {

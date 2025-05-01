@@ -300,6 +300,19 @@ data class ChangeRoleDC(
     val userId: Int,
 )
 
+@Serializable
+data class PasswordDraft(
+    val userId: Int,
+    val hashedPassword: String,
+    val newPassword: String
+)
+
+@Serializable
+data class VerifyPasswordDC(
+    val actualPassword: String,
+    val hashedPassword: String,
+)
+
 val emptyLoggedUser = LoggedUserDC(
     false, 0, "", ""
 )

@@ -80,10 +80,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     var soldProductsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var soldProductsQtdsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
 
-    //
     var salesQuantitiesMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
-//    var salesQuantitiesMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
-//    lateinit var salesQuantitiesMonthsValues: Array<Int>
 
     var salesProfitsMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
@@ -92,7 +89,6 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     val router = Router.current
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(true)}
-
 
     LaunchedEffect(Unit) {
 

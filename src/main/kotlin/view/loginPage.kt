@@ -32,7 +32,7 @@ fun loginPage() {
 
     val router = Router.current
     var email by remember { mutableStateOf("admin@gmain") }
-    var password by remember { mutableStateOf("1111") }
+    var password by remember { mutableStateOf("1110") }
     var errorText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -49,17 +49,16 @@ fun loginPage() {
                                 val (status, userRole) = users.login(loginRequest)
 
                                 if (status) {
-//                                    if (userRole.isNotBlank()) {
-//                                        if (userRole == Role.V.desc) {
-//                                            router.navigate("/sales")
-//                                        } else {
-//                                            router.navigate("/dashboard")
-//                                        }
-//                                    } else {
-//                                        console.error("Login failed.")
-//                                    }
+                                    if (userRole.isNotBlank()) {
+                                        if (userRole == Role.V.desc) {
+                                            router.navigate("/sales")
+                                        } else {
                                             router.navigate("/dashboard")
-
+                                        }
+                                    } else {
+                                        errorText = "Usuário ou senha invalida"
+                                        console.error("Login failed.")
+                                    }
                                 } else {
                                     errorText = "Usuário ou senha invalida"
                                 }
@@ -89,7 +88,7 @@ fun loginPage() {
                         P(attrs = {
                             classes("errorText")
                             id("error_mensage")
-                        }) { Text("") }
+                        }) { Text(errorText) }
                     }
                     Br()
                 }

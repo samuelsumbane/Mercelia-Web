@@ -1,4 +1,4 @@
-package view.Afiliates
+package view.eachUsers
 
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
@@ -18,7 +18,7 @@ typealias AfMap = Map<String, String>
 
 
 @Composable
-fun eachUserPage(userId: Int, sysPackage: String) {
+fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -37,13 +37,22 @@ fun eachUserPage(userId: Int, sysPackage: String) {
 
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var userName by remember { mutableStateOf("") }
+//    var userId by remember { mutableStateOf(0) }
     var role by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
     var lastLogin by remember { mutableStateOf("") }
     var userNameError by remember { mutableStateOf("") }
+    var hashedPassword by remember { mutableStateOf("") }
 
     var userEmail by remember { mutableStateOf("") }
     var isLoggedIn by remember { mutableStateOf(false) }
+    //
+    var afPasscode by remember { mutableStateOf("") }
+    var afPasscodeError by remember { mutableStateOf("") }
+    var afNewPassword by remember { mutableStateOf("") }
+    var afNewPasswordError by remember { mutableStateOf("") }
+    var afConfirmPassword by remember { mutableStateOf("") }
+    var afConfirmPasswordError by remember { mutableStateOf("") }
 
 
     LaunchedEffect(Unit) {
@@ -53,6 +62,8 @@ fun eachUserPage(userId: Int, sysPackage: String) {
                 email = it.email
                 role = it.role
                 lastLogin = it.lastLogin
+//                userId = it.id
+                hashedPassword = it.passwordHash
             }
         } catch (e: Exception) {
             error = "Error: ${e.message}"
@@ -72,8 +83,7 @@ fun eachUserPage(userId: Int, sysPackage: String) {
         Div {}
         //        console.log(data?.afAccountStatus)
 
-        Div(attrs = { id("afiliateDivData") }) {
-            H2 { Text("Dados do usuário") }
+        Div(attrs = { id("eachUserDivData") }) {
 
             // Personal data ------->>
             val personalData: AfMap = mapOf(
@@ -120,6 +130,13 @@ fun eachUserPage(userId: Int, sysPackage: String) {
                 button("btn", "Editar senha") {
                     securityModalState = "open-min-modal"
                     console.log("clicked")
+                    afPasscode = ""
+                    afPasscodeError = ""
+                    afNewPassword = ""
+                    afNewPasswordError = ""
+                    afConfirmPassword = ""
+                    afConfirmPasswordError = ""
+
                 }
             }
         }
@@ -137,11 +154,11 @@ fun eachUserPage(userId: Int, sysPackage: String) {
                     userNameError = if (userName.isBlank()) "O nome é obrigatório" else ""
                     if (userNameError.isBlank()) {
                         coroutineScope.launch {
-                            //                            val editAfiliateDraft = EditAfiliateDraft(
+                            //                            val editeachUserDraft = EditeachUserDraft(
                             //                                userId, userName, afPhone, afLocation, "",
                             //                                afBirthday, afEmail
                             //                            )
-                            //                            users.editAfiliate(editAfiliateDraft)
+                            //                            users.editeachUser(editeachUserDraft)
                             //                            alert("success", "Sucesso!", "Dados do afiliado actualizados com sucesso")
                         }
                     }
@@ -173,16 +190,22 @@ fun eachUserPage(userId: Int, sysPackage: String) {
 
     minModal(securityModalState, "Editar e senha") {
 
-        var afPasscode by remember { mutableStateOf("") }
-        var afPasscodeError by remember { mutableStateOf("") }
-        var afNewPassword by remember { mutableStateOf("") }
-        var afNewPasswordError by remember { mutableStateOf("") }
-        var afConfirmPassword by remember { mutableStateOf("") }
-        var afConfirmPasswordError by remember { mutableStateOf("") }
 
         var passwordMatches by remember { mutableStateOf(false) }
 
-
+        fun checkPassword() {
+            coroutineScope.launch {
+                val (status, message) = users.verifyPassord(VerifyPasswordDC(afPasscode, hashedPassword))
+                if (status == 406 && afPasscodeError.isBlank()) {
+                    afPasscodeError = message
+                }
+                if (afConfirmPasswordError.isNotBlank()) {
+                    if (afNewPassword.isBlank() || afConfirmPassword.isEmpty()) {
+                        afConfirmPasswordError = ""
+                    }
+                }
+            }
+        }
 
         Form(
             attrs = {
@@ -190,28 +213,21 @@ fun eachUserPage(userId: Int, sysPackage: String) {
                 onSubmit { event ->
                     event.preventDefault()
                     afPasscodeError = if (afPasscode.isBlank()) "A senha actual é obrigatória" else ""
-                    afNewPassword = if (afNewPassword.isBlank()) "A nova é obrigatória" else ""
-                    afConfirmPassword = if (afConfirmPassword.isBlank()) "É obrigatório confirmar a senha" else ""
-                    afConfirmPassword =
+                    afNewPasswordError = if (afNewPassword.isBlank()) "A nova é obrigatória" else ""
+                    afConfirmPasswordError = if (afConfirmPassword.isBlank()) "É obrigatório confirmar a senha" else ""
+
+                    afConfirmPasswordError =
                         if (afConfirmPassword != afNewPassword) "As senhas não correspondem." else ""
 
-
-
-                    if (afPasscodeError.isBlank() && afNewPassword.isBlank() && afConfirmPassword.isBlank()) {
+                    if (afPasscodeError.isBlank() && afNewPasswordError.isBlank() && afConfirmPasswordError.isBlank()) {
                         coroutineScope.launch {
+                            val eachUserPasswords = PasswordDraft(userId, hashedPassword, afNewPassword)
+                            val (status, message) = users.updateUserPassword(eachUserPasswords)
 
-                            //                            val afiliatePasswords = VerifyPasswordType(afPasscode, afNewPassword)
-                            //                            passwordMatches = users.verifyPassword(afiliatePasswords)
-
-                            if (!passwordMatches) {
-                                afPasscodeError = "A senha inserida não corresponde a senha actual"
-                            } else {
-                                // Here we will edit password
+                            when (status) {
+                                200 -> alert("success", "Sucesso",message)
+                                404 -> unknownErrorAlert()
                             }
-
-                            val editAfiliateDraft = UserItemDraft(userName, userEmail, role)
-                            users.updateUser(editAfiliateDraft)
-                            alertTimer("Dados do afiliado actualizados com sucesso")
                         }
                     }
                 }
@@ -225,12 +241,22 @@ fun eachUserPage(userId: Int, sysPackage: String) {
 
             formDiv(
                 "Nova senha", afNewPassword, InputType.Password,
-                oninput = { event -> afNewPassword = event.value }, afNewPasswordError
+                oninput = { event ->
+                    afNewPassword = event.value
+                    checkPassword()
+                }, afNewPasswordError
             )
 
             formDiv(
                 "Confirmar a senha", afConfirmPassword, InputType.Password,
-                oninput = { event -> afConfirmPassword = event.value }, afConfirmPasswordError
+                oninput = { event ->
+                    afConfirmPassword = event.value
+                    checkPassword()
+                    if (afConfirmPassword.length > 3) {
+                        afConfirmPasswordError =
+                            if (afConfirmPassword != afNewPassword) "As senhas não correspondem." else ""
+                    }
+                }, afConfirmPasswordError
             )
 
             Div(attrs = { classes("min-submit-buttons") }) {

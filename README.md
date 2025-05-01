@@ -21,3 +21,18 @@ Open ports forever
 - sudo systemctl restart ufw
 
 
+## Files to download
+### Download these files and put in theses dirs
+#### src/resources:
+- chart.js
+- dataTables-2.1.8.min.js
+- jquery-3.6.0.min.js
+
+#### src/resources/scripts
+- sweetalert2.all.min.js
+
+#### src/resources/styles
+- sweetalert2.min.css
+- jquery.dataTables.min.css
+
+
