@@ -153,7 +153,7 @@ fun showMonthlyProfits(labels: Array<String>, profits: Array<String>) {
         (window.asDynamic().salesProfitsByMonthsAndYear)(labels, profits)
     }, 400)
 }
-fun showMonthlySales(labels: Array<String>, quantities: Array<String>) {
+fun showMonthlySales(labels: Array<String>, quantities: Array<Int>) {
     window.setTimeout({
         (window.asDynamic().salesQuantitiesByMonthsAndYear)(labels, quantities)
     }, 400)

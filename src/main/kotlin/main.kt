@@ -132,7 +132,7 @@ fun main() {
                     }
 
                     route("/stockPage") {
-                        stockPage(sysPackage)
+                        stockPage(user.userRole, sysPackage)
                     }
 
                     for (uRoute in norForSellerUserRoutes) {
@@ -161,7 +161,7 @@ fun main() {
                     }
 
                     route("/stockPage") {
-                        stockPage(sysPackage)
+                        stockPage(user.userRole, sysPackage)
                     }
 
                     route("/dashboard") {

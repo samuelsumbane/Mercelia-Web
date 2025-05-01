@@ -42,7 +42,10 @@ fun productsPage(userRole: String, sysPackage: String) {
     var modalUpdateProTitle by remember { mutableStateOf("") }
     var modalIncreaseStockTitle by remember { mutableStateOf("") }
     var modalMoreDetailsTitle by remember { mutableStateOf("") }
-    var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
+
+    var addProModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
+//    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
+
     var modalUpdatePriceState by remember { mutableStateOf("closed") }
     var modalUpdateProState by remember { mutableStateOf("closed") }
     var modalIncreaseStockState by remember { mutableStateOf("closed") }
@@ -115,7 +118,7 @@ fun productsPage(userRole: String, sysPackage: String) {
             if (userRole != Role.V.desc) {
                 button("btnSolid", "+ Producto") {
                     modalTitle = "Adicionar Producto"
-                    modalState = "open-min-modal"
+                    addProModalState = "open-min-modal"
                     submitBtnText = "Submeter"
                     cleanVarFields()
                 }
@@ -209,7 +212,7 @@ fun productsPage(userRole: String, sysPackage: String) {
             Div { Text("Loading...") }
         }
 
-        minModal(modalState, modalTitle) {
+        minModal(addProModalState, modalTitle) {
             Form(
                 attrs = {
                     classes("modalform")
@@ -324,7 +327,7 @@ fun productsPage(userRole: String, sysPackage: String) {
 
                 Div(attrs = { classes("min-submit-buttons") }) {
                     button("closeButton", "Fechar") {
-                        modalState = "u"
+                        addProModalState = "u"
                         coroutineScope.launch {
                             productsData = products.fetchProducts()
                         }
@@ -335,303 +338,304 @@ fun productsPage(userRole: String, sysPackage: String) {
             }
         }
 
-        // Increase product stock --------->>
-        minModal(modalIncreaseStockState, modalIncreaseStockTitle) {
-            Form(
-                attrs = {
-                    classes("modalform")
-                    onSubmit { event ->
-                        event.preventDefault()
-
-                        proCostError = if (costValue == 0.0) "O custo é obrigatório" else ""
-                        proPriceError = if (proPrice == 0.0) "O preço do producto é obrigatório" else ""
-
-                        if (proCostError == "" && proPriceError == "") {
-                            coroutineScope.launch {
-//                                val minProQuantityChecker = if (minProQuantity == 0) null else minProQuantity
-
-                                if (proId != 0) { //Have to edit ------------>>
-                                    val status = products.increaseProductStock(
-                                        IncreaseProductStockDraft(
-                                            proId, costValue, proPrice, proQuantity, "Aumento de Estoque", 1,
-                                        )
-                                    )
-                                    if (status == 201) {
-                                        alertTimer("Novo estoque adicionado com sucesso com valores actualizados.")
-                                    } else unknownErrorAlert()
-                                }
-                                cleanVarFields()
-                            }
-                            modalIncreaseStockState = "closed"
-                        }
-                    }
-                }
-            ) {
-                Input(type = InputType.Hidden, attrs = {
-                    value(proId)
-                    onInput { event -> proId = event.value.toInt() }
-                })
-
-//                formDiv("Quantidade Adicional", proQuantity.toString(), InputType.Number, { event ->
-//                    proQuantity = if (event.value.toString() != "") {
-//                        event.value!!.toInt()
-//                    } else {
-//                        0
+//        // More product details --------->>
+//        minModal(modalMoreDetailsState, modalMoreDetailsTitle) {
+//            Form(
+//                attrs = {
+//                    classes("modalform")
+//                    onSubmit { event ->
+//                        event.preventDefault()
 //                    }
-//                }, proQuantityError)
+//                }
+//            ) {
 //
-                if (sysPackage != SysPackages.L.desc) {
-                    formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
-                        minProQuantity = event.value!!.toInt()
-                    }, minProQuantityError)
-                } else minProQuantity = 0
-
-                formDiv("Custo", costValue.toString(), InputType.Number, { event ->
-                    costValue = event.value!!.toDouble()
-                    if (proQuantity != 0) {
-                        totalPaid = proQuantity * costValue
-                    }
-                }, proCostError)
-
-                formDiv("Preço", proPrice.toString(), InputType.Number, { event ->
-                    proPrice = event.value!!.toDouble()
-                }, proPriceError)
-
-                submitButtons(submitBtnText) {
-                    modalIncreaseStockState = "closed"
-                    modalIncreaseStockTitle = ""
-                    coroutineScope.launch {
-                        productsData = products.fetchProducts()
-                    }
-                }
-            }
-        }
-
-        // More product details --------->>
-        minModal(modalMoreDetailsState, modalMoreDetailsTitle) {
-            Form(
-                attrs = {
-                    classes("modalform")
-                    onSubmit { event ->
-                        event.preventDefault()
-                    }
-                }
-            ) {
-
-                modalPItem("Nome", value = {
-                    P { Text(proName) }
-                })
-                modalPItem("Categoria", value = {
-                    P { Text(categoryName) }
-                })
-                modalPItem("Códgo de Barras", value = {
-                    P { Text(proBarcode) }
-                })
-
-                modalPItem("", value = {
-                    button("btn", "Actualizar Producto") {
-                        modalMoreDetailsState = "closed"
-                        modalUpdateProState = "open-min-modal"
-                        modalUpdateProTitle = "Actualizar Producto"
-                    }
-                })
-                Br()
-                Hr()
-
-                modalPItem("Custo", value = {
-                    P { Text(moneyFormat(costValue)) }
-                })
-
-                modalPItem("Preço", value = {
-                    P { Text(moneyFormat(proPrice)) }
-                })
-
-                modalPItem("", value = {
-                    button("btn", "Actualizar Preço") {
-                        modalMoreDetailsState = "closed"
-                        modalUpdatePriceState = "open-min-modal"
-                        modalUpdatePriceTitle = "Actualizar Preço"
-                    }
-                })
-                Br()
-
-                Hr()
-
-                modalPItem("Estoque", value = {
-                    P { Text(proQuantity.toString()) }
-                })
-
-                if (userRole != "Vendedor/Caixa") {
-                    modalPItem("", value = {
-                        button("btn", "Aumentar Estoque") {
-                            modalMoreDetailsState = "closed"
-                            modalIncreaseStockState = "open-min-modal"
-                            modalIncreaseStockTitle = "Aumentar Estoque"
-                            proQuantity = 0
-                        }
-                    })
-                }
-
-                Br()
-
-                Hr()
-
-                if (sysPackage != SysPackages.L.desc) {
-                    modalPItem("Estoque Min", value = {
-                        P { Text(minProQuantity.toString()) }
-                    })
-                }
-
-
-                submitButtons(submitBtnText) {
-                    modalMoreDetailsState = "closed"
-                    coroutineScope.launch {
-                        productsData = products.fetchProducts()
-                    }
-                }
-            }
-        }
-
-        // Change ProductName and category --------->>
-        minModal(modalUpdateProState, modalUpdateProTitle) {
-            Form(
-                attrs = {
-                    classes("modalform")
-                    onSubmit { event ->
-                        event.preventDefault()
-
-                        proNameError = if (proName.isBlank()) "O nome do producto é obrigatório" else ""
-                        categoryError = if (categoryId == 0) "Selecione a categoria" else ""
-
-                        if (proNameError == "" && categoryError == "") {
-                            coroutineScope.launch {
-                                if (proId != 0) {
-                                    val status = products.changeProductNameAndCategory(
-                                        ProductNameAndCategory(proId, proName, categoryId, proBarcode)
-                                    )
-
-                                    if (status == 201) {
-                                        alertTimer("Producto actualizado com sucesso")
-                                        modalUpdateProState = "closed"
-                                        modalUpdateProTitle = ""
-                                        productsData = products.fetchProducts()
-                                    } else unknownErrorAlert()
-                                }
-                                    cleanVarFields()
-                                }
-                            } else if (categoryError == "") {
-                                alert("error", "Erro", "Por favor, selecione uma categoria.")
-                            }
-
-
-                        }
-                    }
-                ) {
-                    Input(type = InputType.Hidden, attrs = {
-                        value(proId)
-                        onInput { event -> proId = event.value.toInt() }
-                    })
-
-                    formDiv("Nome do producto", proName, InputType.Text, { event -> proName = event.value}, proNameError)
-                    Div(attrs = {
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                        }
-                    }) {
-                        Label { Text("Categoria") }
-                        Select(attrs = {
-                            style { height(33.px) }
-                            id("selectCategory")
-                            classes("formTextInput")
-                            onChange {
-                                val inputValue = it.value
-                                if (inputValue == "0") {
-                                    categoryError = "Por favor, selecione uma categoria"
-                                    return@onChange
-                                }
-
-                                inputValue?.let {
-                                    categoryError = ""
-                                    categoryId = inputValue.toInt()
-                                }
-                            }
-                        }) {
-                            Option("0") {
-                                Text("Selecione uma categoria")
-                            }
-
-                            categoriesData?.map {
-                                Option("${it.id}") {
-                                    Text(it.name)
-                                }
-                            }
-                        }
-
-                        Label(attrs = { classes("errorText") }) { Text(categoryError) }
-                    }
-
-                    formDiv("Código de Barras", proBarcode, InputType.Text, { event ->
-                        proBarcode = event.value
-                    }, "")
-
-                    submitButtons(submitBtnText) {
-                        modalUpdateProState = "closed"
-                        modalUpdateProTitle = ""
-                        coroutineScope.launch {
-                            productsData = products.fetchProducts()
-                        }
-                    }
-                }
-            }
-
-            // Change Product Price --------->>
-            minModal(modalUpdatePriceState, modalUpdatePriceTitle) {
-                Form(
-                    attrs = {
-                        classes("modalform")
-                        onSubmit { event ->
-                            event.preventDefault()
-                            proPriceError = if (proPrice == 0.0) "O preço do producto é obrigatório" else ""
-                            if (proPriceError == "") {
-                                coroutineScope.launch {
-                                    if (proId != 0) {
-                                        val status = products.updateProductPrice(
-                                            ChangeProductPriceDraft(proId, proPrice)
-                                        )
-
-                                        if (status == 201) {
-                                            alertTimer("Preço do producto actualizado com sucesso")
-                                            modalUpdatePriceState = "closed"
-                                            modalUpdatePriceTitle = ""
-                                            cleanVarFields()
-                                        } else unknownErrorAlert()
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                ) {
-                    Input(type = InputType.Hidden, attrs = {
-                        value(proId)
-                        onInput { event -> proId = event.value.toInt() }
-                    })
-
-                    //            CardPitem("Preço Actual", proPrice.toString())
-
-                    formDiv("Novo Preço", proPrice.toString(), InputType.Number, { event ->
-                        proPrice = event.value!!.toDouble()
-                    }, proPriceError)
-
-                    submitButtons(submitBtnText) {
-                        modalUpdatePriceState = "closed"
-                        modalUpdatePriceTitle = ""
-                        coroutineScope.launch {
-                            productsData = products.fetchProducts()
-                        }
-                    }
-                }
-            }
-        }
+//                modalPItem("Nome", value = {
+//                    P { Text(proName) }
+//                })
+//                modalPItem("Categoria", value = {
+//                    P { Text(categoryName) }
+//                })
+//                modalPItem("Códgo de Barras", value = {
+//                    P { Text(proBarcode) }
+//                })
+//
+//                modalPItem("", value = {
+//                    button("btn", "Actualizar Producto") {
+//                        modalMoreDetailsState = "closed"
+//                        modalUpdateProState = "open-min-modal"
+//                        modalUpdateProTitle = "Actualizar Producto"
+//                    }
+//                })
+//                Br()
+//                Hr()
+//
+//                modalPItem("Custo", value = {
+//                    P { Text(moneyFormat(costValue)) }
+//                })
+//
+//                modalPItem("Preço", value = {
+//                    P { Text(moneyFormat(proPrice)) }
+//                })
+//
+//                modalPItem("", value = {
+//                    button("btn", "Actualizar Preço") {
+//                        modalMoreDetailsState = "closed"
+//                        modalUpdatePriceState = "open-min-modal"
+//                        modalUpdatePriceTitle = "Actualizar Preço"
+//                    }
+//                })
+//                Br()
+//
+//                Hr()
+//
+//                modalPItem("Estoque", value = {
+//                    P { Text(proQuantity.toString()) }
+//                })
+//
+//                if (userRole != "Vendedor/Caixa") {
+//                    modalPItem("", value = {
+//                        button("btn", "Aumentar Estoque") {
+//                            modalMoreDetailsState = "closed"
+//                            modalIncreaseStockState = "open-min-modal"
+//                            modalIncreaseStockTitle = "Aumentar Estoque"
+//                            proQuantity = 0
+//                        }
+//                    })
+//                }
+//
+//                Br()
+//
+//                Hr()
+//
+//                if (sysPackage != SysPackages.L.desc) {
+//                    modalPItem("Estoque Min", value = {
+//                        P { Text(minProQuantity.toString()) }
+//                    })
+//                }
+//
+//
+//                submitButtons(submitBtnText) {
+//                    modalMoreDetailsState = "closed"
+//                    coroutineScope.launch {
+//                        productsData = products.fetchProducts()
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Increase product stock --------->>
+//        minModal(modalIncreaseStockState, modalIncreaseStockTitle) {
+//            Form(
+//                attrs = {
+//                    classes("modalform")
+//                    onSubmit { event ->
+//                        event.preventDefault()
+//
+//                        proCostError = if (costValue == 0.0) "O custo é obrigatório" else ""
+//                        proPriceError = if (proPrice == 0.0) "O preço do producto é obrigatório" else ""
+//
+//                        if (proCostError == "" && proPriceError == "") {
+//                            coroutineScope.launch {
+////                                val minProQuantityChecker = if (minProQuantity == 0) null else minProQuantity
+//
+//                                if (proId != 0) { //Have to edit ------------>>
+//                                    val status = products.increaseProductStock(
+//                                        IncreaseProductStockDraft(
+//                                            proId, costValue, proPrice, proQuantity, "Aumento de Estoque", 1,
+//                                        )
+//                                    )
+//                                    if (status == 201) {
+//                                        alertTimer("Novo estoque adicionado com sucesso com valores actualizados.")
+//                                    } else unknownErrorAlert()
+//                                }
+//                                cleanVarFields()
+//                            }
+//                            modalIncreaseStockState = "closed"
+//                        }
+//                    }
+//                }
+//            ) {
+//                Input(type = InputType.Hidden, attrs = {
+//                    value(proId)
+//                    onInput { event -> proId = event.value.toInt() }
+//                })
+//
+////                formDiv("Quantidade Adicional", proQuantity.toString(), InputType.Number, { event ->
+////                    proQuantity = if (event.value.toString() != "") {
+////                        event.value!!.toInt()
+////                    } else {
+////                        0
+////                    }
+////                }, proQuantityError)
+////
+//                if (sysPackage != SysPackages.L.desc) {
+//                    formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
+//                        minProQuantity = event.value!!.toInt()
+//                    }, minProQuantityError)
+//                } else minProQuantity = 0
+//
+//                formDiv("Custo", costValue.toString(), InputType.Number, { event ->
+//                    costValue = event.value!!.toDouble()
+//                    if (proQuantity != 0) {
+//                        totalPaid = proQuantity * costValue
+//                    }
+//                }, proCostError)
+//
+//                formDiv("Preço", proPrice.toString(), InputType.Number, { event ->
+//                    proPrice = event.value!!.toDouble()
+//                }, proPriceError)
+//
+//                submitButtons(submitBtnText) {
+//                    modalIncreaseStockState = "closed"
+//                    modalIncreaseStockTitle = ""
+//                    coroutineScope.launch {
+//                        productsData = products.fetchProducts()
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//        // Change ProductName and category --------->>
+//        minModal(modalUpdateProState, modalUpdateProTitle) {
+//            Form(
+//                attrs = {
+//                    classes("modalform")
+//                    onSubmit { event ->
+//                        event.preventDefault()
+//
+//                        proNameError = if (proName.isBlank()) "O nome do producto é obrigatório" else ""
+//                        categoryError = if (categoryId == 0) "Selecione a categoria" else ""
+//
+//                        if (proNameError == "" && categoryError == "") {
+//                            coroutineScope.launch {
+//                                if (proId != 0) {
+//                                    val status = products.changeProductNameAndCategory(
+//                                        ProductNameAndCategory(proId, proName, categoryId, proBarcode)
+//                                    )
+//
+//                                    if (status == 201) {
+//                                        alertTimer("Producto actualizado com sucesso")
+//                                        modalUpdateProState = "closed"
+//                                        modalUpdateProTitle = ""
+//                                        productsData = products.fetchProducts()
+//                                    } else unknownErrorAlert()
+//                                }
+//                                    cleanVarFields()
+//                                }
+//                            } else if (categoryError == "") {
+//                                alert("error", "Erro", "Por favor, selecione uma categoria.")
+//                            }
+//
+//
+//                        }
+//                    }
+//                ) {
+//                    Input(type = InputType.Hidden, attrs = {
+//                        value(proId)
+//                        onInput { event -> proId = event.value.toInt() }
+//                    })
+//
+//                    formDiv("Nome do producto", proName, InputType.Text, { event -> proName = event.value}, proNameError)
+//                    Div(attrs = {
+//                        style {
+//                            display(DisplayStyle.Flex)
+//                            flexDirection(FlexDirection.Column)
+//                        }
+//                    }) {
+//                        Label { Text("Categoria") }
+//                        Select(attrs = {
+//                            style { height(33.px) }
+//                            id("selectCategory")
+//                            classes("formTextInput")
+//                            onChange {
+//                                val inputValue = it.value
+//                                if (inputValue == "0") {
+//                                    categoryError = "Por favor, selecione uma categoria"
+//                                    return@onChange
+//                                }
+//
+//                                inputValue?.let {
+//                                    categoryError = ""
+//                                    categoryId = inputValue.toInt()
+//                                }
+//                            }
+//                        }) {
+//                            Option("0") {
+//                                Text("Selecione uma categoria")
+//                            }
+//
+//                            categoriesData?.map {
+//                                Option("${it.id}") {
+//                                    Text(it.name)
+//                                }
+//                            }
+//                        }
+//
+//                        Label(attrs = { classes("errorText") }) { Text(categoryError) }
+//                    }
+//
+//                    formDiv("Código de Barras", proBarcode, InputType.Text, { event ->
+//                        proBarcode = event.value
+//                    }, "")
+//
+//                    submitButtons(submitBtnText) {
+//                        modalUpdateProState = "closed"
+//                        modalUpdateProTitle = ""
+//                        coroutineScope.launch {
+//                            productsData = products.fetchProducts()
+//                        }
+//                    }
+//                }
+//            }
+//
+//        // Change Product Price --------->>
+//        minModal(modalUpdatePriceState, modalUpdatePriceTitle) {
+//                Form(
+//                    attrs = {
+//                        classes("modalform")
+//                        onSubmit { event ->
+//                            event.preventDefault()
+//                            proPriceError = if (proPrice == 0.0) "O preço do producto é obrigatório" else ""
+//                            if (proPriceError == "") {
+//                                coroutineScope.launch {
+//                                    if (proId != 0) {
+//                                        val status = products.updateProductPrice(
+//                                            ChangeProductPriceDraft(proId, proPrice)
+//                                        )
+//
+//                                        if (status == 201) {
+//                                            alertTimer("Preço do producto actualizado com sucesso")
+//                                            modalUpdatePriceState = "closed"
+//                                            modalUpdatePriceTitle = ""
+//                                            cleanVarFields()
+//                                        } else unknownErrorAlert()
+//                                    }
+//                                }
+//                            }
+//
+//                        }
+//                    }
+//                ) {
+//                    Input(type = InputType.Hidden, attrs = {
+//                        value(proId)
+//                        onInput { event -> proId = event.value.toInt() }
+//                    })
+//
+//                    //            CardPitem("Preço Actual", proPrice.toString())
+//
+//                    formDiv("Novo Preço", proPrice.toString(), InputType.Number, { event ->
+//                        proPrice = event.value!!.toDouble()
+//                    }, proPriceError)
+//
+//                    submitButtons(submitBtnText) {
+//                        modalUpdatePriceState = "closed"
+//                        modalUpdatePriceTitle = ""
+//                        coroutineScope.launch {
+//                            productsData = products.fetchProducts()
+//                        }
+//                    }
+//                }
+//            }
+    }
 }

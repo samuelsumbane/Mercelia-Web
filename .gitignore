@@ -19,5 +19,11 @@ dist/
 *.js.map
 *.css.map
 custom.min.js
+dataTables-2.1.8.min.js
+jquery-3.6.0.min.js
+chart.js
+scripts/sweetalert2.all.min.js
+styles/sweetalert2.min.css
+styles/jquery.dataTables.min.css
 
 

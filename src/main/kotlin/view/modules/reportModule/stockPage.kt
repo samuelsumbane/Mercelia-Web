@@ -17,7 +17,7 @@ import repository.*
 
 
 @Composable
-fun stockPage(sysPackage: String) {
+fun stockPage(userRole: String, sysPackage: String) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -53,7 +53,6 @@ fun stockPage(sysPackage: String) {
     var finalDateError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     val router = Router.current
-    var user by remember { mutableStateOf(emptyLoggedUser) }
 
     LaunchedEffect(Unit) {
         try {
@@ -74,7 +73,7 @@ fun stockPage(sysPackage: String) {
                 onBackFunc = { router.navigate("/basicReportsPage") },
                 title = "Movimentos de Estoque", pageActivePath = "sidebar-btn-reports",
                 sysPackage = sysPackage,
-                userRole = user.userRole,
+                userRole = userRole,
                 hasNavBar = true, navButtons = {
                     if (sysPackage != SysPackages.L.desc) {
                         multiFilesExportButton {

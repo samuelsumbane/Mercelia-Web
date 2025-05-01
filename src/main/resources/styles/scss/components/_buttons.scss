@@ -251,6 +251,16 @@
     }
 }
 
+// & > button {
+//         background: lightslategrey;
+//         color: white;
+//         border-radius:5px;
+//         &:hover{
+//             background:dodgerblue;
+//             color:white;
+//         }
+//     }
+
 
 .multiFilesExportButton {
   position: relative;
@@ -267,20 +277,23 @@
     left: 0;
     border-radius: 8px;
     padding:6px;
-    background:darkgray;
+    background:white;;
     flex-direction:column;
     z-index: 100;
     transition: all 0.3s ease;
-
+    box-shadow:0 0 8px rgba(black, 0.5);
+    gap: 6px;
     &:hover{display: flex;}
 
     & p{
         padding: 5px;
+        background: lightslategrey;
+        color: white;
+        border-radius:5px;
         &:hover{
-            background:white;
-            color: black;
-            border-radius: 5px;
             cursor: pointer;
+            background:dodgerblue;
+            color:white;
         }
     }
   }

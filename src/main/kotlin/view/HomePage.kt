@@ -39,7 +39,7 @@ data class MonthlyProfitDC(
 data class MonthlyQuantityDC(
     val month: String,
     val year: String,
-    val quantity: String
+    val quantity: Int
 )
 
 
@@ -82,7 +82,8 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
 
     //
     var salesQuantitiesMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
-    var salesQuantitiesMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
+//    var salesQuantitiesMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
+//    lateinit var salesQuantitiesMonthsValues: Array<Int>
 
     var salesProfitsMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
@@ -134,7 +135,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                 salesQuantitiesMonthsLabels = totalQuantitiesByMonthAndYearData.map {
                     "${numberToStringMonth(it.month)} - ${it.year}"
                 }.toTypedArray()
-                salesQuantitiesMonthsValues = totalQuantitiesByMonthAndYearData.map { it.quantity }.toTypedArray()
+                val salesQuantitiesMonthsValues: Array<Int> = totalQuantitiesByMonthAndYearData.map { it.quantity }.toTypedArray()
                 showMonthlySales(salesQuantitiesMonthsLabels, salesQuantitiesMonthsValues)
 
                 // Sold products --------->>
@@ -143,7 +144,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                 soldProductsLabels = productsSoldData.map { it.productname }.toTypedArray()
                 soldProductsQtdsLabels = productsSoldData.map { it.quantity }.toTypedArray()
                 showSoldProductChart(soldProductsLabels, soldProductsQtdsLabels)
-                //
+
                 isLoading = false
 
                 if (activeSysPackage != SysPackages.L.desc) {
@@ -286,6 +287,5 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
             }
         }
     }
-
 
 }
