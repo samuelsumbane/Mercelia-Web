@@ -5,7 +5,6 @@ import components.button
 import org.jetbrains.compose.web.dom.*
 import repository.OrderItemsItem
 import repository.moneyFormat
-import repository.twoDigits
 
 @Composable
 fun saleItemsModal(

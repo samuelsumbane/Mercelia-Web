@@ -6,6 +6,7 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -13,11 +14,14 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.*
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.Event
 import repository.*
+import kotlin.collections.filter
 
 
 @Composable
-fun stockPage(userRole: String, sysPackage: String) {
+fun stockPage(paramData: UserDataAndSys) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -58,7 +62,7 @@ fun stockPage(userRole: String, sysPackage: String) {
         try {
             isLoading = true
             val stockdataDeffered = async { stocks.getAllStock() }
-            stockData = stockdataDeffered.await()
+            stockData = if (paramData.userRole == Role.V.desc) stockdataDeffered.await().filter { it.userId == paramData.userId } else stockdataDeffered.await()
             initializeDataTable()
 
         } catch (e: Exception) {
@@ -72,12 +76,35 @@ fun stockPage(userRole: String, sysPackage: String) {
                 showBackButton = true,
                 onBackFunc = { router.navigate("/basicReportsPage") },
                 title = "Movimentos de Estoque", pageActivePath = "sidebar-btn-reports",
-                sysPackage = sysPackage,
-                userRole = userRole,
+                sysPackage = paramData.sysPackage,
+                userRole = paramData.userRole,
                 hasNavBar = true, navButtons = {
-                    if (sysPackage != SysPackages.L.desc) {
+                    multiFilesExportButton(btnText = "Venda de hoje") {
+                        P(attrs = {
+                            onClick {
+                                val input = document.getElementById("dt-search-0") as? HTMLInputElement
+                                input?.value = getUserLocalDateString()
+                                input?.dispatchEvent(Event("input"))
+                            }
+                        }) {
+                            Text("Filtrar")
+                        }
+
+                        P(attrs = {
+                            onClick {
+                                val todayDate = getUserLocalDateString()
+                                filteredStocks = stockData.filter { it.datetime.split(" ")[0] == todayDate }.toMutableList()
+                                modalState = "closed"
+                                maxModalState = "open-max-modal"
+                                maySendData = true
+                            }
+                        }) {
+                            Text("Imprimir")
+                        }
+                    }
+                    if (paramData.sysPackage != SysPackages.L.desc) {
                         multiFilesExportButton {
-                            if (sysPackage == SysPackages.PO.desc) {
+                            if (paramData.sysPackage == SysPackages.PO.desc) {
                                 P(attrs = {
                                     onClick {
                                         window.open("http://0.0.0.0:2000/stocks/export/stocks/excel", "_blank")
@@ -220,24 +247,24 @@ fun stockPage(userRole: String, sysPackage: String) {
                         }
                     ) {
 
-                        formDiv("Data Inicial", initialDate, inputType = InputType.Date, oninput = { event ->
+                        formDiv("Data Inicial", initialDate, inputType = InputType.Date, 0, oninput = { event ->
                             initialDate = event.value
                         }, initialDateError)
 
                         formDiv(
-                            "Hora Inicial", initialTime, InputType.Date,
+                            "Hora Inicial", initialTime, InputType.Time, 0,
                             oninput = { event -> initialTime = event.value }, ""
                         )
 
                         Br()
 
                         formDiv(
-                            "Data Final", finalDate, InputType.Date,
+                            "Data Final", finalDate, InputType.Date, 0,
                             oninput = { event -> finalDate = event.value }, finalDateError
                         )
 
                         formDiv(
-                            "Hora Final", finalTime, InputType.Date,
+                            "Hora Final", finalTime, InputType.Time, 0,
                             oninput = { event -> finalTime = event.value }, ""
                         )
 
@@ -269,7 +296,7 @@ fun stockPage(userRole: String, sysPackage: String) {
                         }) {
 
                             Div(attrs = { id("r-leftPart") }) {
-                                if (maySendData) stockPaper(filteredStocks)
+                                if (maySendData) stockPaper(paramData.userName, filteredStocks)
                             }
 
                             //Right

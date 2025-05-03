@@ -30,9 +30,6 @@ fun brancesPage(userRole: String, sysPackage: String) {
         }
     }
     val router = Router.current
-    val settings = SettingsRepository(httpClient)
-    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
-    var sysPackage by remember { mutableStateOf("") }
 
     val branches = BranchRepository(httpClient)
     var branchData by remember { mutableStateOf(emptyList<BranchItem>()) }
@@ -65,19 +62,14 @@ fun brancesPage(userRole: String, sysPackage: String) {
                 isLoading = true
                 val branchesDeffered = async { branches.allBranches() }
                 branchData = branchesDeffered.await()
-                sysConfigs = settings.getSettings()
             } catch (e: Exception) {
                 error = "Error: ${e.message}"
             } finally {
                 isLoading = false
             }
 
-            for((key, value) in sysConfigs) {
-                if (key == "active_package") {
-                    sysPackage = value
-                    appropriateName = if (value == SysPackages.L.desc) "Sede" else "Sucursal"
-                }
-            }
+            appropriateName = if (sysPackage == SysPackages.L.desc) "Sede" else "Sucursal"
+
         }
 
     }
@@ -242,12 +234,12 @@ fun brancesPage(userRole: String, sysPackage: String) {
                 formDiv(
                     "Nome da $appropriateName",
                     branchName,
-                    InputType.Text,
+                    InputType.Text, 98,
                     { event -> branchName = event.value },
                     branchNameError
                 )
 
-                formDiv("Endereço da $appropriateName", branchAddress, InputType.Text, { event ->
+                formDiv("Endereço da $appropriateName", branchAddress, InputType.Text, 0,{ event ->
                     branchAddress = event.value
                 }, branchAddressError)
 

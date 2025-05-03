@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.max
+import org.jetbrains.compose.web.attributes.maxLength
 //import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.min
 import org.jetbrains.compose.web.attributes.readOnly
@@ -11,6 +13,7 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import org.jetbrains.compose.web.events.SyntheticInputEvent
 import org.w3c.dom.HTMLInputElement
+import kotlin.math.max
 
 @Composable
 fun cardButtons(
@@ -46,11 +49,12 @@ fun userCardButtons(
 
 @Composable
 fun multiFilesExportButton(
+    btnText: String = "Exportar Todos",
     divContent: @Composable () -> Unit
 ) {
     Div(attrs = {classes("multiFilesExportButton")}) {
         Button(attrs = { classes("multiFilesExportButton-btn") }) {
-            Text("Exportar Todos")
+            Text(btnText)
         }
         Div(attrs = { classes("multiFilesExportButton-child")}) {
             divContent()
@@ -264,6 +268,7 @@ fun <K> formDiv(
     label: String,
     inputValue: String,
     inputType: InputType<K>,
+    maxLength: Int = 0,
     oninput: (SyntheticInputEvent<K, HTMLInputElement>) -> Unit,
     spanError: String,
 ) {
@@ -273,6 +278,7 @@ fun <K> formDiv(
             classes("formTextInput")
             value(inputValue)
             min("0")
+            if (maxLength > 0) { maxLength(maxLength) }
             onInput { event -> oninput(event) }
         })
         Span(attrs = { classes("errorText") }) { Text(spanError) }

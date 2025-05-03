@@ -200,7 +200,7 @@ fun payablesPage(userRole: String, sysPackage: String) {
 //                    }
 
                     formDiv("Valor a pagar", payValue.toString(),
-                        InputType.Number, { event ->
+                        InputType.Number, 12, { event ->
                             if (event.value != null) {
                                 payValue = event.value!!.toDouble()
                             }
@@ -263,25 +263,24 @@ fun payablesPage(userRole: String, sysPackage: String) {
                     }
                 ) {
 
-                    formDiv("Fornecedor", supplier, InputType.Text,
+                    formDiv("Fornecedor", supplier, InputType.Text, 28,
                         { event -> supplier = event.value}, supplierError
                     )
 
-                    formDiv("Descrição", description, InputType.Text,
-                        { event -> description = event.value}, ""
+                    formDiv("Descrição", inputValue = description, inputType = InputType.Text, oninput = { event -> description = event.value}, spanError = ""
                     )
 
-                    formDiv("Valor a pagar", payValue.toString(),
-                        InputType.Number, { event ->
+                    formDiv("Valor a pagar", inputValue = payValue.toString(),
+                        inputType = InputType.Number, oninput = { event ->
                             if (event.value != null) {
                                 payValue = event.value!!.toDouble()
                             }
-                        }, payValueError
+                        }, spanError = payValueError
                     )
 
                     formDiv("Data de Expiração", expirationDate, inputType = InputType.Date, oninput = { event ->
                         expirationDate = event.value
-                    }, expirationDateError)
+                    }, spanError = expirationDateError)
 
                     Div {
                         Label { Text("Metodo de Pagamento") }

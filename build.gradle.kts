@@ -43,6 +43,8 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.4") // Para Kotlin Serialization
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0") // Para JSON
                 implementation("org.jetbrains.kotlinx:kotlinx-html:0.9.1")
+                // datetime ------>>
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
             }
         }

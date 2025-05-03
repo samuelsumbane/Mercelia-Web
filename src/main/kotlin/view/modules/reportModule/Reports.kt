@@ -6,6 +6,7 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -17,11 +18,14 @@ import org.jetbrains.compose.web.attributes.width
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.*
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.Event
 import repository.*
 
 
+
 @Composable
-fun reportsPage(userRole: String, sysPackage: String) {
+fun reportsPage(paramData: UserDataAndSys) {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -31,7 +35,7 @@ fun reportsPage(userRole: String, sysPackage: String) {
 
     val reports = ReportsRepository(httpClient)
 
-    var allReportsData by mutableStateOf(listOf<SaleReportItem>())
+    var allReportsData by remember { mutableStateOf(listOf<SaleReportItem>()) }
 //    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
@@ -58,8 +62,9 @@ fun reportsPage(userRole: String, sysPackage: String) {
         try {
             isLoading = true
             val reportsDeffered = async { reports.fetchSaleReports() }
-            allReportsData = reportsDeffered.await()
-//            console.log(allReportsData)
+            allReportsData =
+                if (paramData.userRole == Role.V.desc) reportsDeffered.await().filter {it.userId == paramData.userId}
+                else reportsDeffered.await()
         } catch (e: Exception) {
             error = "Error: ${e.message}"
         } finally {
@@ -72,12 +77,39 @@ fun reportsPage(userRole: String, sysPackage: String) {
             showBackButton = true,
             onBackFunc = { router.navigate("/basicReportsPage") },
             title = "Relatórios de Vendas", pageActivePath = "sidebar-btn-reports",
-            sysPackage = sysPackage,
-            userRole = userRole,
+            sysPackage = paramData.sysPackage,
+            userRole = paramData.userRole,
             hasNavBar = true, navButtons = {
-                if (sysPackage != SysPackages.L.desc) {
+
+                multiFilesExportButton(btnText = "Venda de hoje") {
+                    P(attrs = {
+                        onClick {
+//                            allReportsData = emptyList()
+//                            dt-search-0
+                            val input = document.getElementById("dt-search-0") as? HTMLInputElement
+                            input?.value = getUserLocalDateString()
+                            input?.dispatchEvent(Event("input"))
+                        }
+                    }) {
+                        Text("Filtrar")
+                    }
+
+                    P(attrs = {
+                        onClick {
+                            val todayDate = getUserLocalDateString()
+                            filteredReports = allReportsData.filter { it.datetime?.split(" ")[0] == todayDate }.toMutableList()
+                            modalState = "closed"
+                            maxModalState = "open-max-modal"
+                            maySendData = true
+                        }
+                    }) {
+                        Text("Imprimir")
+                    }
+                }
+
+                if (paramData.sysPackage != SysPackages.L.desc) {
                     multiFilesExportButton {
-                        if (sysPackage == SysPackages.PO.desc) {
+                        if (paramData.sysPackage == SysPackages.PO.desc) {
                             P(attrs = {
                                 onClick {
                                     window.open("http://0.0.0.0:2000/order/export/orders", "_blank")
@@ -107,9 +139,9 @@ fun reportsPage(userRole: String, sysPackage: String) {
                 }
         }) {
 
-                val filteredReporsData = allReportsData
+//                val filteredReporsData = allReportsData
                 if (error == null) {
-                    if (filteredReporsData.isEmpty()) {
+                    if (allReportsData.isEmpty()) {
                         Div(attrs = { classes("centerDiv") }) {
                             Text("Nenhum registro de vendas efectuadas.")
                         }
@@ -130,7 +162,7 @@ fun reportsPage(userRole: String, sysPackage: String) {
                                 }
                             }
                             Tbody {
-                                filteredReporsData.map {
+                                allReportsData.forEach {
                                     Tr {
                                         Td { Text(it.productName) }
                                         Td { Text(it.quantity.toString()) }
@@ -190,12 +222,7 @@ fun reportsPage(userRole: String, sysPackage: String) {
                                             "Nenhum registro encontrado com datas selecionadas"
                                         )
                                     } else {
-                                        console.log("items $teredReports")
-
-                                        //                                    console.log("chegamos aqui")
                                         filteredReports = teredReports.toMutableList()
-                                        //                                    console.log("filtered $filteredReports")
-
                                         modalState = "closed"
                                         maxModalState = "open-max-modal"
                                         maySendData = true
@@ -215,24 +242,24 @@ fun reportsPage(userRole: String, sysPackage: String) {
                     }
                 ) {
 
-                    formDiv("Data Inicial", initialDate, inputType = InputType.Date, oninput = { event ->
+                    formDiv("Data Inicial", initialDate, inputType = InputType.Date, 0, oninput = { event ->
                         initialDate = event.value
                     }, initialDateError)
 
                     formDiv(
-                        "Hora Inicial", initialTime, InputType.Time,
+                        "Hora Inicial", initialTime, InputType.Time, 0,
                         oninput = { event -> initialTime = event.value }, ""
                     )
 
                     Br()
 
                     formDiv(
-                        "Data Final", finalDate, InputType.Date,
+                        "Data Final", finalDate, InputType.Date, 0,
                         oninput = { event -> finalDate = event.value }, finalDateError
                     )
 
                     formDiv(
-                        "Hora Final", finalTime, InputType.Time,
+                        "Hora Final", finalTime, InputType.Time, 0,
                         oninput = { event -> finalTime = event.value }, ""
                     )
 
@@ -260,7 +287,7 @@ fun reportsPage(userRole: String, sysPackage: String) {
                     }) {
 
                         Div(attrs = { id("r-leftPart") }) {
-                            if (maySendData) reportPaper(filteredReports)
+                            if (maySendData) reportPaper(paramData.userName, filteredReports)
                         }
 
                         //Right
@@ -305,4 +332,6 @@ fun reportsPage(userRole: String, sysPackage: String) {
         }
 
 }
+
+
 

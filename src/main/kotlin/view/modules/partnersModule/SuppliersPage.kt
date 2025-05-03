@@ -146,17 +146,17 @@ fun suppliersPage(userRole: String, sysPackage: String) {
             ) {
 
                 formDiv(
-                    "Nome", supplierName, InputType.Text,
+                    "Nome", supplierName, InputType.Text, 48,
                     { event -> supplierName = event.value }, supplierNameError
                 )
 
                 formDiv(
-                    "Telefone", supplierPhone, InputType.Text,
+                    "Telefone", supplierPhone, InputType.Text, 48,
                     { event -> supplierPhone = event.value }, ""
                 )
 
                 formDiv(
-                    "Endereço", supplierAddress, InputType.Text,
+                    "Endereço", supplierAddress, InputType.Text, 98,
                     { event -> supplierAddress = event.value }, ""
                 )
 

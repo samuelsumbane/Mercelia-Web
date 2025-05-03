@@ -64,6 +64,7 @@ fun Menu(activePath: String, userRole: String, sysPackage: String) {
                 }) {
                     Button(attrs = {
                         classes("hamburger", "sidebar-item", sideBarState)
+                        attr("aria-label", "Alternar menu lateral")
                         onClick {
                             sideBarState = if (sideBarState == "active") "-" else "active"
                         }

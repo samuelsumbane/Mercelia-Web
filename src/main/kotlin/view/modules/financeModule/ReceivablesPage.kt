@@ -254,23 +254,23 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                     }
                 ) {
 
-                    formDiv("Cliente", client, InputType.Text,
+                    formDiv("Cliente", client, InputType.Text, 48,
                         { event -> client = event.value}, clientError
                     )
 
-                    formDiv("Descrição", description, InputType.Text,
+                    formDiv("Descrição", description, InputType.Text, 0,
                         { event -> description = event.value}, ""
                     )
 
                     formDiv("Valor a receber", receiveValue.toString(),
-                        InputType.Number, { event ->
+                        InputType.Number, 0, { event ->
                             if (event.value != null) {
                                 receiveValue = event.value!!.toDouble()
                             }
                         }, receiveValueError
                     )
 
-                    formDiv("Data de Expiração", expirationDate, inputType = InputType.Date, oninput = { event ->
+                    formDiv("Data de Expiração", expirationDate, inputType = InputType.Date, 0, oninput = { event ->
                         expirationDate = event.value
                     }, expirationDateError)
 

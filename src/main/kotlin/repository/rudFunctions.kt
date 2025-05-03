@@ -1,9 +1,5 @@
 package repository
 
-fun <T> Double.twoDigits(): T = this.asDynamic().toFixed(2) as T
-fun Double.twoDigitsDouble(): Double = this.asDynamic().toFixed(2) as Double
-
-
 fun formatToTwoDecimalPlaces(value: Double): Double {
     val formattedString = value.asDynamic().toFixed(2) as String
     return formattedString.toDouble()

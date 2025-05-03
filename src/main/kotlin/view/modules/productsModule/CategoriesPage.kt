@@ -145,7 +145,7 @@ fun categoriesPage(userRole: String, sysPackage: String) {
             ) {
 
                 formDiv(
-                    "Nome", categoryName, InputType.Text,
+                    "Nome", categoryName, InputType.Text, 98,
                     oninput = { event -> categoryName = event.value },
                     categoryNameError
                 )

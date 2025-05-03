@@ -46,12 +46,12 @@ function showAlertTimer(title) {
 
 function basicPieChart(canvaId, labelsData, labelName, backgroundcolor, data, optionText) {
     new Chart(document.getElementById(canvaId), {
-        type: 'pie',
+        type: 'doughnut',
         data: {
               labels: labelsData,
               datasets: [{
                 label: labelName,
-                type: "pie",
+                type: 'doughnut',
                 backgroundColor: ['#02152a', '#f64535', '#185cee', '#60A5FA', '#93C5FD'],
                 data: data,
             }]
@@ -64,47 +64,6 @@ function basicPieChart(canvaId, labelsData, labelName, backgroundcolor, data, op
                    maintainAspectRatio: false,
                  },
             },
-        }
-    });
-}
-
-function basicBarChart(canvaId, labelsData, labelName, backgroundcolor, data, optionText) {
-//    let delayed;
-    new Chart(document.getElementById(canvaId), {
-        type: 'bar',
-        data: {
-              labels: labelsData,
-              datasets: [{
-                barPercentage: 1,
-                barThickness: 18,
-                maxBarThickness: 100,
-                minBarLength: 14,
-                label: labelName,
-                type: "bar",
-                backgroundColor: backgroundcolor,
-                data: data,
-            }]
-        },
-        options: {
-            title: {
-                display: true,
-                text: optionText
-            },
-            legend: {
-                display: false
-            },
-//            animations: {
-//                onComplete: () => {
-//                    delayed = true;
-//                  },
-//                  delay: (context) => {
-//                    let delay = 0;
-//                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
-//                      delay = context.dataIndex * 300 + context.datasetIndex * 100;
-//                    }
-//                    return delay;
-//                  },
-//            }
         }
     });
 }
@@ -124,4 +83,33 @@ function salesProfitsByMonthsAndYear(labelsData, profitsData) {
 
 function salesQuantitiesByMonthsAndYear(labelsData, quantitiesData) {
     basicBarChart("monthlySalesQuantities", labelsData, "Vendas Mensais", "#3daee9", quantitiesData, "quantitiesData")
+}
+
+function basicBarChart(canvaId, labelsData, labelName, backgroundcolor, data, optionText) {
+//    let delayed;
+    new Chart(document.getElementById(canvaId), {
+        type: 'bar',
+        data: {
+              labels: labelsData,
+              datasets: [{
+                barPercentage: 1,
+                barThickness: 18,
+                maxBarThickness: 100,
+                minBarLength: 14,
+                label: labelName,
+                type: "bar",
+                backgroundColor: backgroundcolor,
+                borderRadius: 6,
+                borderSkipped: false,
+                data: data,
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                  beginAtZero: true
+                }
+            }
+        }
+    });
 }

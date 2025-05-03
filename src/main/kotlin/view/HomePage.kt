@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.web.dom.*
+import org.w3c.dom.get
 import repository.*
 
 
@@ -50,6 +51,8 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
             json(Json { isLenient = true })
         }
     }
+    val router = Router.current
+
 
     val reports = ReportsRepository(httpClient)
     val users = UserRepository(httpClient)
@@ -86,7 +89,6 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var showNotificationAlert by remember { mutableStateOf(true)}
 
-    val router = Router.current
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(true)}
 

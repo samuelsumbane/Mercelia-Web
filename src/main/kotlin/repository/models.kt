@@ -61,6 +61,7 @@ data class OrderItem(
     val total: Double,
     val orderDateTime: String?,
     val status: String,
+    val userId: Int,
     val userName: String,
     val branchName: String,
 )
@@ -149,6 +150,7 @@ data class StockItem(
     val price: Double,
     val reason: String,
     val datetime: String,
+    val userId: Int,
     val userName: String,
     val branchName: String
 )
@@ -287,6 +289,15 @@ data class LoggedUserDC(
     val userName: String,
     val userRole: String,
 )
+
+data class UserDataAndSys(
+    val userId: Int,
+    val userName: String,
+    val userRole: String,
+    val sysPackage: String,
+)
+
+
 
 @Serializable
 data class ChangeStatusDC(

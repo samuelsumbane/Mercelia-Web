@@ -1,4 +1,5 @@
 package repository
+import kotlinx.datetime.*
 
 const val apiPath = "http://0.0.0.0:2000"
 //const val apiPath = "http://192.168.48.253:2000"
@@ -23,6 +24,30 @@ enum class SysPackages(val desc: String) { // desc -> description
     L("Lite"),
     PL("Plus"),
     PO("Pro"),
+}
+
+
+fun getUserLocalDateTime(): LocalDateTime {
+    val now = Clock.System.now()
+    val timeZone = TimeZone.currentSystemDefault() // use browser timezone
+    return now.toLocalDateTime(timeZone)
+}
+
+
+fun getUserLocalDateString(): String {
+    val localDateTime = getUserLocalDateTime()
+    return "${localDateTime.dayOfMonth.toString().padStart(2, '0')}." +
+            "${localDateTime.monthNumber.toString().padStart(2, '0')}." +
+            localDateTime.year.toString().padStart(4, '0')
+}
+
+fun getUserLocalDateTimeString(): String {
+    val localDateTime = getUserLocalDateTime()
+    return "${localDateTime.dayOfMonth.toString().padStart(2, '0')}." +
+            "${localDateTime.monthNumber.toString().padStart(2, '0')}." +
+            "${localDateTime.year.toString().padStart(4, '0')} " +
+            "${localDateTime.hour.toString().padStart(2, '0')}:" +
+            localDateTime.minute.toString().padStart(2, '0')
 }
 
 

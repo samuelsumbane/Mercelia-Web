@@ -14,6 +14,7 @@ import org.jetbrains.compose.web.attributes.*
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import repository.*
+import kotlin.collections.filter
 
 
 @Composable
@@ -57,7 +58,8 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
         try {
             isLoading = true
             val fetched = async { orders.fetchOrders() }
-            ordersData = fetched.await()
+            ordersData = if (userRole == Role.V.desc) fetched.await().filter { it.userId == userId } else fetched.await()
+
         } catch (e: Exception) {
             error = "Erro: ${e.message}"
         } finally {
@@ -82,7 +84,11 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
     ) {
         if (ordersData.isEmpty()) {
             Div(attrs = { classes("centerDiv") }) {
-                Text("Nenhum registro de vendas efectuadas.")
+                if (userRole == Role.V.desc) {
+                    Text("Nenhuma venda por si efectuada foi encontrada.")
+                } else {
+                    Text("Nenhum registro de vendas efectuadas.")
+                }
             }
         } else {
 
@@ -132,7 +138,9 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
     saleModal(httpClient, toSaleSysPackage, saleMode, orders, userId, modalState) {
         modalState = "closed"
         coroutineScope.launch {
-            ordersData = orders.fetchOrders()
+            val allOrders = orders.fetchOrders()
+            ordersData = if (userRole == Role.V.desc) allOrders.filter { it.userId == userId } else allOrders
+
         }
         saleMode = false
     }

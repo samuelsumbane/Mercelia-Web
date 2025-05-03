@@ -5,12 +5,13 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import repository.ActivityItemGrupped
 import repository.SaleReportItem
+import repository.getUserLocalDateTimeString
 import repository.moneyFormat
-import repository.twoDigits
 
 
 @Composable
 fun reportPaper(
+    user: String,
     reportData: List<SaleReportItem>
 ) {
     var totalFromSell by remember { mutableDoubleStateOf(0.0) }
@@ -141,7 +142,7 @@ fun reportPaper(
                     paddingLeft(25.px)
                 }
             }) {
-                Text("Impreso por Administrador  12/01/2025 12:35")
+                Text("Impreso por $user,   ${getUserLocalDateTimeString()}")
             }
         }
     }

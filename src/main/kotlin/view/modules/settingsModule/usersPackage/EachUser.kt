@@ -6,6 +6,7 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.sessionStorage
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.ButtonType
@@ -139,6 +140,16 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
 
                 }
             }
+            Div(attrs = { classes("div-item", "no-border") }) {
+                P {}
+                button("btn", "Encerrar a sessão") {
+                    coroutineScope.launch {
+                        val (status, message) = users.logout()
+                        sessionStorage.removeItem("jwt_token")
+                        router.navigate("/")
+                    }
+                }
+            }
         }
 
     }
@@ -167,12 +178,12 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
             }
         ) {
             formDiv(
-                "Nome", userName, InputType.Text,
+                "Nome", userName, InputType.Text, 48,
                 oninput = { event -> userName = event.value }, userNameError
             )
 
             formDiv(
-                "Email", userEmail, InputType.Email,
+                "Email", userEmail, InputType.Email, 50,
                 oninput = { event -> userEmail = event.value }, ""
             )
 
@@ -235,12 +246,12 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
         ) {
 
             formDiv(
-                "Senha actual", afPasscode, InputType.Password,
+                "Senha actual", afPasscode, InputType.Password, 0,
                 oninput = { event -> afPasscode = event.value }, afPasscodeError
             )
 
             formDiv(
-                "Nova senha", afNewPassword, InputType.Password,
+                "Nova senha", afNewPassword, InputType.Password, 0,
                 oninput = { event ->
                     afNewPassword = event.value
                     checkPassword()
@@ -248,7 +259,7 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
             )
 
             formDiv(
-                "Confirmar a senha", afConfirmPassword, InputType.Password,
+                "Confirmar a senha", afConfirmPassword, InputType.Password, 0,
                 oninput = { event ->
                     afConfirmPassword = event.value
                     checkPassword()

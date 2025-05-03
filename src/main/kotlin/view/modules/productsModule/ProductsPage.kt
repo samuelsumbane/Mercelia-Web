@@ -252,9 +252,9 @@ fun productsPage(userRole: String, sysPackage: String) {
                     onInput { event -> proId = event.value.toInt() }
                 })
 
-                formDiv("Nome do producto", proName, InputType.Text, { event -> proName = event.value}, proNameError)
+                formDiv("Nome do producto", proName, InputType.Text, 48, { event -> proName = event.value}, proNameError)
 
-                formDiv("Quantidade", proQuantity.toString(), InputType.Number, { event ->
+                formDiv("Quantidade", proQuantity.toString(), InputType.Number, 0, { event ->
                     if (event.value.toString() != "") {
                         proQuantity = event.value!!.toInt()
                         if (costValue != 0.0) {
@@ -267,19 +267,19 @@ fun productsPage(userRole: String, sysPackage: String) {
                 }, proQuantityError)
 
                 if (sysPackage != SysPackages.L.desc) {
-                    formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, { event ->
+                    formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, 0,{ event ->
                         minProQuantity = event.value!!.toInt()
                     }, minProQuantityError)
                 } else minProQuantity = 0
 
-                formDiv("Custo", costValue.toString(), InputType.Number, { event ->
+                formDiv("Custo", costValue.toString(), InputType.Number, 0, { event ->
                     costValue = event.value!!.toDouble()
                     if (proQuantity != 0) {
                         totalPaid = proQuantity * costValue
                     }
                 }, proCostError)
 
-                formDiv("Preço", proPrice.toString(), InputType.Number, { event ->
+                formDiv("Preço", proPrice.toString(), InputType.Number, 0, { event ->
                     proPrice = event.value!!.toDouble()
                 }, proPriceError)
 
@@ -320,8 +320,7 @@ fun productsPage(userRole: String, sysPackage: String) {
                     Label(attrs = { classes("errorText") }) { Text(categoryError) }
                 }
 
-                formDiv("Código de Barras", proBarcode, InputType.Text, { event ->
-                    proBarcode = event.value
+                formDiv("Código de Barras", proBarcode, InputType.Text, 48, { event -> proBarcode = event.value
                 }, "")
 
 

@@ -4,12 +4,13 @@ import androidx.compose.runtime.*
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import repository.StockItem
+import repository.getUserLocalDateTimeString
 import repository.moneyFormat
-import repository.twoDigits
 
 
 @Composable
 fun stockPaper(
+    user: String,
     reportData: List<StockItem>
 ) {
     var totalFromSell by remember { mutableDoubleStateOf(0.0) }
@@ -131,7 +132,7 @@ fun stockPaper(
             Br()
             Br()
 //            totalLabelDiv("Valor de saidas (Stock): ", totalFromStock)
-            totalLabelDivStock("Total de entrada (Venda): ", totalFromSell)
+            totalLabelDivStock("Total de saída: ", totalFromSell)
             Br()
         }
 
@@ -152,7 +153,7 @@ fun stockPaper(
                     paddingLeft(25.px)
                 }
             }) {
-                Text("Impreso por Administrador  12/01/2025 12:35")
+                Text("Impreso por $user, ${getUserLocalDateTimeString()}")
             }
         }
     }

@@ -79,6 +79,12 @@ fun UsersPage(userRole: String, sysPackage: String) {
         }
     }
 
+    fun cleanFields() {
+        userId = 0
+        userName = ""
+        userEmail = ""
+    }
+
     NormalPage(
         showBackButton = true,
         onBackFunc = { router.navigate("/basicSettingsPage") },
@@ -147,7 +153,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
 
                                 when (statusCode) {
                                     101, 102, 103 -> alert("error", "Usuário não adicionado", message)
-                                    201 -> alert("success", "Usuário adicionado", "A senha é: $message")
+                                    201 -> alert("success", "Usuário adicionado com sucesso", "A senha é: $message")
                                     404 -> alert("error", "Usuário não adicionado", message)
                                     else -> unknownErrorAlert()
                                 }
@@ -162,13 +168,13 @@ fun UsersPage(userRole: String, sysPackage: String) {
                 formDiv(
                     "Nome do usuário",
                     userName,
-                    InputType.Text,
+                    InputType.Text, 48,
                     { event -> userName = event.value },
                     userNameError
                 )
 
                 formDiv(
-                    "Email", userEmail, InputType.Email, { event -> userEmail = event.value }, userEmailError
+                    "Email", userEmail, InputType.Email, 100, { event -> userEmail = event.value }, userEmailError
                 )
 
                 Div {
@@ -202,6 +208,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
                         usersData = users.fetchUsers()
                     }
                     modalState = "u"
+                    cleanFields()
                 }
                 Br()
             }

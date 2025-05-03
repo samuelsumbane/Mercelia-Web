@@ -135,11 +135,11 @@ fun clientsPage(userRole: String, sysPackage: String) {
                 }
             ) {
 
-                formDiv("Nome", clientName, InputType.Text,
+                formDiv("Nome", clientName, InputType.Text, 48,
                     { event -> clientName = event.value}, clientNameError
                 )
 
-                formDiv("Telefone", clientPhone, InputType.Text,
+                formDiv("Telefone", clientPhone, InputType.Text, 18,
                     { event -> clientPhone = event.value}, ""
                 )
 

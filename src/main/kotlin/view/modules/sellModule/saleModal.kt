@@ -337,7 +337,7 @@ fun saleModal(
                         Div(attrs = { classes("chargeAndDiscont")}) {
                             P()
                             formDiv("Desconto", descont.toString(),
-                                InputType.Number, { event ->
+                                InputType.Number, 0, { event ->
                                     val inputValue = (event.value as? String)?.toDoubleOrNull()
                                     if (inputValue != null && inputValue >= 0) {
                                         descont = inputValue

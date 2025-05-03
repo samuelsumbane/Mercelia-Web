@@ -102,9 +102,8 @@ class UserRepository(private val httpClient: HttpClient) {
     }
 
     suspend fun logout(): Pair<Int, String> {
-//        localStorage.removeItem("jwt_token")
         return try {
-            val response = httpClient.post("$apiPath/user/") {
+            val response = httpClient.post("$apiPath/user/logout") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
 //                setBody(data)

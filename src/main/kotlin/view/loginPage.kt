@@ -6,6 +6,8 @@ import components.formDiv
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.sessionStorage
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.ButtonType
@@ -25,14 +27,23 @@ fun loginPage() {
     }
 
     val users = UserRepository(httpClient)
-
-    // admin@gmain : 1111 -> admin
-    // sam@gmail.com : 8262 -> gerente
-    // seller@gmail : 5692  -> vendedor
-
     val router = Router.current
-    var email by remember { mutableStateOf("admin@gmain") }
-    var password by remember { mutableStateOf("1110") }
+    sessionStorage.getItem("reloadFromLogin")?.let {
+        when (it) {
+           "1" -> router.navigate("/dashboard")
+           "2" -> router.navigate("/sales")
+        }
+        sessionStorage.removeItem("reloadFromLogin")
+    }
+
+
+    // admin@gmain : 1110 -> admin
+    // sam@gmail.com : 8262 -> gerente
+    // seller@gmail :   -> vendedor
+    // marcos@gmail: 3792 -> vendedor
+
+    var email by remember { mutableStateOf("marcos@gmail") }
+    var password by remember { mutableStateOf("3792") }
     var errorText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -50,11 +61,9 @@ fun loginPage() {
 
                                 if (status) {
                                     if (userRole.isNotBlank()) {
-                                        if (userRole == Role.V.desc) {
-                                            router.navigate("/sales")
-                                        } else {
-                                            router.navigate("/dashboard")
-                                        }
+                                        val userIdentifier = if (userRole == Role.V.desc) "2" else "1"
+                                        sessionStorage.setItem("reloadFromLogin", userIdentifier)
+                                        window.location.reload()
                                     } else {
                                         errorText = "Usuário ou senha invalida"
                                         console.error("Login failed.")
@@ -67,13 +76,13 @@ fun loginPage() {
                     }
                 }) {
                     Br()
-                    H2 { Text("Mercelia") }
+                    H2 { Text("SSPT") }
                     Br()
 
-                    formDiv("", email, InputType.Text, oninput = { event -> email = event.value
-                    }, "")
-                    formDiv("", password, InputType.Password, oninput = { event -> password = event.value
-                    }, "")
+                    formDiv(label = "", inputValue = email, inputType = InputType.Text, oninput = { event -> email = event.value
+                    }, spanError = "")
+                    formDiv(label = "", inputValue = password, inputType = InputType.Password, oninput = { event -> password = event.value
+                    }, spanError = "")
                     Br()
                     Div(attrs = { classes("loginbutton-div")}) {
                         Button(attrs = {

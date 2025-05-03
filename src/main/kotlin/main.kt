@@ -11,6 +11,7 @@ import components.userHasNotAccessScreen
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.browser.sessionStorage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -19,6 +20,7 @@ import repository.Role
 import repository.SettingsRepository
 import repository.SysConfigItem
 import repository.SysPackages
+import repository.UserDataAndSys
 import repository.UserRepository
 import repository.emptyLoggedUser
 import view.*
@@ -112,6 +114,7 @@ fun main() {
                     loginPage()
                 }
 
+
                 if (user.userRole == Role.V.desc) {
 
                     route("/eachUser") {
@@ -127,11 +130,17 @@ fun main() {
                     }
 
                     route("/reports") {
-                        reportsPage(user.userRole, sysPackage)
+                        val paramData = user.let {
+                            UserDataAndSys(it.userId, it.userName, it.userRole, sysPackage)
+                        }
+                        reportsPage(paramData)
                     }
 
                     route("/stockPage") {
-                        stockPage(user.userRole, sysPackage)
+                        val paramData = user.let {
+                            UserDataAndSys(it.userId, it.userName, it.userRole, sysPackage)
+                        }
+                        stockPage(paramData)
                     }
 
                     for (uRoute in norForSellerUserRoutes) {
@@ -156,11 +165,17 @@ fun main() {
                     }
 
                     route("/reports") {
-                        reportsPage(user.userRole, sysPackage)
+                        val paramData = user.let {
+                            UserDataAndSys(it.userId, it.userName, it.userRole, sysPackage)
+                        }
+                        reportsPage(paramData)
                     }
 
                     route("/stockPage") {
-                        stockPage(user.userRole, sysPackage)
+                        val paramData = user.let {
+                            UserDataAndSys(it.userId, it.userName, it.userRole, sysPackage)
+                        }
+                        stockPage(paramData)
                     }
 
                     route("/dashboard") {
@@ -170,7 +185,6 @@ fun main() {
                     route("/clients") {
                         clientsPage(user.userRole, sysPackage)
                     }
-
 
                     route("/users") {
                         UsersPage(user.userRole, sysPackage)
