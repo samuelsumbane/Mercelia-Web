@@ -16,6 +16,7 @@
     background-size:28px;
     background-position: center;
 
+
     &:hover{
         @include btn-hover;
         // border:1px solid $btn-bg-hover;
@@ -28,11 +29,16 @@
     color: white;
     padding: 10px 15px;
     border-radius: 6px;
-    font-weight: bold;
+//     font-weight: bold;
     border:none;
     box-shadow: 0 0 120px rgba(0, 0, 0, 0.5);
     transition: 0.3s;
     color: white;
+    font-weight: 500;
+    font-size: 14px;
+    @include respond-to(small) {
+        padding:5px;
+    }
 
     &:hover{
         background-color: deepskyblue;

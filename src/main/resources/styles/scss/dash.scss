@@ -1,9 +1,7 @@
-@use 'abstracts/variables' as *;
+// @use 'abstracts/variables' as *;
+@use 'abstracts' as *;
 
-:root {
-    --sidemindiv: polygon(calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0% calc(100% - 10px), 0 0);
-    --secondaryBg: white;
-}
+:root { --secondaryBg: white;}
 
 
 * {
@@ -18,6 +16,9 @@
     width:95vw;
     height:100%;
     background: radial-gradient(circle, rgb(203, 215, 226), white);
+    @include respond-to(small){
+        width:100vw;
+    }
 }
 
 // rgb(30, 144, 255)
@@ -38,18 +39,18 @@ header {
     gap: 30px;
 //     background:blue;
 
-#closeNotificationAlertButton{
-            position:relative;
-            z-index:2;
-            width:20px;
-            height:20px;
-            left:21%;
-            background:gray;
-            top:-1.5%;
-            border:none;
-            border-radius:50%;
-            color:white;
-        }
+    #closeNotificationAlertButton{
+        position:relative;
+        z-index:2;
+        width:20px;
+        height:20px;
+        left:21%;
+        background:gray;
+        top:-1.5%;
+        border:none;
+        border-radius:50%;
+        color:white;
+    }
 
     #notificationAlertDiv{
         position:relative;
@@ -105,6 +106,10 @@ header {
             margin:auto !important;
             transition: all 0.8s;
         }
+
+        @include respond-to(small) {
+            margin-right:3%;
+        }
     }
 
     #header-top-perfil-div:hover #user-perfil-options{
@@ -135,6 +140,10 @@ header {
     box-shadow:0 0 8px rgba(black, 0.5);
     gap: 2px;
 
+    @include respond-to(small) {
+        right:206%;
+    }
+
     #userNameLabel{
         padding-bottom:8px;
     }
@@ -156,17 +165,21 @@ header {
     background: var(--secondaryBg);
 //     background: blue;
     display: flex;
-    margin: auto auto 0 auto;
+    margin: auto;
     justify-content: space-around;
     border-radius: 17px;
+    @include respond-to(small) {
+        width: 80%;
+        height: 180px;
+//         margin-right: 7%;
+    }
 //         clip-path: var(--sidemindiv);
 
     #afiliatesInfo{
         // background: red !important;
-
         &-divs{
             width: 100%;
-            // background:purple;
+//             background:purple;
             margin:30px auto;
             display: flex;
             justify-content: space-around;
@@ -203,14 +216,19 @@ header {
 
     & > div {
         width: 33%;
-        // background:green;
+//         background:green;
         margin: 5px;
         padding: 10px;
+        @include respond-to(small) {
+            padding:0;
+        }
 
         & h3 {
             /* color:red; */
             margin-top: -2px;
+            font-size: clamp(0.95rem, 1rem, 1.10rem)
         }
+
     }
 }
 
@@ -238,24 +256,43 @@ header {
     display: flex;
     margin-top:2%;
     overflow-y: auto !important;
+//     background:red;
+    @include respond-to(small) {
+        width:97%;
+        flex-direction:column;
+        margin-left:2%;
+    }
 
     #divCharts {
         width: 100%;
         height: 750px;
         display: flex;
+        @include respond-to(small) {
+//             width:90%;
+            flex-direction:column;
+                gap:6%;
+        }
 
         & > div {
-            width: 49%;
+            width: 89%;
             height: 720px;
             margin: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 4%;
             margin: 10px;
-        
+//             background:green;
+            @include respond-to(small) {
+                width:95%;
+//                 margin:0;
+                margin-left:2.5%;
+                gap:9%;
+            }
+
             & > div {
                 height: 50%;
                 background: rgba(255,255,255,0.7);
+//                 background:tomato;
                 border-radius:14px;
 
                 & > p{
@@ -284,45 +321,47 @@ header {
 } */
 
 // dash media queries
-@media (max-width: 768px) {
-    .container {
-      padding: 15px;
-    }
-}
-  
-@media (max-width: 480px) {
-    header > div{
-       width: 85%;
-       & h3{
-        font-size:medium
-       }
-       & p{
-        font-size: small
-       }
 
-       .afStatus-indicator{
-        width:10px !important;
-        height:10px !important;
-       }
 
-    }
-
-    
-    main {
-        #divCharts {
-            height: 750px;
-            margin-bottom:80px;
-            display: flex;
-            flex-direction: column;
-
-            & > div {
-                width: 90%;
-                
-                & > div {
-                    height: 50%;
-                }
-            }
-        }
-    }    
-
-}
+// @media (max-width: 768px) {
+//     .container {
+//       padding: 15px;
+//     }
+// }
+//
+// @media (max-width: 480px) {
+//     header > div{
+//        width: 85%;
+//        & h3{
+//         font-size:medium
+//        }
+//        & p{
+//         font-size: small
+//        }
+//
+//        .afStatus-indicator{
+//         width:10px !important;
+//         height:10px !important;
+//        }
+//
+//     }
+//
+//
+//     main {
+//         #divCharts {
+//             height: 750px;
+//             margin-bottom:80px;
+//             display: flex;
+//             flex-direction: column;
+//
+//             & > div {
+//                 width: 90%;
+//
+//                 & > div {
+//                     height: 50%;
+//                 }
+//             }
+//         }
+//     }
+//
+// }

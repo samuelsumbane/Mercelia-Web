@@ -1,12 +1,7 @@
 
 @use 'abstracts' as *;
-
-// @font-face {
-//     font-family: 'Poppins
-//     src: url("../fonts/Poppins-Italic.ttf") format('truetype');
-// }
-
-*{margin:0;padding:0;box-sizing:border-box;}
+// clamp(1rem, 1.2vw, 1.25rem)
+*{margin:0;padding:0;box-sizing:border-box;font-family: 'Inter', sans-serif;}
 
 button:disabled{
     background:gray;
@@ -17,12 +12,17 @@ input:disabled{
     color:black;
 }
 
+h2{
+    font-weight: 650;
+    font-size: clamp(1rem, 1.2vw, 1.25rem);
+}
+
 body{
     position:fixed;
     width:100vw;
     height:100vh;
     display:flex;
-    // background:blue;
+
 //     border:2px solid yellow;
 }
 
@@ -56,11 +56,13 @@ body{
 .users-page, .sells-page, .products-page, .management-page, .normal-page{
     @include wh(95vw,100vh);
     // width: calc(95vw);
-//     background: radial-gradient(circle, rgb(203, 215, 226), white);
-    background: radial-gradient(circle, rgb(197, 235, 241), white);
-//     background-color: rgb(167, 190, 190) !important;
+//     background: radial-gradient(circle, rgb(197, 235, 241), white);
+    background-color: tomato !important;
     display:flex;
     flex-direction:column;
+    @include respond-to(small) {
+        width:100vw;
+    }
 
     & > div{
         @include w(100%)
@@ -78,13 +80,18 @@ body{
             display: flex;
             & > h2{
                 padding:20px;
-                font-family:'sans-serif', Arial;
+//                 font-family:'sans-serif', Arial;
                 color:#333;
-                font-weight: bold;
+//                 font-weight: bold;
                 text-transform: uppercase;
             }
             & > button{
                 margin-top:2%;
+            }
+            @include respond-to(small) {
+                width:90%;
+//                 background:green;
+                margin-left:12%;
             }
         }
         .navDiv{
@@ -95,7 +102,17 @@ body{
             align-items:center;
             margin-top:auto;
             gap: 4%;
+            @include respond-to(small) {
+                width:99%;
+                height:70px;
+//                 background:red;
+                gap: 2%;
+            }
 //             padding-top:auto;
+        }
+        @include respond-to(small) {
+//             padding: 1rem;
+            flex-direction:column;
         }
     }
 
@@ -115,6 +132,9 @@ body{
 //             border-radius: $div-radius;
             flex-direction:column;
 //             background:purple;
+            @include respond-to(small) {
+                margin-top:15%;
+            }
         }
 
         &-flex-column{

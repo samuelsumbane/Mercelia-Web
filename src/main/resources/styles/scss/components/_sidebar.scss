@@ -1,4 +1,6 @@
 @use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+// @use 'abstracts' as *;
 
 *{margin:0;padding:0}
 
@@ -7,14 +9,17 @@ body{
   width: 100vw;
   height: 100vh;
 //   background:red;
-//   display: flex;
+  display: flex;
 }
 
 #root{
     background:white;
     display: flex;
 }
-.sidebar-container {flex: 0 0 5%;}
+
+.sidebar-container {
+    flex: 0 0 5%;
+}
 
 // .content-container {flex: 1;
 //     background:rgba(247, 86, 86, 0.795);
@@ -28,6 +33,10 @@ body{
     flex-direction: column;
     transition:.8s;
     // background:blue;
+    @include respond-to(small) {
+//         background:red;
+        width:0
+    }
 
     & > div{
         margin:0 auto;
@@ -51,6 +60,11 @@ body{
         height:90px;
         margin-left:20%;
 //         background:red;
+        @include respond-to(small) {
+            position:absolute;
+//             margin-left:-100%
+        left:-17%;
+        }
     }
 
     #div-hamburger.active{

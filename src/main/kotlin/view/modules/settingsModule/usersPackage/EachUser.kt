@@ -7,6 +7,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.browser.sessionStorage
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.ButtonType
@@ -146,7 +147,8 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
                     coroutineScope.launch {
                         val (status, message) = users.logout()
                         sessionStorage.removeItem("jwt_token")
-                        router.navigate("/")
+//                        router.navigate("/")
+                        window.location.href = "/"
                     }
                 }
             }

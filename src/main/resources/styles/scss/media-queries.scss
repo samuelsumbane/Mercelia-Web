@@ -1,84 +1,84 @@
-@media (max-width: 768px) {
-    .container {padding: 15px;}
-}
-  
-@media (max-width: 480px) {
-    .users-page, .afiliates-page, .sells-page, .package-page, .products-page{
-   
-        & > div{
-            width:100%;
-        }
-    
-        &-header{
-            .titleDiv{
-                width:35% !important;
-                display: flex;
-                & > h2{
-                    font-size: 16px;
-                }
-                & > button{
-                    margin:auto !important;
-                }
-            }
-
-            .navDiv{
-                width:60% !important;
-            }
-        }
-    }
-
-
-    .sidebar{
-        width:40px !important;
-        margin-left:-75px;
-        & button{
-            background-size:20px;
-        }
-
-        &-perfil{
-            width:25px !important;
-            height:25px !important;
-            background:red;
-            // margin:auto !important;
-            padding-left:0.3px;
-        }
-    }    
- 
-    .showSidebar{
-        margin-left: 0 !important;
-    }
-
-    #showHideSidebar{
-        display: block !important;
-        position:relative !important;
-        left:77px !important;
-        top:-90px !important;
-        background:#D8E1E9;
-        color:#333;
-        width:25px;
-        height:25px;
-        border:none; 
-        font-size:16px;
-        font-weight: bold;
-        border-radius:6px;
-        text-align:center;
-        z-index:2;
-    }
-
-    .afiliateModal{
-        width:100% !important;
-        &-main{
-            display: flex;
-            flex-direction: column;
-
-            & > div{
-                width:90% !important;
-                border:none;
-                margin:auto;
-            }
-        }
-    }
-
-}
-
-// to import @import 'media-queries';
+// @media (max-width: 768px) {
+//     .container {padding: 15px;}
+// }
+//
+// @media (max-width: 480px) {
+//     .users-page, .afiliates-page, .sells-page, .package-page, .products-page{
+//
+//         & > div{
+//             width:100%;
+//         }
+//
+//         &-header{
+//             .titleDiv{
+//                 width:35% !important;
+//                 display: flex;
+//                 & > h2{
+//                     font-size: 16px;
+//                 }
+//                 & > button{
+//                     margin:auto !important;
+//                 }
+//             }
+//
+//             .navDiv{
+//                 width:60% !important;
+//             }
+//         }
+//     }
+//
+//
+//     .sidebar{
+//         width:40px !important;
+//         margin-left:-75px;
+//         & button{
+//             background-size:20px;
+//         }
+//
+//         &-perfil{
+//             width:25px !important;
+//             height:25px !important;
+//             background:red;
+//             // margin:auto !important;
+//             padding-left:0.3px;
+//         }
+//     }
+//
+//     .showSidebar{
+//         margin-left: 0 !important;
+//     }
+//
+//     #showHideSidebar{
+//         display: block !important;
+//         position:relative !important;
+//         left:77px !important;
+//         top:-90px !important;
+//         background:#D8E1E9;
+//         color:#333;
+//         width:25px;
+//         height:25px;
+//         border:none;
+//         font-size:16px;
+//         font-weight: bold;
+//         border-radius:6px;
+//         text-align:center;
+//         z-index:2;
+//     }
+//
+//     .afiliateModal{
+//         width:100% !important;
+//         &-main{
+//             display: flex;
+//             flex-direction: column;
+//
+//             & > div{
+//                 width:90% !important;
+//                 border:none;
+//                 margin:auto;
+//             }
+//         }
+//     }
+//
+// }
+//
+// // to import @import 'media-queries';
