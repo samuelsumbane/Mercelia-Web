@@ -13,12 +13,17 @@
 
 .dash-container{
     overflow:auto;
-    width:95vw;
+    width:95.5vw;
+//     width:100vw;
     height:100%;
     background: radial-gradient(circle, rgb(203, 215, 226), white);
     @include respond-to(small){
         width:100vw;
     }
+}
+
+.dark .dash-container{
+    background: radial-gradient(circle, rgb(203, 215, 226), $dark-bg-principal);
 }
 
 // rgb(30, 144, 255)
@@ -173,10 +178,11 @@ header {
         height: 180px;
 //         margin-right: 7%;
     }
+
 //         clip-path: var(--sidemindiv);
 
     #afiliatesInfo{
-        // background: red !important;
+//         background: red !important;
         &-divs{
             width: 100%;
 //             background:purple;
@@ -230,6 +236,11 @@ header {
         }
 
     }
+}
+
+.dark #header-bottom {
+    background: $dark-widget-bg;
+    color: lightgray;
 }
 
 
@@ -291,7 +302,7 @@ header {
 
             & > div {
                 height: 50%;
-                background: rgba(255,255,255,0.7);
+                background: rgba(255,255,255,0.4);
 //                 background:tomato;
                 border-radius:14px;
 
@@ -301,6 +312,9 @@ header {
                     color:lightslategrey;
                     padding:10px 0 0 10px;
                 }
+            }
+            .dark & > div{
+                background: rgba($dark-widget-bg, 0.2);
             }
         }
     }

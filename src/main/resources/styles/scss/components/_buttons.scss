@@ -76,6 +76,9 @@
     border:none;
     background-color:aliceblue;
 }
+.dark :is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .smallEyeBtn, .card-editButton){
+    background-color:$dark-widget-bg;
+}
 
 .throwRight {
     @extend .btn;
@@ -86,10 +89,18 @@
     background-color:aliceblue;
 }
 
+.dark .throwRight{
+    background-color: $dark-widget-bg;
+}
+
 
 :is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .smallEyeBtn, .card-editButton):hover{
     background-color:lightgray;
 }
+
+// :is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .smallEyeBtn, .card-editButton):hover{
+//     background-color:lightgray;
+// }
 
 .smallEyeBtn{
     padding: 1px !important;

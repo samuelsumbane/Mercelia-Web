@@ -18,7 +18,7 @@ body{
 }
 
 .sidebar-container {
-    flex: 0 0 5%;
+    flex: 0 0 1.5%;
 }
 
 // .content-container {flex: 1;
@@ -63,7 +63,7 @@ body{
         @include respond-to(small) {
             position:absolute;
 //             margin-left:-100%
-        left:-17%;
+            left:-17%;
         }
     }
 
@@ -76,15 +76,19 @@ body{
         cursor:pointer;
         margin-top:10px;
         margin-left:-5px;
-//         background:blue;
+        background:transparent;
         border:none;
 
         .bar{
-            display:block;width:23px;height:3px;margin:5px auto;background:rgb(0, 95, 139);
+            display:block;width:23px;height:3px;margin:5px auto;
+            background:rgb(0, 95, 139);
             &.active{
                 margin:5px 0 0 auto;
             }
         }
+//         .dark .bar{
+//             background:red;
+//         }
 
         &.active .bar:nth-child(2){opacity:0;}
         &.active .bar:nth-child(1){transform:translateY(8px) rotate(45deg)}
@@ -94,7 +98,9 @@ body{
             margin-left:67%
         }
     }
-
+//     .dark .hamburger {
+//         background:green !important;
+//         }
 
 
     #showHideSidebar{display: none;}
@@ -105,13 +111,14 @@ body{
         height:auto;
         display: flex;
         flex-direction: column;
-        border:2px solid rgb(198, 206, 212);
-        border-radius: 0 12px 12px 0;
+//         border:2px solid rgb(198, 206, 212);
+//         border-radius: 0 12px 12px 0;
         gap:35px;
 
         .active-btn{
             border-left:4px solid rgb(3, 34, 61);
         }
+
 
         a { height: 35px; }
 
@@ -169,4 +176,12 @@ body{
         width:90%;
         height:20vh;
     }
+}
+
+.dark .sidebar{
+    background: $dark-bg-principal;
+    .active-btn{
+        border-left:4px solid dodgerblue;
+    }
+
 }

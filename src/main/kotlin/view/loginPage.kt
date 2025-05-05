@@ -42,8 +42,8 @@ fun loginPage() {
     // seller@gmail :   -> vendedor
     // marcos@gmail: 3792 -> vendedor
 
-    var email by remember { mutableStateOf("marcos@gmail") }
-    var password by remember { mutableStateOf("3792") }
+    var email by remember { mutableStateOf("admin@gmain") }
+    var password by remember { mutableStateOf("1110") }
     var errorText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 

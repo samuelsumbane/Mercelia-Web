@@ -16,6 +16,9 @@ h2{
     font-weight: 650;
     font-size: clamp(1rem, 1.2vw, 1.25rem);
 }
+.dark h2{
+    color: $dark-text-principal !important;
+}
 
 body{
     position:fixed;
@@ -54,12 +57,14 @@ body{
 
 
 .users-page, .sells-page, .products-page, .management-page, .normal-page{
-    @include wh(95vw,100vh);
+    @include wh(96vw,100vh);
     // width: calc(95vw);
-//     background: radial-gradient(circle, rgb(197, 235, 241), white);
-    background-color: tomato !important;
+    background: radial-gradient(circle, rgb(197, 235, 241), white);
+//     background-color: tomato !important;
     display:flex;
     flex-direction:column;
+//     margin-left:.5%;
+    padding:.5%;
     @include respond-to(small) {
         width:100vw;
     }
@@ -235,6 +240,11 @@ body{
                     }
                 }
             }
+            .dark .card{
+                background:rgba(#031331, 0.3)
+            }
+
+
 
             .card-warning{
                 background: red;
@@ -263,6 +273,7 @@ body{
                     background-position: center;
                     background-size: 30px;
 //                     padding-top:60px;
+                    padding:5px;
                     font-size:16px;
                     font-weight: bold;
                     color:#333;
@@ -270,8 +281,6 @@ body{
                 }
             }
         }
-
-
     }
 
     // &-footer{
@@ -279,6 +288,19 @@ body{
     //     background:transparent;
     // }
 }
+.dark .users-page, .sells-page, .products-page, .management-page, .normal-page {
+    background: radial-gradient(circle, rgb(203, 215, 226), $dark-bg-principal);
+
+    .card{
+        background-color: $dark-bg-principal;
+        color: $dark-text-principal;
+    }
+    .page-card{
+        background-color: $dark-widget-bg !important;
+        color: $dark-text-principal !important;
+    }
+}
+
 
 // .card{margin: 5px}
 
@@ -294,7 +316,7 @@ body{
 
 .def-page{
     @include wh(95vw, 100%);
-    background: radial-gradient(circle, rgb(203, 215, 226), white);
+    background: radial-gradient(circle, rgb(197, 235, 241), white);
 //     background: blue;
     display:flex;
     flex-direction:column;
@@ -302,11 +324,7 @@ body{
     &-header{
         @include wh(100%, 10%);
 //         background:red;
-
-        &-title{
-            height: 50%;
-            // background:purple;
-        }
+        &-title{height: 50%;}
     }
 
     &-body{
@@ -373,23 +391,19 @@ body{
                 .defDivConf{
                     width: 80%;
                     max-width: 500px;
-                    // min-height: 80px;
                     height: auto;
-
                     margin: 20px auto 0 auto;
-                    border-radius: $input-radius;
-                    border:1.6px solid $bg-primary;
-                    padding: 5px;
-                    // overflow-y: auto;
+                    border-radius: 12px;
+                    padding: 8px;
+                    box-shadow: 0 0 15px 6px rgba(black, 0.6);
 
                     &-title{
                         // color: $bg-primary;
-                        color: rgb(0, 57, 90);
                         margin: 0 0 5px 0;
                     }
 
                     &-desc{
-                        color: $scrollcolor;
+//                         color: $scrollcolor;
                         margin: 0 0 5px 0;
                     }
 
@@ -410,10 +424,22 @@ body{
                 overflow-y:auto;
             }
         }
-
     }
 }
+.dark .def-page{
+    background: radial-gradient(circle, rgb(203, 215, 226), $dark-bg-principal);
+    .defDivConf {
+        background:$dark-widget-bg;
+        &-title{color: $dark-text-principal !important;}
+        &-desc{color: $dark-text-secondary;}
+        & > input {
+            background:rgba($dark-bg-principal, 0.98);
+            border:1px solid #1E1E1E !important;
+            color:$dark-text-principal;
+        }
+    }
 
+}
 
 
 

@@ -1,7 +1,12 @@
+$dark-bg-principal: #121212;
+$dark-widget-bg: #1E1E1E;
+// #2D2D2D
+$dark-text-principal: #EAEAEA;
+$dark-text-secondary: #A0A0A0;
+
 .myTable {
     border-radius: 8px;
     overflow: hidden;
-
     background:white;
     border:1px solid #01172f;
     border-bottom:0;
@@ -11,20 +16,45 @@
     background-color: #021b36;
     color: white;
 }
+.dark .myTable thead {
+    background-color:#04192f;
+}
 
+.myTable tbody tr:nth-child(odd) {
+    background:red !important;
+}
+.dark .myTable tbody tr:nth-child(odd) {
+    background:rgba($dark-widget-bg, 0.7) !important;
+    color: $dark-text-principal;
+}
 
 .myTable tbody tr:nth-child(even) {
     background-color: aliceblue;
+}
+
+.dark .myTable tbody tr:nth-child(even){
+    background: rgba($dark-widget-bg, 0.9) !important;
+    color: $dark-text-principal;
 }
 
 .myTable tbody tr .sorting_1 {
     background:rgba(aliceblue, 0.1) !important;
 }
 
+.dark .myTable tbody tr .sorting_1 {
+    background: rgba($dark-widget-bg, 0.1) !important;
+}
+
 .myTable tbody tr:hover {
     background-color: #D1FAE5; /* Verde suave */
     transition: 0.3s;
 }
+
+.dark .myTable tbody tr:hover {
+    background:rgba($dark-bg-principal, 0.2) !important;
+    color: rgba(black, 0.9)
+}
+
 
 .myTable td, .myTable th {
     text-align: left;

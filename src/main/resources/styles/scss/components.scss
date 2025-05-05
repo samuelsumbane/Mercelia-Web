@@ -14,6 +14,12 @@
     outline-width:1px !important;
     background:rgba(white, 0.4);
 }
+.dark .formTextInput, .formTextMinInput{
+    background:rgba($dark-widget-bg, 0.4);
+    border:1px solid #1E1E1E !important;
+    color:$dark-text-principal;
+}
+
 
 .formTextMinInput{
     width:55%;

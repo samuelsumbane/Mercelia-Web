@@ -48,7 +48,6 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
 //    } else toFilterData.toList()
     var isOrdersFetched by remember { mutableStateOf(false) }
 
-
     val router = Router.current
     var isLoading by remember { mutableStateOf<Boolean?>(null) }
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -136,6 +135,7 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
     }
 
     saleModal(httpClient, toSaleSysPackage, saleMode, orders, userId, modalState) {
+//    saleModal(httpClient, toSaleSysPackage, true, orders, userId, "open-min-modal") {
         modalState = "closed"
         coroutineScope.launch {
             val allOrders = orders.fetchOrders()

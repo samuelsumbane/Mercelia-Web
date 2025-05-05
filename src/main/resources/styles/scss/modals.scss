@@ -19,6 +19,7 @@
     flex-direction:Column;
     transition: 0.8s;
 
+
     &-header{
         height:7%;
         padding:5%
@@ -99,6 +100,7 @@
 }
 
 
+
 :is(.open-min-modal, .open-medium-modal, .open-max-modal){
     right: 0 !important;
 }
@@ -124,14 +126,13 @@
     &-header{
         height:40px;
         padding:0 !important;
-//         background:green;
     }
     
     &-title{
         text-transform:uppercase;
-        font-family:'Lucida sans';
         padding: 17px
     }
+
 
     &-body{
         display:flex;
@@ -213,7 +214,6 @@
                 }
                 .sellTable {
                     border-radius: 10px 10px 0 0;
-
                     border: 1px solid #021b36;
                     height: calc(100% - 80px);
                 }
@@ -309,12 +309,7 @@
                        gap: 15px;
                        flex-wrap: wrap;
                    }
-
-
             }
-
-
-
         }
     }
 
@@ -324,6 +319,32 @@
     }
 }
 
+
+.dark .min-modal, .medium-modal, .max-modal {
+    background: $dark-bg-principal;
+    color: $dark-text-principal;
+
+    .productToSaleItem, #center .center-div-item-title{
+        background: $dark-widget-bg;
+    }
+
+    #leftPart, #rightPart{
+        border:1px solid $dark-blue-color;
+    }
+    #center .sellTable{
+        border: 1px solid $dark-blue-color;
+    }
+
+    #center .center-div-item-title{
+        color: rgba(deepskyblue, 0.6);
+    }
+
+    #center .chargeAndDiscont {
+        border:1px solid $dark-blue-color;
+        border-top:0;
+    }
+
+}
 
 .medium-modal{
     width:70%;
