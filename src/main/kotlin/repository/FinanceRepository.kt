@@ -10,7 +10,7 @@ import kotlinx.browser.sessionStorage
 class FinanceRepository(private val httpClient: HttpClient) {
 
     // all-brances, create-branch, update-branch, delete-branch
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
     private val token = sessionStorage.getItem("jwt_token") ?: ""
 
 

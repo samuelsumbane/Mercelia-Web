@@ -29,7 +29,7 @@ fun settingsPage(userRole: String, sysPackage: String) {
     }
 
     val settings = SettingsRepository(httpClient)
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
     var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var user by remember { mutableStateOf(emptyLoggedUser) }

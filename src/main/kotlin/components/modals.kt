@@ -26,5 +26,4 @@ fun minModal(
 
         Div(attrs = { classes("min-modal-footer")})
     }
-
 }

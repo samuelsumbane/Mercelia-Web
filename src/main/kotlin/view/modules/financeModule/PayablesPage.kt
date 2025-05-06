@@ -31,7 +31,7 @@ fun payablesPage(userRole: String, sysPackage: String) {
         }
     }
 
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
     val payables = FinanceRepository(httpClient)
 
     var allPayableData by mutableStateOf(listOf<PayableItem>())

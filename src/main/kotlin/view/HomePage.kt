@@ -55,8 +55,8 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
 
 
     val reports = ReportsRepository(httpClient)
-    val users = UserRepository(httpClient)
-    val products = ProductRepository(httpClient)
+    val users = UserRepository()
+    val products = ProductRepository()
 
     var productsData by remember { mutableStateOf<List<ProductItem>?>(null) }
 

@@ -1,13 +1,11 @@
 package repository
 
-import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 
-class CategoryRepository(private val httpClient: HttpClient) {
+class CategoryRepository : ClassHttpClient() {
     val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend fun getCategories(): List<CategoryItem> {
@@ -16,44 +14,8 @@ class CategoryRepository(private val httpClient: HttpClient) {
         }.body()
     }
 
-    suspend fun createCategory(data: CategoryItem): Int {
-        return try {
-            val response = httpClient.post("$apiCategoriesPath/create-category") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data)
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
-    suspend fun editCategory(data: CategoryItem): Int {
-        return try {
-            val response = httpClient.put("$apiCategoriesPath/update-category") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data)
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
     suspend fun deleteCategory(categoryId: Int): Int {
         val response = httpClient.delete("$apiCategoriesPath/delete-category/$categoryId")
         return response.status.value
     }
-
-
 }
-
-
-//    suspend fun fetchEachAfiliateData(id: Int): AfiliateItem {
-//        return httpClient.get("$apiPath/afiliate/get_afiliate_by_id/$id").body()
-//    }
-//

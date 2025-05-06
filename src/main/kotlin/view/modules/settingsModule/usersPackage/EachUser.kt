@@ -22,13 +22,8 @@ typealias AfMap = Map<String, String>
 @Composable
 fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
+    val commonRepo = CommonRepository()
 
     var data by remember { mutableStateOf(emptyUserItem) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -114,7 +109,7 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
                 P {}
                 button("btn", "Editar dados pessoais") {
                     minModalState = "open-min-modal"
-                    console.log("clicked")
+//                    console.log("clicked")
                 }
             }
 
@@ -208,7 +203,7 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
 
         fun checkPassword() {
             coroutineScope.launch {
-                val (status, message) = users.verifyPassord(VerifyPasswordDC(afPasscode, hashedPassword))
+                val (status, message) = commonRepo.postRequest("$apiPath/user/verify-password", VerifyPasswordDC(afPasscode, hashedPassword))
                 if (status == 406 && afPasscodeError.isBlank()) {
                     afPasscodeError = message
                 }
@@ -235,7 +230,7 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
                     if (afPasscodeError.isBlank() && afNewPasswordError.isBlank() && afConfirmPasswordError.isBlank()) {
                         coroutineScope.launch {
                             val eachUserPasswords = PasswordDraft(userId, hashedPassword, afNewPassword)
-                            val (status, message) = users.updateUserPassword(eachUserPasswords)
+                            val (status, message) = commonRepo.postRequest("$apiPath/user/update-user-password", eachUserPasswords)
 
                             when (status) {
                                 200 -> alert("success", "Sucesso",message)

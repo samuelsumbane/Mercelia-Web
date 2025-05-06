@@ -18,15 +18,9 @@ import repository.*
 @Composable
 fun categoriesPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
     val router = Router.current
-    val categories = CategoryRepository(httpClient)
-    val users = UserRepository(httpClient)
+    val categories = CategoryRepository()
+    val commonRepo = CommonRepository()
 
     var categoriesData by remember { mutableStateOf<List<CategoryItem>?>(null) }
 
@@ -39,9 +33,6 @@ fun categoriesPage(userRole: String, sysPackage: String) {
     var categoryName by remember { mutableStateOf("") }
     var categoryNameError by remember { mutableStateOf("") }
     var submitBtnText by remember { mutableStateOf("Submeter") }
-    var isLoggedIn by remember { mutableStateOf(false) }
-    var formAction by remember { mutableStateOf("") }
-
 
     fun cleanFormFields() {
         categoryName = ""
@@ -129,13 +120,12 @@ fun categoriesPage(userRole: String, sysPackage: String) {
                         coroutineScope.launch {
                             if (categoryId != 0) {
                                 // Edit category --------->
-                                val status = categories.editCategory(CategoryItem(categoryId, categoryName))
+                                val (status, message) = commonRepo.postRequest("$apiCategoriesPath/update-category", CategoryItem(categoryId, categoryName), "put")
                                 if (status == 201) alertTimer("Categoria actualizada com sucesso.")
-
                                 modalState = "closed"
                             } else {
                                 // Save category --------->
-                                val status = categories.createCategory(CategoryItem(null, categoryName))
+                                val (status, message) = commonRepo.postRequest("$apiCategoriesPath/create-category", CategoryItem(null, categoryName))
                                 if (status == 201) alertTimer("Categoria adicionada com sucesso.")
                             }
                             categoryName = ""

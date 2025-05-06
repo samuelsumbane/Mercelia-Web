@@ -273,7 +273,7 @@ fun <K> formDiv(
     spanError: String,
 ) {
     Div {
-        Label { Text(label) }
+        Label(attrs = { classes("inputTitleLabel") }) { Text(label) }
         Input(type = inputType, attrs = {
             classes("formTextInput")
             value(inputValue)

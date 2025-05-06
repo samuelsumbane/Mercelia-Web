@@ -1,6 +1,10 @@
 @use 'abstracts/variables' as *;
 @use 'abstracts/mixins' as *;
 
+.dark .inputTitleLabel{
+    color: $dark-text-secondary;
+}
+
 .formTextInput, .formTextMinInput{
     margin-top:3px;
     height: 30px;

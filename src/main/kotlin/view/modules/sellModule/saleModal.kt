@@ -35,9 +35,9 @@ fun saleModal(
     onCloseModal: () -> Unit,
 ) {
 
-    val products = ProductRepository(httpClient)
-    val categories = CategoryRepository(httpClient)
-    val clients = ClientRepository(httpClient)
+    val products = ProductRepository()
+    val categories = CategoryRepository()
+    val clients = ClientRepository()
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -75,7 +75,7 @@ fun saleModal(
     var submitButton by remember { mutableStateOf<HTMLButtonElement?>(null) }
     val inputRef = remember { mutableStateOf<HTMLInputElement?>(null) }
 
-    val branches = BranchRepository(httpClient)
+    val branches = BranchRepository()
     var branchDeffered by remember { mutableStateOf("") }
 
     fun clearFields() {

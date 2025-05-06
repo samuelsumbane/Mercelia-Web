@@ -31,7 +31,7 @@ fun brancesPage(userRole: String, sysPackage: String) {
     }
     val router = Router.current
 
-    val branches = BranchRepository(httpClient)
+    val branches = BranchRepository()
     var branchData by remember { mutableStateOf(emptyList<BranchItem>()) }
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()

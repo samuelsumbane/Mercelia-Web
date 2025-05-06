@@ -17,17 +17,10 @@ import repository.*
 @Composable
 fun UsersPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
+    val commonRepo = CommonRepository()
     var usersData by remember { mutableStateOf<List<UserItem>?>(null) }
-    val settings = SettingsRepository(httpClient)
-    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
-    var sysPackage by remember { mutableStateOf("") }
+    var sysPackage by remember { mutableStateOf(sysPackage) }
 
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -48,23 +41,14 @@ fun UsersPage(userRole: String, sysPackage: String) {
     var newRole by remember { mutableStateOf("") }
     var roleError by remember { mutableStateOf("") }
     val router = Router.current
-
     var submitBtnText by remember { mutableStateOf("Submeter") }
-    var showDialog by remember { mutableStateOf(true) }
-    var isLoggedIn by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         try {
             usersData = users.fetchUsers()
-            sysConfigs = settings.getSettings()
         } catch (e: Exception) {
             error = "Error: ${e.message}"
         }
-
-        for((key, value) in sysConfigs) {
-            if (key == "active_package") sysPackage = value
-        }
-
     }
 
 
@@ -147,7 +131,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
 
                         if (userName != "") {
                             coroutineScope.launch {
-                                val (statusCode, message) = users.createUser(
+                                val (statusCode, message) = commonRepo.postRequest("$apiPath/user/create_user",
                                     (UserItemDraft(userName, userEmail, role))
                                 )
 
@@ -234,7 +218,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
                     if (userStatus == "Activo") {
                         button("btn", "Bloquear") {
                             coroutineScope.launch {
-                                val (status, message) = users.changeUserStatus(
+                                val (status, message) = commonRepo.postRequest("$apiPath/user/change-status",
                                     ChangeStatusDC(2, userId)
                                 )
                                 alertStatusAndMessageResponse(status, message)
@@ -243,7 +227,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
                     } else {
                         button("btn", "Activar") {
                             coroutineScope.launch {
-                                val (status, message) = users.changeUserStatus(
+                                val (status, message) = commonRepo.postRequest("$apiPath/user/change-status",
                                     ChangeStatusDC(1, userId)
                                 )
                                 alertStatusAndMessageResponse(status, message)
@@ -301,7 +285,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
                     if (newRole.isNotBlank()) {
                         button("checkButton", "") {
                             coroutineScope.launch {
-                                val (status, message) = users.changeUserRole(
+                                val (status, message) = commonRepo.postRequest("$apiPath/user/change-role",
                                     ChangeRoleDC(newRole, userId)
                                 )
                                 alertStatusAndMessageResponse(status, message)

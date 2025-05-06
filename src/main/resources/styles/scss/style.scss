@@ -289,7 +289,7 @@ body{
     // }
 }
 .dark .users-page, .sells-page, .products-page, .management-page, .normal-page {
-    background: radial-gradient(circle, rgb(203, 215, 226), $dark-bg-principal);
+    background: radial-gradient(circle, $dark-bg-principal);
 
     .card{
         background-color: $dark-bg-principal;
@@ -448,14 +448,13 @@ body{
 }
 
 
-:is(.min-modal-body)::-webkit-scrollbar{
-    width:10px;
-}
 
-:is(.min-modal-body)::-webkit-scrollbar-thumb{
-    background:$scrollcolor;
-    border-radius:12px;
-}
+
+// .dark .scrolled{
+//     &::-webkit-scrollbar-thumb{
+//         background:rgba(red, 0.95) !important;
+//     }
+// }
 
 .user-div, .user-divFalse{
     width:240px;

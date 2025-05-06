@@ -25,7 +25,9 @@
         margin:auto;
         margin-top:40px;
     }
-
+}
+.dark .centerDiv{
+    color: $dark-text-principal !important;
 }
 
 .scrolled::-webkit-scrollbar{
@@ -37,5 +39,4 @@
     width:10px;
     border-radius: $scroll-radius;
     background:rgba($bg-primary, 0.7);
-    
 }

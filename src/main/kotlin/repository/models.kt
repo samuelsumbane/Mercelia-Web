@@ -9,6 +9,19 @@ data class CategoryItem(
     val name: String
 )
 
+//@Serializable
+//data class ProductItem(
+//    val id: Int?,
+//    val name: String,
+//    val cost: Double,
+//    val price: Double,
+//    val stock: Int,
+//    val minStock: Int?,
+//    val categoryId: Int,
+//    val categoryName: String?,
+//    val barcode: String,
+//)
+
 @Serializable
 data class ProductItem(
     val id: Int?,
@@ -20,6 +33,15 @@ data class ProductItem(
     val categoryId: Int,
     val categoryName: String?,
     val barcode: String,
+    val ownerId: Int,
+    val ownerName: String,
+)
+
+@Serializable
+data class OwnerItem(
+    val id: Int?,
+    val name: String,
+    val telephone: String?,
 )
 
 @Serializable

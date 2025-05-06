@@ -19,13 +19,8 @@ import repository.*
 @Composable
 fun clientsPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val clients = ClientRepository(httpClient)
+    val clients = ClientRepository()
+    val commonRepo = CommonRepository()
     var clientData by remember { mutableStateOf<List<ClientItem>?>(null) }
 
     var error by remember { mutableStateOf<String?>(null) }
@@ -118,11 +113,12 @@ fun clientsPage(userRole: String, sysPackage: String) {
                         if (clientName.isNotBlank()) {
                             coroutineScope.launch {
                                 if (clientId != 0) {
-                                    val status = clients.editClient(ClientItem(clientId, clientName, clientPhone))
+                                    val (status, message) = commonRepo.postRequest("$apiClientsPath/edit-client", ClientItem(clientId, clientName, clientPhone), "put")
                                     if (status == 201) alertTimer("Cliente actualizado com sucesso.")
                                     modalState = "closed"
+                                    coroutineScope.launch { clientData = clients.getClients() }
                                 } else {
-                                    val status = clients.createClient(ClientItem(null, clientName, clientPhone))
+                                    val (status, message) = commonRepo.postRequest("$apiClientsPath/create-client", ClientItem(null, clientName, clientPhone))
                                     if (status == 201) alertTimer("Cliente adicionado com sucesso.")
                                 }
                                 clientId = 0
@@ -146,9 +142,7 @@ fun clientsPage(userRole: String, sysPackage: String) {
                 Div(attrs = { classes("min-submit-buttons") }) {
                     button("closeButton", "Fechar") {
                         modalState = "closed"
-                        coroutineScope.launch {
-                            clientData = clients.getClients()
-                        }
+                        coroutineScope.launch { clientData = clients.getClients() }
                     }
                     button("submitButton", btnText = submitBtnText, ButtonType.Submit)
                 }

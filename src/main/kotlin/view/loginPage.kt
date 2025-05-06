@@ -26,7 +26,7 @@ fun loginPage() {
         }
     }
 
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
     val router = Router.current
     sessionStorage.getItem("reloadFromLogin")?.let {
         when (it) {

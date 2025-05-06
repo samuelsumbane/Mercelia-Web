@@ -7,7 +7,7 @@ import io.ktor.http.*
 import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 
-class SupplierRepository(private val httpClient: HttpClient) {
+class SupplierRepository() : ClassHttpClient() {
 
     private val token = sessionStorage.getItem("jwt_token") ?: ""
 
@@ -17,23 +17,10 @@ class SupplierRepository(private val httpClient: HttpClient) {
         }.body()
     }
 
-    suspend fun createSupplier(data: SupplierItem): Int {
-        return try {
-            val response = httpClient.post("$apiSupplierPath/create-supplier") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data)
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
 
     suspend fun editSupplier(data: SupplierItem): Int {
         return try {
-            val response = httpClient.put("$apiSupplierPath/edit-supplier") {
+            val response = httpClient.put() {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
                 setBody(data)

@@ -18,13 +18,8 @@ import repository.*
 @Composable
 fun suppliersPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val suppliers = SupplierRepository(httpClient)
+    val suppliers = SupplierRepository()
+    val commonRepo = CommonRepository()
     var supplierData by remember { mutableStateOf<List<SupplierItem>?>(null) }
 
     var error by remember { mutableStateOf<String?>(null) }
@@ -42,6 +37,13 @@ fun suppliersPage(userRole: String, sysPackage: String) {
     var isLoading by remember { mutableStateOf(false) }
 
     val router = Router.current
+
+    fun closeModalAndFetch() {
+        modalState = "closed"
+        coroutineScope.launch {
+            supplierData = suppliers.getSuppliers()
+        }
+    }
 
     LaunchedEffect(Unit) {
         try {
@@ -111,29 +113,25 @@ fun suppliersPage(userRole: String, sysPackage: String) {
                         if (supplierName.isNotBlank()) {
                             coroutineScope.launch {
                                 if (supplierId != 0) {
-                                    val status = suppliers.editSupplier(
+                                    val (status, message) = commonRepo.postRequest("$apiSupplierPath/edit-supplier",
                                         SupplierItem(
-                                            supplierId,
-                                            supplierName,
-                                            supplierPhone,
-                                            supplierAddress
-                                        )
+                                            supplierId, supplierName, supplierPhone, supplierAddress
+                                        ), "put"
                                     )
-                                    if (status == 201) alertTimer("Fornecedor actualiado com sucesso.")
+                                    if (status == 201) {
+                                        alertTimer("Fornecedor actualiado com sucesso.")
+                                        closeModalAndFetch()
+                                    }
                                     else unknownErrorAlert()
                                 } else {
-                                    val status = suppliers.createSupplier(
+                                    val (status, message) = commonRepo.postRequest("$apiSupplierPath/create-supplier",
                                         SupplierItem(
-                                            null,
-                                            supplierName,
-                                            supplierPhone,
-                                            supplierAddress
+                                            null, supplierName, supplierPhone, supplierAddress
                                         )
                                     )
                                     if (status == 201) alertTimer("Fornecedor adicionado com sucesso.")
                                     else unknownErrorAlert()
                                 }
-
 
                                 supplierName = ""
                                 supplierPhone = ""
@@ -160,12 +158,7 @@ fun suppliersPage(userRole: String, sysPackage: String) {
                     { event -> supplierAddress = event.value }, ""
                 )
 
-                submitButtons(submitBtnText) {
-                    modalState = "closed"
-                    coroutineScope.launch {
-                        supplierData = suppliers.getSuppliers()
-                    }
-                }
+                submitButtons(submitBtnText) { closeModalAndFetch() }
             }
         }
     }

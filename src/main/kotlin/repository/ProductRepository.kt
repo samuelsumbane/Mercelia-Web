@@ -6,7 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.browser.sessionStorage
 
-class ProductRepository(private val httpClient: HttpClient) {
+class ProductRepository : ClassHttpClient() {
 
     private val token = sessionStorage.getItem("jwt_token") ?: ""
 
@@ -16,56 +16,13 @@ class ProductRepository(private val httpClient: HttpClient) {
         }.body()
     }
 
-
 //    suspend fun getAfiliateProducts(afId: Int): List<ProductItem> {
 //        return httpClient.get("$apiPath/product/afiliate_products/${afId}").body()
 //    }
 
-    suspend fun createProduct(data: ProductItem): Int {
-        return try {
-            val response = httpClient.post("$apiProductsPath/create-product") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data)
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
-    suspend fun increaseProductStock(data: IncreaseProductStockDraft): Int {
-        return try {
-            val response = httpClient.put("$apiProductsPath/increase-stock") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data) // Enviar o objeto como JSON
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
-    suspend fun changeProductNameAndCategory(data: ProductNameAndCategory): Int {
-        return try {
-            val response = httpClient.put("$apiProductsPath/change-product-name-and-category") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data) // Enviar o objeto como JSON
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
     suspend fun updateProductPrice(data: ChangeProductPriceDraft): Int {
         return try {
-            val response = httpClient.put("$apiProductsPath/change-product-price") {
+            val response = httpClient.put() {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
                 setBody(data) // Enviar o objeto como JSON

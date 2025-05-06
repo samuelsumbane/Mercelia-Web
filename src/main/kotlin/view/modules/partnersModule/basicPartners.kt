@@ -9,6 +9,7 @@ fun basicPartners(userRole: String, sysPackage: String) {
     val partnersPages = listOf(
         BtnDetails("clientsBtn", "/clients", "Clientes"),
         BtnDetails("suppliersBtn", "/suppliers", "Fornecedores"),
+        BtnDetails("ownersBtn", "/owners", "Proprietários"),
     )
 
     basicGruppedPages("Parceiros", partnersPages, userRole, sysPackage)

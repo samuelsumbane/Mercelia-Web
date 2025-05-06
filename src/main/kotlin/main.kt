@@ -24,6 +24,7 @@ import repository.UserDataAndSys
 import repository.UserRepository
 import repository.emptyLoggedUser
 import view.*
+import view.Afiliates.OwnersPage
 import view.Afiliates.clientsPage
 import view.Afiliates.suppliersPage
 import view.eachUsers.eachUserPage
@@ -62,7 +63,7 @@ fun main() {
         HashRouter(initPath = "/") {
             val router = Router.current
             val settings = SettingsRepository(httpClient)
-            val users = UserRepository(httpClient)
+            val users = UserRepository()
             var isLoggedIn by remember { mutableStateOf(false) }
             var isLoading by remember { mutableStateOf(false) }
             var hasLoading by remember { mutableStateOf(false) }
@@ -184,6 +185,10 @@ fun main() {
 
                     route("/clients") {
                         clientsPage(user.userRole, sysPackage)
+                    }
+
+                    route("/owners") {
+                        OwnersPage(user.userRole, sysPackage)
                     }
 
                     route("/users") {

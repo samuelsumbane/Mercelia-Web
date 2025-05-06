@@ -16,7 +16,7 @@ import kotlinx.browser.sessionStorage
 class SaleRepository(private val httpClient: HttpClient) {
 
     private val token = sessionStorage.getItem("jwt_token") ?: ""
-    val users = UserRepository(httpClient)
+    val users = UserRepository()
 
     suspend fun fetchOrders(): List<OrderItem> {
         return try {
