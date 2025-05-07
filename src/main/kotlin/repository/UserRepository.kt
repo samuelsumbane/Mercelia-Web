@@ -1,20 +1,13 @@
 package repository
 
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
-import kotlinx.browser.window
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.w3c.dom.get
-import org.w3c.dom.set
-
 
 class UserRepository : ClassHttpClient() {
     private val token = sessionStorage.getItem("jwt_token") ?: ""
@@ -52,7 +45,6 @@ class UserRepository : ClassHttpClient() {
         val response = httpClient.get("$apiPath/user/check-session") {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
-        println(response.status)
         return if (response.status == HttpStatusCode.Accepted) {
             val jsonResponse = Json.parseToJsonElement(response.bodyAsText()) as JsonObject
             val userid = jsonResponse["userid"]?.jsonPrimitive?.content?.toInt()

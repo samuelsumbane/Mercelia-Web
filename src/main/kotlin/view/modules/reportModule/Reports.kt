@@ -27,13 +27,7 @@ import repository.*
 @Composable
 fun reportsPage(paramData: UserDataAndSys) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val reports = ReportsRepository(httpClient)
+    val reports = ReportsRepository()
 
     var allReportsData by remember { mutableStateOf(listOf<SaleReportItem>()) }
 //    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
@@ -75,7 +69,7 @@ fun reportsPage(paramData: UserDataAndSys) {
 
         NormalPage(
             showBackButton = true,
-            onBackFunc = { router.navigate("/basicReportsPage") },
+            onBackFunc = { router.navigate("/inventories-module") },
             title = "Relatórios de Vendas", pageActivePath = "sidebar-btn-reports",
             sysPackage = paramData.sysPackage,
             userRole = paramData.userRole,
@@ -84,8 +78,6 @@ fun reportsPage(paramData: UserDataAndSys) {
                 multiFilesExportButton(btnText = "Venda de hoje") {
                     P(attrs = {
                         onClick {
-//                            allReportsData = emptyList()
-//                            dt-search-0
                             val input = document.getElementById("dt-search-0") as? HTMLInputElement
                             input?.value = getUserLocalDateString()
                             input?.dispatchEvent(Event("input"))
@@ -157,6 +149,7 @@ fun reportsPage(paramData: UserDataAndSys) {
                                     Th { Text("Sub Total") }
                                     Th { Text("Lucro") }
                                     Th { Text("Status") }
+                                    Th { Text("Proprietário") }
                                     Th { Text("Usuário") }
                                     Th { Text("Data e hora") }
                                 }
@@ -169,6 +162,7 @@ fun reportsPage(paramData: UserDataAndSys) {
                                         Td { Text(moneyFormat(it.subTotal)) }
                                         Td { Text(moneyFormat(it.profit)) }
                                         Td { Text(it.status) }
+                                        Td { Text(it.ownerName) }
                                         Td { Text(it.userName) }
                                         Td { Text(it.datetime.toString()) }
                                     }

@@ -34,6 +34,7 @@ fun saleItemsModal(
                         Th { Text("Quantidade") }
                         Th { Text("Sub Total") }
                         Th { Text("Lucro") }
+                        Th { Text("Proprietário") }
                     }
                 }
                 Tbody {
@@ -43,6 +44,7 @@ fun saleItemsModal(
                             Td { Text(it.quantity.toString()) }
                             Td { Text(moneyFormat(it.subTotal)) }
                             Td { Text(moneyFormat(it.profit)) }
+                            Td { Text(it.ownerName) }
                         }
                     }
                 }

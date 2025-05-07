@@ -35,10 +35,10 @@ import view.modules.partnersModule.basicPartners
 import view.modules.productsModule.basicProductsPage
 import view.modules.productsModule.categoriesPage
 import view.modules.productsModule.productsPage
+import view.modules.reportModule.basicReportPage
 //import view.modules.productsModule.categoriesPage
 //import view.modules.productsModule.productsPage
 //import view.modules.reportModule.stockPage
-import view.modules.reportModule.basicReportsPage
 import view.modules.reportModule.reportsPage
 import view.modules.reportModule.stockPage
 //import view.modules.reportModule.reportsPage
@@ -229,23 +229,23 @@ fun main() {
 
                 // -------->>
 
-                route("/basicPartnersPage") {
+                route("/partners-module") {
                     basicPartners(user.userRole, sysPackage)
                 }
 
-                route("/basicProductsPage") {
+                route("/products-module") {
                     basicProductsPage(user.userRole, sysPackage)
                 }
 
-                route("/basicFinancePage") {
+                route("/finances-module") {
                     basicFinances(user.userRole, sysPackage)
                 }
 
-                route("/basicReportsPage") {
-                    basicReportsPage(user.userRole, sysPackage)
+                route("/inventories-module") {
+                    basicReportPage(user.userRole, sysPackage)
                 }
 
-                route("/basicSellPage") {
+                route("/sale-module") {
                     basicSalePage(user.userRole, sysPackage)
                 }
 
@@ -280,10 +280,10 @@ val routesList = listOf(
     "/suppliers",
     "/settings",
     "/branches",
-    "/basicPartnersPage",
-    "/basicProductsPage",
-    "/basicReportsPage",
-    "/basicSellPage",
+    "/partners-module",
+    "/products-module",
+    "/inventories-module",
+    "/sale-module",
 )
 
 val norForSellerUserRoutes = listOf(
@@ -296,7 +296,7 @@ val norForSellerUserRoutes = listOf(
     "/suppliers",
     "/settings",
     "/branches",
-    "/basicPartnersPage",
+    "/partners-module",
 )
 
 

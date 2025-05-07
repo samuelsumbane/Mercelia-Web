@@ -13,7 +13,7 @@ import kotlinx.browser.sessionStorage
 //    @Serializable data class Empty(val message: String) : OrderResult()
 //}
 
-class SaleRepository(private val httpClient: HttpClient) {
+class SaleRepository : ClassHttpClient() {
 
     private val token = sessionStorage.getItem("jwt_token") ?: ""
     val users = UserRepository()
@@ -35,21 +35,6 @@ class SaleRepository(private val httpClient: HttpClient) {
         }.body()
     }
 
-//
-    suspend fun saleProduct(data: SaleItem): Int {
-        return try {
-            val response = httpClient.post("$apiPath/order/sale_products") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data) // Enviar o objeto como JSON
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
 
 //    suspend fun updateSale(updatedData: SalesControlDraft) {
 //        try {
@@ -62,6 +47,4 @@ class SaleRepository(private val httpClient: HttpClient) {
 //            println("Error during PUT: ${e.message}")
 //        }
 //    }
-
-
 }

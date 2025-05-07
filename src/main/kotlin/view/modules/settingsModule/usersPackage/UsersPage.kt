@@ -79,15 +79,16 @@ fun UsersPage(userRole: String, sysPackage: String) {
         hasNavBar = true,
         userRole = userRole,
         navButtons = {
-            val canAddUser = (sysPackage == "Lite" && usersData!!.size < 3) ||
-                    (sysPackage == "Plus" && usersData!!.size < 10) ||
-                    (sysPackage == "Pro")
-
-            if (canAddUser) {
-                button("btnSolid", "+ Usuário") {
-                    modalTitle = "Adicionar Usuário"
-                    modalState = "open-min-modal"
-                    submitBtnText = "Submeter"
+            if (usersData != null) {
+                val canAddUser = (sysPackage == SysPackages.L.desc && usersData!!.size < 3) ||
+                        (sysPackage == SysPackages.PL.desc && usersData!!.size < 10) ||
+                        (sysPackage == SysPackages.PO.desc)
+                if (canAddUser) {
+                    button("btnSolid", "+ Usuário") {
+                        modalTitle = "Adicionar Usuário"
+                        modalState = "open-min-modal"
+                        submitBtnText = "Submeter"
+                    }
                 }
             }
 
@@ -200,9 +201,7 @@ fun UsersPage(userRole: String, sysPackage: String) {
 
         minModal(moreDetailsModalState, "Detalhes do usuário") {
             Form(
-                attrs = {
-                    classes("modalform")
-                }
+                attrs = { classes("modalform") }
             ) {
                 modalPItem("Nome do usuário", value = {
                     P { Text(userName) }
@@ -239,9 +238,8 @@ fun UsersPage(userRole: String, sysPackage: String) {
                 Br()
                 Hr()
                 Br()
-                modalPItem("Histórico de vendas", value = {
-
-                })
+//                modalPItem("Histórico de vendas", value = {
+//                })
 
                 modalPItem("Papel", value = {
                     P { Text(role) }

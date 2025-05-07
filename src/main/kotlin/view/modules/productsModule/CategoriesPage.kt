@@ -49,7 +49,7 @@ fun categoriesPage(userRole: String, sysPackage: String) {
 
     NormalPage(
         showBackButton = true,
-        onBackFunc = { router.navigate("/basicProductsPage") },
+        onBackFunc = { router.navigate("/products-module") },
         title = "Categorias",
         pageActivePath = "sidebar-btn-products",
         sysPackage = sysPackage,

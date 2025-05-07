@@ -21,16 +21,11 @@ import repository.*
 @Composable
 fun receivablesPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
 
-    val receivables = FinanceRepository(httpClient)
+    val receivables = FinanceRepository()
+    val commonRepo = CommonRepository()
 
     var allReceivablesData by mutableStateOf(listOf<ReceivableItem>())
-//    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
     var error by remember { mutableStateOf<String?>(null) }
@@ -75,7 +70,7 @@ fun receivablesPage(userRole: String, sysPackage: String) {
 
         NormalPage(
             showBackButton = true,
-            onBackFunc = { router.navigate("/basicFinancePage") },
+            onBackFunc = { router.navigate("/finances-module") },
             title = "Contas a receber", pageActivePath = "sidebar-btn-reports",
             sysPackage = sysPackage,
             userRole = userRole,
@@ -169,7 +164,7 @@ fun receivablesPage(userRole: String, sysPackage: String) {
 
                                 if (receiveValueError.isBlank()) {
                                     val receiveData = IdAndStatus(receiveAccountId, 2)
-                                    val (status, message) = receivables.receiveBillPayment(receiveData)
+                                    val (status, message) = commonRepo.postRequest("$apiReceivablesPath/receive-account-payment", receiveData)
                                     when (status) {
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()
@@ -243,7 +238,7 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                                 if (clientError.isBlank() && receiveValueError.isBlank() && expirationDateError.isBlank() && receivementDateError.isBlank()) {
 
                                     val receiveData = ReceivableDraft(client, description, receiveValue, expirationDate, paymentForm)
-                                    val (status, message) = receivables.createReceivable(receiveData)
+                                    val (status, message) = commonRepo.postRequest("$apiReceivablesPath/create-receivable", receiveData)
                                     when (status) {
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()

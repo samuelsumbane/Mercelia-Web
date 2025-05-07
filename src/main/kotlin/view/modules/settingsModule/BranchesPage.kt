@@ -24,14 +24,11 @@ import repository.*
 @Composable
 fun brancesPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
     val router = Router.current
 
     val branches = BranchRepository()
+    val commonRepo = CommonRepository()
+
     var branchData by remember { mutableStateOf(emptyList<BranchItem>()) }
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -69,7 +66,6 @@ fun brancesPage(userRole: String, sysPackage: String) {
             }
 
             appropriateName = if (sysPackage == SysPackages.L.desc) "Sede" else "Sucursal"
-
         }
 
     }
@@ -81,6 +77,12 @@ fun brancesPage(userRole: String, sysPackage: String) {
             systemLocation = if (branchItemData != null) {
                 "${branchItemData.name} - ${branchItemData.address}"
             } else "Não definido"
+        }
+    }
+    fun closeAndFetch() {
+        modalState = "u"
+        coroutineScope.launch {
+            branchData = branches.allBranches()
         }
     }
 
@@ -195,14 +197,14 @@ fun brancesPage(userRole: String, sysPackage: String) {
                         if (branchNameError == "" && branchAddressError == "") {
                             coroutineScope.launch {
                                 if (branchId != 0) {
-                                    val updateStatus =
-                                        branches.updateBranch(BranchItem(branchId, branchName, branchAddress))
+                                    val (updateStatus, message) = commonRepo.postRequest("$apiBranchesPath/update-branch", BranchItem(branchId, branchName, branchAddress), "put")
                                     if (updateStatus == 201) {
                                         alertTimer("$appropriateName actualizada com sucesso.")
                                     } else unknownErrorAlert()
-                                    modalState = "closed"
+//                                    modalState = "closed"
+                                    closeAndFetch()
                                 } else {
-                                    val (status, message) = branches.createBranch(
+                                    val (status, message) = commonRepo.postRequest("$apiBranchesPath/create-branch",
                                         BranchItem(
                                             branchId,
                                             branchName,
@@ -245,10 +247,7 @@ fun brancesPage(userRole: String, sysPackage: String) {
 
                 Div(attrs = { classes("min-submit-buttons") }) {
                     button("closeButton", "Fechar") {
-                        modalState = "u"
-                        coroutineScope.launch {
-                            branchData = branches.allBranches()
-                        }
+                        closeAndFetch()
                     }
                     button("submitButton", submitBtnText, ButtonType.Submit)
                 }

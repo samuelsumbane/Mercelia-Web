@@ -1,8 +1,5 @@
-// @use 'abstracts/variables' as *;
+@use 'abstracts/variables' as *;
 @use 'abstracts' as *;
-
-:root { --secondaryBg: white;}
-
 
 * {
     margin: 0;
@@ -23,7 +20,7 @@
 }
 
 .dark .dash-container{
-    background: radial-gradient(circle, rgb(203, 215, 226), $dark-bg-principal);
+    background: $dark-bg-principal;
 }
 
 // rgb(30, 144, 255)
@@ -314,7 +311,7 @@ header {
                 }
             }
             .dark & > div{
-                background: rgba($dark-widget-bg, 0.2);
+                background: $dark-widget-bg;
             }
         }
     }
@@ -323,59 +320,11 @@ header {
         width:98%;
         max-height: 98%;
     }
-
 }
-
-
-
-
-/* #chart1{
-    height:50%;
-    background:yellow
-} */
-
-// dash media queries
-
-
-// @media (max-width: 768px) {
-//     .container {
-//       padding: 15px;
-//     }
-// }
-//
-// @media (max-width: 480px) {
-//     header > div{
-//        width: 85%;
-//        & h3{
-//         font-size:medium
-//        }
-//        & p{
-//         font-size: small
-//        }
-//
-//        .afStatus-indicator{
-//         width:10px !important;
-//         height:10px !important;
-//        }
-//
-//     }
-//
-//
-//     main {
-//         #divCharts {
-//             height: 750px;
-//             margin-bottom:80px;
-//             display: flex;
-//             flex-direction: column;
-//
-//             & > div {
-//                 width: 90%;
-//
-//                 & > div {
-//                     height: 50%;
-//                 }
-//             }
+// .dark .dash-container main{
+//     #divCharts{
+//         & > div > div{
+//             background:$dark-width-bg;
 //         }
 //     }
-//
 // }

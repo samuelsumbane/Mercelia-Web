@@ -47,7 +47,7 @@ fun clientsPage(userRole: String, sysPackage: String) {
 
     NormalPage(
         showBackButton = true,
-        onBackFunc = { router.navigate("/basicPartnersPage") },
+        onBackFunc = { router.navigate("/partners-module") },
         title = "Clientes", pageActivePath = "sidebar-btn-partners",
         sysPackage = sysPackage,
         userRole = userRole, hasMain = true, hasNavBar = true, navButtons = {

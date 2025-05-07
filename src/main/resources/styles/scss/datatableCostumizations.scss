@@ -1,6 +1,5 @@
 $dark-bg-principal: #121212;
-$dark-widget-bg: #1E1E1E;
-// #2D2D2D
+$dark-widget-bg: #444444;
 $dark-text-principal: #EAEAEA;
 $dark-text-secondary: #A0A0A0;
 
@@ -10,6 +9,14 @@ $dark-text-secondary: #A0A0A0;
     background:white;
     border:1px solid #01172f;
     border-bottom:0;
+}
+.dark #DataTables_Table_0_wrapper{
+    color: $dark-text-principal;
+}
+
+.dark button.dt-paging-button{
+    background:rgba(darkgray, 0.2) !important;
+    color: $dark-text-secondary !important;
 }
 
 .myTable thead {

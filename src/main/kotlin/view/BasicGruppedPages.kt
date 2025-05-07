@@ -31,7 +31,7 @@ fun basicGruppedPages(
         router.navigate(btnsListClasses.first().navTo)
     } else {
         Menu(activePath = "sidebar-btn-management", userRole, sysPackage)
-        Div(attrs = { classes("content-container") }) {
+//        Div(attrs = { classes("content-container") }) {
             Div(attrs = { classes("management-page") }) {
                 Div(
                     attrs = {
@@ -46,20 +46,18 @@ fun basicGruppedPages(
 
                 Div(attrs = { classes("management-page-body") }) {
 
-                    Div(attrs = { classes("management-page-body-main") }) {
-                        Div(attrs = { classes("page-card-div") }) {
-                            for (btn in btnsListClasses) {
-                                Button(attrs = {
-                                    classes("page-card")
-                                    onClick { router.navigate(btn.navTo) }
-                                }) {
-                                    Text(btn.btnText)
-                                }
+                    Div(attrs = { classes("management-page-body-card-div") }) {
+                        for (btn in btnsListClasses) {
+                            Button(attrs = {
+                                classes("management-page-body-card-div-btn")
+                                onClick { router.navigate(btn.navTo) }
+                            }) {
+                                Text(btn.btnText)
                             }
                         }
                     }
                 }
             }
-        }
+//        }
     }
 }

@@ -104,9 +104,25 @@ fun productsPage(userRole: String, sysPackage: String) {
         }
     }
 
+    fun onSeeFunc(id: Int, name: String, stock: Int, cost: Double, price: Double,
+                  minStock: Int?, category: String, barcode: String, owner: String
+    ) {
+        modalMoreDetailsState = "open-min-modal"
+        modalMoreDetailsTitle = "Detalhes do producto"
+        proId = id
+        proName = name
+        proQuantity = stock
+        costValue = cost
+        proPrice = price
+        minProQuantity = minStock ?: 0
+        categoryName = category
+        proBarcode = barcode
+        ownerProduct = owner
+    }
+
     NormalPage(title = "Productos",
         showBackButton = true,
-        onBackFunc = { router.navigate("/basicProductsPage") },
+        onBackFunc = { router.navigate("/products-module") },
         pageActivePath = "sidebar-btn-products",
         sysPackage = sysPackage,
         userRole = userRole,
@@ -137,17 +153,10 @@ fun productsPage(userRole: String, sysPackage: String) {
                                     cardButtons(
                                         showDetailsButton = true,
                                         onSeeDetails = {
-                                            modalMoreDetailsState = "open-min-modal"
-                                            modalMoreDetailsTitle = "Detalhes do producto"
-                                            proId = item.id!!
-                                            proName = item.name
-                                            proQuantity = item.stock
-                                            costValue = item.cost
-                                            proPrice = item.price
-                                            proQuantity = item.stock
-                                            minProQuantity = item.minStock ?: 0
-                                            categoryName = item.categoryName.toString()
-                                            proBarcode = item.barcode
+                                            onSeeFunc(
+                                                item.id!!, item.name, item.stock, item.cost, item.price, item.minStock,
+                                                item.categoryName!!, item.barcode, item.ownerName
+                                            )
                                         },
                                         showDeleteBtn = false
                                     )
@@ -172,17 +181,10 @@ fun productsPage(userRole: String, sysPackage: String) {
                                     cardButtons(
                                         showDetailsButton = true,
                                         onSeeDetails = {
-                                            modalMoreDetailsState = "open-min-modal"
-                                            modalMoreDetailsTitle = "Detalhes do producto"
-                                            proId = item.id!!
-                                            proName = item.name
-                                            proQuantity = item.stock
-                                            costValue = item.cost
-                                            proPrice = item.price
-                                            proQuantity = item.stock
-                                            minProQuantity = item.minStock ?: 0
-                                            categoryName = item.categoryName.toString()
-                                            proBarcode = item.barcode
+                                            onSeeFunc(
+                                                item.id!!, item.name, item.stock, item.cost, item.price, item.minStock,
+                                                item.categoryName!!, item.barcode, item.ownerName
+                                            )
                                         },
                                         showDeleteBtn = false
                                     )
@@ -441,24 +443,16 @@ fun productsPage(userRole: String, sysPackage: String) {
                 modalPItem("Proprietário", value = {
                     P { Text(ownerProduct) }
                 })
-                modalPItem("", value = {
-                    button("btn", "") {
-                        modalMoreDetailsState = "closed"
-                        modalIncreaseStockState = "open-min-modal"
-                        modalIncreaseStockTitle = "Aumentar Estoque"
-                        proQuantity = 0
-                    }
-                })
 
                 //
-                modalPItem("Pro/Despromover à", value = {
+                modalPItem("Mudar proprietário: ", value = {
                     Div(attrs = {
                         style {
                             display(DisplayStyle.Flex)
                             flexDirection(FlexDirection.Column)
                         }
                     }) {
-                        Label { Text("Proprietário") }
+                        Label { Text("Novo Proprietário") }
                         Select(attrs = {
                             style { height(33.px) }
                             id("selectOwner")

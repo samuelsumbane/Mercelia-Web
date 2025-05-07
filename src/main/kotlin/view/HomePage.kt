@@ -54,7 +54,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     val router = Router.current
 
 
-    val reports = ReportsRepository(httpClient)
+    val reports = ReportsRepository()
     val users = UserRepository()
     val products = ProductRepository()
 

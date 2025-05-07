@@ -15,25 +15,4 @@ class ProductRepository : ClassHttpClient() {
             header(HttpHeaders.Authorization, "Bearer $token")
         }.body()
     }
-
-//    suspend fun getAfiliateProducts(afId: Int): List<ProductItem> {
-//        return httpClient.get("$apiPath/product/afiliate_products/${afId}").body()
-//    }
-
-    suspend fun updateProductPrice(data: ChangeProductPriceDraft): Int {
-        return try {
-            val response = httpClient.put() {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data) // Enviar o objeto como JSON
-            }
-            console.log(response.status.value)
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
-
 }

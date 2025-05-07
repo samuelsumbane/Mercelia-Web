@@ -55,7 +55,7 @@ fun suppliersPage(userRole: String, sysPackage: String) {
 
     NormalPage(
         showBackButton = true,
-        onBackFunc = { router.navigate("/basicPartnersPage") },
+        onBackFunc = { router.navigate("/partners-module") },
         title = "Fornecedores",
         pageActivePath = "sidebar-btn-partners",
         sysPackage = sysPackage,

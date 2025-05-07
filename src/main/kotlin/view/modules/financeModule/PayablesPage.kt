@@ -25,17 +25,10 @@ import view.modules.reportModule.reportPaper
 @Composable
 fun payablesPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val users = UserRepository()
-    val payables = FinanceRepository(httpClient)
+    val payables = FinanceRepository()
+    val commonRepo = CommonRepository()
 
     var allPayableData by mutableStateOf(listOf<PayableItem>())
-//    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
     var error by remember { mutableStateOf<String?>(null) }
@@ -46,7 +39,6 @@ fun payablesPage(userRole: String, sysPackage: String) {
 //    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
     var maxModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
 //    var maxModalState by remember { mutableStateOf("open-max-modal") } //closed = "" --------->>
-
     var supplier by remember { mutableStateOf("") }
     var supplierError by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -60,10 +52,8 @@ fun payablesPage(userRole: String, sysPackage: String) {
     var paymentForm by remember { mutableStateOf("") }
     var payAccountId by remember { mutableIntStateOf(0) }
 
-
     val router = Router.current
     var isLoading by remember { mutableStateOf(false) }
-
 
     LaunchedEffect(Unit) {
         try {
@@ -80,7 +70,7 @@ fun payablesPage(userRole: String, sysPackage: String) {
 
         NormalPage(
             showBackButton = true,
-            onBackFunc = { router.navigate("/basicFinancePage") },
+            onBackFunc = { router.navigate("/finances-module") },
             title = "Contas a pagar", pageActivePath = "sidebar-btn-reports",
             sysPackage = sysPackage,
             userRole = userRole,
@@ -179,7 +169,7 @@ fun payablesPage(userRole: String, sysPackage: String) {
 
                                 if (payValueError.isBlank()) {
                                     val payData = IdAndStatus(payAccountId, 2)
-                                    val (status, message) = payables.payABill(payData)
+                                    val (status, message) = commonRepo.postRequest("$apiPayablesPath/pay-account", payData)
                                     when (status) {
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()
@@ -252,7 +242,7 @@ fun payablesPage(userRole: String, sysPackage: String) {
                                 paymentDateError = if (supplier.isBlank()) "A data de pagamento é obrigatória" else ""
                                 if (supplierError.isBlank() && payValueError.isBlank() && expirationDateError.isBlank() && paymentDateError.isBlank()) {
                                     val payData = PayableDraft(supplier, description, payValue, expirationDate, paymentForm)
-                                    val (status, message) = payables.createPayable(payData)
+                                    val (status, message) = commonRepo.postRequest("$apiPayablesPath/create-payable", payData)
                                     when (status) {
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()

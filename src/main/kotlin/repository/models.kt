@@ -97,6 +97,7 @@ data class OrderItemsItem(
     val quantity: Int,
     val subTotal: Double,
     val profit: Double,
+    val ownerName: String,
 )
 
 @Serializable
@@ -210,6 +211,7 @@ data class SaleReportItem(
     val status: String,
     val userId: Int,
     val userName: String,
+    val ownerName: String,
     val datetime: String?,
 )
 

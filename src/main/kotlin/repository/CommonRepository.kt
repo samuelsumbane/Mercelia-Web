@@ -15,21 +15,30 @@ import kotlinx.browser.sessionStorage
 import kotlinx.serialization.json.Json
 
 class CommonRepository : ClassHttpClient() {
-    val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend inline fun <reified T : Any> postRequest(
-        url: String, data: T,
+        url: String,
+        data: T,
         method: String = "post"
     ): Pair<Int, String> {
         return try {
-            val response = if (method == "post") httpClient.post(url) else httpClient.put(url) {
-                contentType(ContentType.Application.Json)
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(data)
+            val token = sessionStorage.getItem("jwt_token") ?: ""
+            val response = when (method.lowercase()) {
+                "post" -> httpClient.post(url) {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(data)
+                }
+                "put" -> httpClient.put(url) {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(data)
+                }
+                else -> throw IllegalArgumentException("Unsupported HTTP method: $method")
             }
             Pair(response.status.value, response.bodyAsText())
         } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
+            println("Error during POST/PUT: ${e.message}")
             Pair(400, "")
         }
     }

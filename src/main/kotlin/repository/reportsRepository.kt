@@ -8,10 +8,7 @@ import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 import kotlinx.serialization.json.JsonObject
 
-class ReportsRepository(
-    private val httpClient: HttpClient,
-//    val token: String,
-) {
+class ReportsRepository : ClassHttpClient(){
     val token = sessionStorage.getItem("jwt_token") ?: ""
 
     suspend fun fetchSaleReports(): List<SaleReportItem> {

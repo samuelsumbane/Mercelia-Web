@@ -45,9 +45,14 @@ fun OwnersPage(userRole: String, sysPackage: String) {
         }
     }
 
+    fun closeAndFetch() {
+        coroutineScope.launch { ownerData = owners.getOwners() }
+        modalState = "closed"
+    }
+
     NormalPage(
         showBackButton = true,
-        onBackFunc = { router.navigate("/basicPartnersPage") },
+        onBackFunc = { router.navigate("/partners-module") },
         title = "Proprietários", pageActivePath = "sidebar-btn-partners",
         sysPackage = sysPackage,
         userRole = userRole, hasMain = true, hasNavBar = true, navButtons = {
@@ -108,19 +113,19 @@ fun OwnersPage(userRole: String, sysPackage: String) {
                     classes("modalform")
                     onSubmit { event ->
                         event.preventDefault()
-
                         ownerNameError = if (ownerName.isBlank()) "O nome é obrigatório" else ""
 
-                        if (ownerName.isNotBlank()) {
+                        if (ownerNameError.isBlank()) {
                             coroutineScope.launch {
                                 if (ownerId != 0) {
                                     val (status, message) = commonRepository.postRequest<OwnerItem>("$apiOwnersPath/edit-owner", OwnerItem(ownerId, ownerName, ownerPhone), "put")
 
                                     if (status == 201) alertTimer("Proprietário actualizado com sucesso.")
-                                    modalState = "closed"
+                                    closeAndFetch()
                                 } else {
                                     val (status, message) = commonRepository.postRequest<OwnerItem>("$apiOwnersPath/create-owner", OwnerItem(null, ownerName, ownerPhone))
 //                                    val status = owners.createOwner(OwnerItem(null, ownerName, ownerPhone))
+                                    console.log(status)
                                     if (status == 201) alertTimer(message)
                                 }
                                 ownerId = 0
@@ -143,8 +148,7 @@ fun OwnersPage(userRole: String, sysPackage: String) {
 
                 Div(attrs = { classes("min-submit-buttons") }) {
                     button("closeButton", "Fechar") {
-                        modalState = "closed"
-                        coroutineScope.launch { ownerData = owners.getOwners() }
+                        closeAndFetch()
                     }
                     button("submitButton", btnText = submitBtnText, ButtonType.Submit)
                 }

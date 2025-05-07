@@ -24,10 +24,10 @@ fun Menu(activePath: String, userRole: String, sysPackage: String) {
 
     val baseBtns = listOf(
         BtnDetails("sidebar-btn-home", "/dashboard", "Home"),
-        BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
-        BtnDetails("sidebar-btn-partners","/basicPartnersPage", "Parceiros"),
-        BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
-        BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
+        BtnDetails("sidebar-btn-sales", "/sale-module", "Vendas"),
+        BtnDetails("sidebar-btn-partners","/partners-module", "Parceiros"),
+        BtnDetails("sidebar-btn-products", "/products-module", "Productos"),
+        BtnDetails("sidebar-btn-reports", "/inventories-module", "Inventários"),
         BtnDetails("sidebar-btn-settings", "/basicSettingsPage", "Definições"),
     )
 
@@ -35,16 +35,16 @@ fun Menu(activePath: String, userRole: String, sysPackage: String) {
     val btnsListClasses = when (userRole) {
         Role.V.desc -> {
             listOf(
-                BtnDetails("sidebar-btn-sales", "/basicSellPage", "Vendas"),
-                BtnDetails("sidebar-btn-products", "/basicProductsPage", "Productos"),
-                BtnDetails("sidebar-btn-reports", "/basicReportsPage", "Inventários"),
+                BtnDetails("sidebar-btn-sales", "/sale-module", "Vendas"),
+                BtnDetails("sidebar-btn-products", "/products-module", "Productos"),
+                BtnDetails("sidebar-btn-reports", "/inventories-module", "Inventários"),
                 BtnDetails("sidebar-btn-user", "/eachUser", "Perfil"),
             )
         }
         Role.G.desc, Role.A.desc -> {
             if (activeSysPackage == SysPackages.PO.desc) {
                 baseBtns.toMutableList().apply {
-                    add(4, BtnDetails("sidebar-btn-finance", "/basicFinancePage", "Finanças"))
+                    add(4, BtnDetails("sidebar-btn-finance", "/finances-module", "Finanças"))
                 }
             } else {
                 baseBtns

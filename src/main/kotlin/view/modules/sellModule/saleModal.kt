@@ -26,7 +26,6 @@ data class ProItem(
 
 @Composable
 fun saleModal(
-    httpClient: HttpClient,
     sysPackage: String,
     saleMode: Boolean,
     orders: SaleRepository,
@@ -38,6 +37,7 @@ fun saleModal(
     val products = ProductRepository()
     val categories = CategoryRepository()
     val clients = ClientRepository()
+    val commonRepo = CommonRepository()
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -192,7 +192,8 @@ fun saleModal(
                                 if (sysLocationId.isBlank()) {
                                     branchIdNotFoundAlert()
                                 } else {
-                                    val saleStatus = orders.saleProduct(
+                                    val (saleStatus, message) = commonRepo.postRequest(
+                                        "$apiPath/order/sale_products",
                                         SaleItem(
                                             order = OrderItemDraft(
                                                 clientId = clientId,

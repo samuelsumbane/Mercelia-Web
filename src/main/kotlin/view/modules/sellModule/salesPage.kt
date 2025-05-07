@@ -20,13 +20,7 @@ import kotlin.collections.filter
 @Composable
 fun salesPage(userId: Int, userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val orders = SaleRepository(httpClient)
+    val orders = SaleRepository()
 
     var ordersData by remember { mutableStateOf(listOf<OrderItem>()) }
     var ordersItemsData by mutableStateOf(listOf<OrderItemsItem>())
@@ -68,7 +62,6 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
         }
     }
 
-
     NormalPage(
         title = "Vendas", pageActivePath = "sidebar-btn-sales", sysPackage = sysPackage, hasNavBar = true,
         userRole = userRole,
@@ -90,7 +83,6 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
                 }
             }
         } else {
-
             Table(attrs = {
                 classes("display", "myTable")
             }) {
@@ -134,13 +126,11 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
         }
     }
 
-    saleModal(httpClient, toSaleSysPackage, saleMode, orders, userId, modalState) {
-//    saleModal(httpClient, toSaleSysPackage, true, orders, userId, "open-min-modal") {
+    saleModal(toSaleSysPackage, saleMode, orders, userId, modalState) {
         modalState = "closed"
         coroutineScope.launch {
             val allOrders = orders.fetchOrders()
             ordersData = if (userRole == Role.V.desc) allOrders.filter { it.userId == userId } else allOrders
-
         }
         saleMode = false
     }

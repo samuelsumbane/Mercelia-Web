@@ -17,21 +17,4 @@ class SupplierRepository() : ClassHttpClient() {
         }.body()
     }
 
-
-    suspend fun editSupplier(data: SupplierItem): Int {
-        return try {
-            val response = httpClient.put() {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(data)
-            }
-            response.status.value
-        } catch (e: Exception) {
-            println("Error during POST: ${e.message}")
-            400
-        }
-    }
-
-
-
 }

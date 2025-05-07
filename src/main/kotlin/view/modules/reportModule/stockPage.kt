@@ -74,7 +74,7 @@ fun stockPage(paramData: UserDataAndSys) {
 
             NormalPage(
                 showBackButton = true,
-                onBackFunc = { router.navigate("/basicReportsPage") },
+                onBackFunc = { router.navigate("/inventories-module") },
                 title = "Movimentos de Estoque", pageActivePath = "sidebar-btn-reports",
                 sysPackage = paramData.sysPackage,
                 userRole = paramData.userRole,
