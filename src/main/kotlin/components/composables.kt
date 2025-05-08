@@ -63,17 +63,37 @@ fun multiFilesExportButton(
 }
 
 @Composable
-fun loadingModal() {
-//    <div id="flashingModal">
-//        <div class="dotsdiv">
-//            <div class="snippet" data-title="dot-flashing">
-//                <div class="stage">
-//                    <div class="dot-flashing"></div>
-//            </div>
-//            </div>
-//        </div>
-//    </div>
+fun OptionsDiv(divId: String, divContent: @Composable () -> Unit) {
+    Div(attrs = {
+        classes("options-div")
+        id(divId)
+    }) {
+        Div(attrs = { classes("options-div-child")}) {
+            divContent()
+        }
+    }
+}
 
+@Composable
+fun OptionsDivItem(
+    title: String,
+    text: String,
+    onClick: () -> Unit
+) {
+    Div(attrs = {
+        onClick { onClick() }
+    }) {
+        P(attrs = { classes("optinsDivItemTitle") }){
+            Text(title)
+        }
+        P(attrs = { classes("optinsDivItemText") }) {
+            Text(text)
+        }
+    }
+}
+
+@Composable
+fun loadingModal() {
     Div(attrs = { id("flashingModal") }) {
         Div(attrs = { classes("dotsdiv") }) {
             Div(attrs = { classes("snippet") }) {

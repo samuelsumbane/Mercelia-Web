@@ -6,6 +6,8 @@ import components.*
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.document
+import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
@@ -42,7 +44,6 @@ data class MonthlyQuantityDC(
     val year: String,
     val quantity: Int
 )
-
 
 @Composable
 fun homeScreen(userRole: String, userName: String, sysPackage: String) {
@@ -91,9 +92,16 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
 
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(true)}
-
+    var showPerfilDiv by remember { mutableStateOf(false) }
+    var showThemeModeChooserDiv by remember { mutableStateOf(false) }
+    var actualTheme by remember { mutableStateOf(localStorage.getItem("system_theme"))}
+    val currentActualThemeName =
+        when (actualTheme) {
+            "Light" -> "Claro"
+            "Dark" -> "Escuro"
+            else -> "Auto"
+        }
     LaunchedEffect(Unit) {
-
         if (userRole != Role.V.desc) {
             try {
                 val userStates = users.getUserStatus()
@@ -144,7 +152,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                 showSoldProductChart(soldProductsLabels, soldProductsQtdsLabels)
 
                 isLoading = false
-
+                //
                 if (activeSysPackage != SysPackages.L.desc) {
                     productsData = products.fetchProducts()
                         .filter { it.minStock != null && it.stock < it.minStock }
@@ -202,30 +210,61 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                         }
                     }
 
-                    Button(attrs = {
+                    Div(attrs = {
                         id("header-top-perfil-div")
                     }) {
-                        H3 {
-                            val letter = userName[0]
-                            Text(letter.toString())
+                        Button(attrs = {
+                            id("header-top-perfil-div-btn")
+                            onClick {
+                                showPerfilDiv = !showPerfilDiv
+                            }
+                        }) {
+                            H3 {
+                                val letter = userName[0]
+                                Text(letter.toString())
+                            }
                         }
-                        Div(attrs = { id("user-perfil-options") }) {
-                            P(attrs = { id("userNameLabel") }) {
-                                Text(userName)
-                            }
+                        if (showPerfilDiv) {
 
-                            button("bt", "Perfil") {
-                                router.navigate("/eachUser")
-                            }
+                            Div(attrs = { id("user-perfil-options") }) {
+                                P(attrs = { id("userNameLabel") }) {
+                                    Text(userName)
+                                }
 
-                            button("bt", "Sair") {
-                                coroutineScope.launch {
-                                    val (status, message) = users.logout()
-                                    if (status == 200) {
-                                        sessionStorage.removeItem("jwt_token")
-                                        router.navigate("/")
-                                    } else {
-                                        alert("error", "Erro", message)
+                                button("bt", "Perfil") {
+                                    router.navigate("/eachUser")
+                                }
+
+                                button("bt", "Tema: $actualTheme") {
+                                    showThemeModeChooserDiv = !showThemeModeChooserDiv
+                                }
+
+                                button("bt", "Sair") {
+                                    coroutineScope.launch {
+                                        val (status, message) = users.logout()
+                                        if (status == 200) {
+                                            sessionStorage.removeItem("jwt_token")
+                                            router.navigate("/")
+                                        } else {
+                                            alert("error", "Erro", message)
+                                        }
+                                    }
+                                }
+                            }
+                            if (showThemeModeChooserDiv) {
+                                OptionsDiv("themeModeOptions"){
+                                    OptionsDivItem("Auto", "Usa o mesmo tema do dispositivo") {
+                                        setThemeMode("Auto")
+                                        actualTheme = "Auto"
+                                    }
+                                    OptionsDivItem("Claro", "Fundo claro com texto escuro") {
+                                        setThemeMode("Light")
+                                        actualTheme = "Light"
+                                    }
+
+                                    OptionsDivItem("Escuro", "Fundo escuro com texto claro") {
+                                        setThemeMode("Dark")
+                                        actualTheme = "Dark"
                                     }
                                 }
                             }
@@ -286,4 +325,21 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
         }
     }
 
+}
+
+
+
+fun setThemeMode(mode: String) {
+    when (mode) {
+        "Light" -> document.documentElement?.classList?.remove("dark")
+        "Dark" -> document.documentElement?.classList?.add("dark")
+        "Auto" -> {
+            val prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            console.log(prefersDark)
+            if (prefersDark) {
+                document.documentElement?.classList?.add("dark");
+            }
+        }
+    }
+    localStorage.setItem("system_theme", mode)
 }
