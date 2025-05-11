@@ -8,7 +8,7 @@ import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 
 
-class StockRepository(private val httpClient: HttpClient) {
+class StockRepository : ClassHttpClient() {
 
     private val token = sessionStorage.getItem("jwt_token") ?: ""
 

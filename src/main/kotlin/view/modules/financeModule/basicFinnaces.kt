@@ -12,5 +12,6 @@ fun basicFinances(userRole: String, sysPackage: String) {
         BtnDetails("historic", "/finance-history", "Histórico"),
     )
 
-    basicGruppedPages("Finanças", financesPages, userRole, sysPackage)
+    basicGruppedPages("Finanças", financesPages, userRole,
+        sysPackage, "sidebar-btn-reports")
 }

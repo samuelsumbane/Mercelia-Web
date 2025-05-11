@@ -93,15 +93,24 @@ fun OptionsDivItem(
 }
 
 @Composable
+fun div(id: String = "", divClasses: List<String> = emptyList(), content: @Composable () -> Unit) {
+    Div(attrs = {
+        if (id.isNotBlank()) { id(id) }
+        if (divClasses.isNotEmpty()) classes(divClasses)
+    }) { content() }
+}
+
+
+
+@Composable
 fun loadingModal() {
-    Div(attrs = { id("flashingModal") }) {
+    div("flashingModal") {
         Div(attrs = { classes("dotsdiv") }) {
             Div(attrs = { classes("snippet") }) {
                 Div(attrs = {
                     classes("stage")
                 }) {
                     Div(attrs = { classes("dot-flashing") }) {
-
                     }
                 }
 
@@ -145,19 +154,6 @@ fun alertTimer(title: String) {
     window.setTimeout({
         showAlertTimer(title)
     }, 10)
-}
-
-//showAlertDelete
-
-//@JsName("allProductChart")
-//external fun allProductChart()
-//external fun allProductChart(productLabels: ArrayList<String>, productProfits: ArrayList<Int>)
-
-
-fun showAllProductChart(labels: Array<String>, profits: Array<String>) {
-    window.setTimeout({
-        (window.asDynamic().allProductChart)(labels, profits)
-    }, 500)
 }
 
 fun showSoldProductChart(labels: Array<String>, quantity: Array<String>) {
@@ -222,44 +218,6 @@ fun initializeDataTable() {
     }, 500) // Aguarde para garantir que a tabela foi montada
 }
 
-fun initializeDataTable2() {
-    window.setTimeout({
-        js("""
-            $(document).ready(function() {
-                $('#reportsPageTable').DataTable({
-                    stripeClasses: ['odd', 'even'],
-                    paging: true,
-                    searching: true,
-                    language: {
-                         "decimal":        "",
-                        "emptyTable":     "Nenhum dado disponivel na tabela",
-                        "info":           "Mostrando _START_ to _END_ of _TOTAL_ registros",
-                        "infoEmpty":      "Mostrando 0 to 0 of 0 entries",
-                        "infoFiltered":   "(Filtrado de _MAX_ total entries)",
-                        "infoPostFix":    "",
-                        "thousands":      ",",
-                        "lengthMenu":     "Mostrar _MENU_ registros",
-                        "loadingRecords": "Carregando...",
-                        "processing":     "",
-                        "search":         "Pesquisar:",
-                        "zeroRecords":    "Nenhum registro correspondente",
-                        "paginate": {
-                            "first":      "Primeiro",
-                            "last":       "Ultimo",
-                            "next":       "Proximo",
-                            "previous":   "Anterior"
-                        },
-                        "aria": {
-                            "orderable":  "Ordenar esta coluna",
-                            "orderableReverse": " Reverse esta coluna"
-                        }
-                    }
-                });
-            });
-        """)
-    }, 400) // Aguarde para garantir que a tabela foi montada
-}
-
 fun printPaper() {
     window.setTimeout({
         js(
@@ -273,7 +231,6 @@ fun printPaper() {
         )
     })
 }
-
 
 @Composable
 fun CardPitem(pKey: String, pValue: String) {
@@ -370,17 +327,17 @@ fun homeDivMinResume(
     firstTextSecondDiv: String,
     secondTextSecondDiv: String,
 ) {
-    Div(attrs = { id(divId) }) {
+    div("divId") {
         H4 { Text(title) }
         Br()
-        Div(attrs = { classes("flex") }) {
+        div(divClasses=listOf("flex")) {
             Label { Text("$firstTextFirstDiv: ") }
             P(attrs = { classes("home-bold") }) {
                 Text(secondTextFirstDiv)
             }
         }
         Br()
-        Div(attrs = { classes("flex") }) {
+        div(divClasses=listOf("flex")) {
             P { Text("$firstTextSecondDiv:") }
             P (attrs = { classes("home-bold") }) {
                 Text(secondTextSecondDiv)

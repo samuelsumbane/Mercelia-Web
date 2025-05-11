@@ -11,5 +11,6 @@ fun basicProductsPage(userRole: String, sysPackage: String) {
         BtnDetails("productsBtn", "/products", "Productos"),
     )
 
-    basicGruppedPages("Productos", productsPages, userRole, sysPackage)
+    basicGruppedPages("Productos", productsPages, userRole,
+        sysPackage, "sidebar-btn-products")
 }

@@ -10,7 +10,9 @@ fun basicSettingsPage(userRole: String, sysPackage: String) {
         BtnDetails("sellsBtn", "/settings", "Configurações do sistema"),
         BtnDetails("sellsBtn", "/users", "Usuários"),
         BtnDetails("sellsBtn", "/branches", "Sucursais"),
+        BtnDetails("sellsBtn", "/notifications", "Notificações"),
     )
 
-    basicGruppedPages("Configurações", reportPages, userRole, sysPackage)
+    basicGruppedPages("Configurações", reportPages, userRole,
+        sysPackage, "sidebar-btn-settings")
 }

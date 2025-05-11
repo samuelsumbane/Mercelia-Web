@@ -15,9 +15,4 @@ class OwnersRepository : ClassHttpClient() {
             header(HttpHeaders.Authorization, "Bearer $token")
         }.body()
     }
-
-    suspend fun deleteOwner(ownerId: Int): Int {
-        val response = httpClient.delete("$apiOwnersPath/delete-owner/$ownerId")
-        return response.status.value
-    }
 }

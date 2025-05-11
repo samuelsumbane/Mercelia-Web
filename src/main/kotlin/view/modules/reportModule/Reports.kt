@@ -21,40 +21,32 @@ import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.Event
 import repository.*
-
+import view.state.AppState.isLoading
+import view.state.UiState.finalDate
+import view.state.UiState.finalDateError
+import view.state.UiState.finalTime
+import view.state.UiState.initialDate
+import view.state.UiState.initialDateError
+import view.state.UiState.initialTime
+import view.state.UiState.maxModalState
+import view.state.UiState.maySendData
+import view.state.UiState.modalState
+import view.state.UiState.modalTitle
+import view.state.AppState.error
 
 
 @Composable
 fun reportsPage(paramData: UserDataAndSys) {
 
     val reports = ReportsRepository()
-
     var allReportsData by remember { mutableStateOf(listOf<SaleReportItem>()) }
-//    var filteredReporsData by mutableStateOf(listOf<SaleReportItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
-    var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
-    var modalTitle by remember { mutableStateOf("") }
-    var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
-//    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
-    var maxModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
-//    var maxModalState by remember { mutableStateOf("open-max-modal") } //closed = "" --------->>
-    var maySendData by remember { mutableStateOf(false) }
-
     val router = Router.current
-    var initialDate by remember { mutableStateOf("") }
-    var initialTime by remember { mutableStateOf("") }
-    var finalDate by remember { mutableStateOf("") }
-    var finalTime by remember { mutableStateOf("") }
-    var initialDateError by remember { mutableStateOf("") }
-    var finalDateError by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-
 
     LaunchedEffect(Unit) {
         try {
-            isLoading = true
             val reportsDeffered = async { reports.fetchSaleReports() }
             allReportsData =
                 if (paramData.userRole == Role.V.desc) reportsDeffered.await().filter {it.userId == paramData.userId}
@@ -66,7 +58,9 @@ fun reportsPage(paramData: UserDataAndSys) {
             isLoading = false
         }
     }
-
+    if (isLoading) {
+        loadingModal()
+    } else {
         NormalPage(
             showBackButton = true,
             onBackFunc = { router.navigate("/inventories-module") },
@@ -89,7 +83,8 @@ fun reportsPage(paramData: UserDataAndSys) {
                     P(attrs = {
                         onClick {
                             val todayDate = getUserLocalDateString()
-                            filteredReports = allReportsData.filter { it.datetime?.split(" ")[0] == todayDate }.toMutableList()
+                            filteredReports =
+                                allReportsData.filter { it.datetime?.split(" ")[0] == todayDate }.toMutableList()
                             modalState = "closed"
                             maxModalState = "open-max-modal"
                             maySendData = true
@@ -124,57 +119,55 @@ fun reportsPage(paramData: UserDataAndSys) {
                     }
                 }
 
-
                 button("btnSolid", "Gerar Inventário") {
                     modalTitle = "Inventário de Vendas"
                     modalState = "open-min-modal"
                 }
-        }) {
+            }) {
 
 //                val filteredReporsData = allReportsData
-                if (error == null) {
-                    if (allReportsData.isEmpty()) {
-                        Div(attrs = { classes("centerDiv") }) {
-                            Text("Nenhum registro de vendas efectuadas.")
-                        }
-                    } else {
-                        Table(attrs = {
-                            //                id("reportsPageTable")
-                            classes("display", "myTable")
-                        }) {
-                            Thead {
-                                Tr {
-                                    Th { Text("Producto") }
-                                    Th { Text("Quantidade") }
-                                    Th { Text("Sub Total") }
-                                    Th { Text("Lucro") }
-                                    Th { Text("Status") }
-                                    Th { Text("Proprietário") }
-                                    Th { Text("Usuário") }
-                                    Th { Text("Data e hora") }
-                                }
+            if (error == null) {
+                if (allReportsData.isEmpty()) {
+                    Div(attrs = { classes("centerDiv") }) {
+                        Text("Nenhum registro de vendas efectuadas.")
+                    }
+                } else {
+                    Table(attrs = {
+                        classes("display", "myTable")
+                    }) {
+                        Thead {
+                            Tr {
+                                Th { Text("Producto") }
+                                Th { Text("Quantidade") }
+                                Th { Text("Sub Total") }
+                                Th { Text("Lucro") }
+                                Th { Text("Status") }
+                                Th { Text("Proprietário") }
+                                Th { Text("Usuário") }
+                                Th { Text("Data e hora") }
                             }
-                            Tbody {
-                                allReportsData.forEach {
-                                    Tr {
-                                        Td { Text(it.productName) }
-                                        Td { Text(it.quantity.toString()) }
-                                        Td { Text(moneyFormat(it.subTotal)) }
-                                        Td { Text(moneyFormat(it.profit)) }
-                                        Td { Text(it.status) }
-                                        Td { Text(it.ownerName) }
-                                        Td { Text(it.userName) }
-                                        Td { Text(it.datetime.toString()) }
-                                    }
+                        }
+                        Tbody {
+                            allReportsData.forEach {
+                                Tr {
+                                    Td { Text(it.productName) }
+                                    Td { Text(it.quantity.toString()) }
+                                    Td { Text(moneyFormat(it.subTotal)) }
+                                    Td { Text(moneyFormat(it.profit)) }
+                                    Td { Text(it.status) }
+                                    Td { Text(it.ownerName) }
+                                    Td { Text(it.userName) }
+                                    Td { Text(it.datetime.toString()) }
                                 }
                             }
                         }
                     }
-                } else if (error != null) {
-                    Div { Text(error!!) }
-                } else {
-                    Div { Text("Loading...") }
                 }
+            } else if (error != null) {
+                Div { Text(error!!) }
+            } else {
+                Div { Text("Loading...") }
+            }
 
 
             minModal(modalState, "Selecionar Intervalo de Datas") {
@@ -320,11 +313,10 @@ fun reportsPage(paramData: UserDataAndSys) {
                         }
                     }
                 }
-
                 Div(attrs = { classes("max-modal-footer") })
             }
         }
-
+    }
 }
 
 

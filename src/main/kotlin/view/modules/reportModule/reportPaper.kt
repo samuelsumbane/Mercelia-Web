@@ -15,9 +15,6 @@ fun reportPaper(
     reportData: List<SaleReportItem>
 ) {
     var totalFromSell by remember { mutableDoubleStateOf(0.0) }
-//    val gruped = mutableListOf<ActivityItemGrupped>()
-    val gruped = mutableListOf<ActivityItemGrupped>()
-
 
     Div(attrs = {
         classes("parentMainDiv")

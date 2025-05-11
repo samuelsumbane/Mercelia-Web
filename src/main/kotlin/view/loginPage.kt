@@ -20,11 +20,6 @@ import repository.UserRepository
 
 @Composable
 fun loginPage() {
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
 
     val users = UserRepository()
     val router = Router.current

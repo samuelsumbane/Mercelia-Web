@@ -1,3 +1,5 @@
+
+
 function showAlert(icon, title, text) {
     Swal.fire({
       title: title,
@@ -86,7 +88,6 @@ function salesQuantitiesByMonthsAndYear(labelsData, quantitiesData) {
 }
 
 function basicBarChart(canvaId, labelsData, labelName, backgroundcolor, data, optionText) {
-//    let delayed;
     new Chart(document.getElementById(canvaId), {
         type: 'bar',
         data: {

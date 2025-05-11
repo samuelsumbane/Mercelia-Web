@@ -27,9 +27,6 @@ $dark-text-secondary: #A0A0A0;
     background-color:#04192f;
 }
 
-.myTable tbody tr:nth-child(odd) {
-    background:red !important;
-}
 .dark .myTable tbody tr:nth-child(odd) {
     background:rgba($dark-widget-bg, 0.7) !important;
     color: $dark-text-principal;

@@ -189,7 +189,7 @@ header {
 #header-bottom {
     width: 50%;
     height: 130px;
-    background: var(--secondaryBg);
+    background: white;
 //     background: blue;
     display: flex;
     margin: auto;
@@ -202,7 +202,6 @@ header {
     }
 
 //         clip-path: var(--sidemindiv);
-
     #afiliatesInfo{
 //         background: red !important;
         &-divs{
@@ -217,11 +216,8 @@ header {
                 :is(#active-Status, #allUsers-Status, #suspended-Status){
                     width:18px;height:18px;border-radius:50%;
                 }
-
                 #active-Status{background:rgb(10, 224, 3)}
-
                 #allUsers-Status{background:darkblue;}
-
                 #suspended-Status{background:red;}
 
                 p{
@@ -245,7 +241,6 @@ header {
         }
 
         & h3 {
-            /* color:red; */
             margin-top: -2px;
             font-size: clamp(0.95rem, 1rem, 1.10rem)
         }
@@ -257,7 +252,6 @@ header {
     background: $dark-widget-bg;
     color: lightgray;
 }
-
 
 #afiliatesInfo > div {
     display: flex;
@@ -330,8 +324,11 @@ header {
     }
 
     #topUsers{
-        width:98%;
-        max-height: 98%;
+        width:78%;
+        max-height: 78%;
+//         background:red;
+        margin:auto;
+        margin-top:4% !important;
     }
 }
 // .dark .dash-container main{

@@ -11,6 +11,7 @@ import org.jetbrains.compose.web.dom.*
 fun cardWG( // Card Widget ---------->>
     title: String,
     warningClass: String = "empty",
+    showSeparator: Boolean = false,
     cardButtons: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -18,16 +19,12 @@ fun cardWG( // Card Widget ---------->>
         Div(attrs = { classes("card-header") }) {
             P { Text(title) }
         }
-
-        Div(attrs = { classes("card-body") }) {
-            content()
-        }
+        if (showSeparator) { Hr() }
+        Div(attrs = { classes("card-body") }) { content() }
 
         Div(attrs = {
             classes("card-footer")
-            style {
-                paddingBottom(18.px)
-            }
+            style { paddingBottom(18.px) }
         }) {
             cardButtons()
         }

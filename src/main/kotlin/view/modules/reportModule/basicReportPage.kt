@@ -11,5 +11,6 @@ fun basicReportPage(userRole: String, sysPackage: String) {
         BtnDetails("stocksBtn", "/stockPage", "Inv. de Estoques"),
     )
 
-    basicGruppedPages("Inventários", reportPages, userRole, sysPackage)
+    basicGruppedPages("Inventários", reportPages, userRole,
+        sysPackage, "sidebar-btn-reports")
 }

@@ -1,17 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt">
 <script>
-  const storedTheme = localStorage.getItem('system_theme');
-  if (storedTheme === 'Dark') {
-    document.documentElement.classList.add('dark');
-  } else if (storedTheme === 'Light') {
-    document.documentElement.classList.remove('dark');
-  } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      document.documentElement.classList.add('dark');
-    }
-  }
+  const storedTheme=localStorage.getItem("system_theme");if(storedTheme==="Dark"){document.documentElement.classList.add("dark")}else if(storedTheme==="Light"){document.documentElement.classList.remove("dark")}else{const prefersDark=window.matchMedia("(prefers-color-scheme: dark)").matches;if(prefersDark){document.documentElement.classList.add("dark")}}
 </script>
 <head>
   <meta charset="UTF-8">
@@ -42,7 +32,6 @@
 <div id="root"></div>
 <script src="SSPT_Web.js"></script>
 <!--<script src="SSPT_Web-production.js" defer></script˝>-->
-
 <script src="jquery-3.6.0.min.js"></script>
 <script src="dataTables-2.1.8.min.js" async></script>
 <script src="scripts/sweetalert2.all.min.js" async></script>

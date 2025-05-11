@@ -2,6 +2,7 @@ package repository
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.delete
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -39,6 +40,18 @@ class CommonRepository : ClassHttpClient() {
             Pair(response.status.value, response.bodyAsText())
         } catch (e: Exception) {
             println("Error during POST/PUT: ${e.message}")
+            Pair(400, "")
+        }
+    }
+
+    suspend fun deleteRequest(url: String): Pair<Int, String> {
+        return try {
+            val token = sessionStorage.getItem("jwt_token") ?: ""
+            val response = httpClient.delete(url) {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+            Pair(response.status.value, response.bodyAsText())
+        } catch (e: Exception) {
             Pair(400, "")
         }
     }

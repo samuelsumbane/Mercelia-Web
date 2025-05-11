@@ -21,7 +21,8 @@ fun basicGruppedPages(
     pageTitle: String,
     routeList: List<BtnDetails>,
     userRole: String,
-    sysPackage: String
+    sysPackage: String,
+    activePage: String,
 ) {
 
     val router = Router.current
@@ -30,7 +31,7 @@ fun basicGruppedPages(
     if (btnsListClasses.size == 1) {
         router.navigate(btnsListClasses.first().navTo)
     } else {
-        Menu(activePath = "sidebar-btn-management", userRole, sysPackage)
+        Menu(activePath = activePage, userRole, sysPackage)
 //        Div(attrs = { classes("content-container") }) {
             Div(attrs = { classes("management-page") }) {
                 Div(

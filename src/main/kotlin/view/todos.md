@@ -35,12 +35,14 @@
 # Lite
 - usuarios: 3
 - sucursais: 1
+- Proprietários: 1
 - M. Pagamento: Dinheiro
 
 
 # Plus
 - usuarios: 10 
 - sucursais: 5
+- Proprietários: 5
 - M. Pagamento: Dinheiro, Cartao, E-mola ...
 - Exportar vendas e estoques em (CSV e Json)
 
@@ -48,6 +50,7 @@
 # Pro
 - usuarios: ilimitado
 - sucursais: ilimitado
+- Proprietários: ilimitado
 - M. Pagamento: Dinheiro, Cartao, E-mola ...
 - Notificar quando o producto atingir a quantidade minima
 - > mandar email?

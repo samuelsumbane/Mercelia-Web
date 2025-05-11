@@ -5,7 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 
-class SettingsRepository(private val httpClient: HttpClient) {
+class SettingsRepository : ClassHttpClient() {
     suspend fun getSettings(): List<SysConfigItem> {
         return httpClient.get("$apiPath/system_configurations/get-all").body()
     }

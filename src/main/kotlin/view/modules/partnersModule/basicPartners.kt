@@ -12,5 +12,6 @@ fun basicPartners(userRole: String, sysPackage: String) {
         BtnDetails("ownersBtn", "/owners", "Proprietários"),
     )
 
-    basicGruppedPages("Parceiros", partnersPages, userRole, sysPackage)
+    basicGruppedPages("Parceiros", partnersPages,
+        userRole, sysPackage, "sidebar-btn-partners")
 }

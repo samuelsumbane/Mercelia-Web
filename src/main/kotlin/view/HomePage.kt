@@ -17,6 +17,7 @@ import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.get
 import repository.*
+import view.state.AppState.isLoading
 
 
 @Serializable
@@ -47,23 +48,14 @@ data class MonthlyQuantityDC(
 
 @Composable
 fun homeScreen(userRole: String, userName: String, sysPackage: String) {
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-    val router = Router.current
 
+    val router = Router.current
 
     val reports = ReportsRepository()
     val users = UserRepository()
     val products = ProductRepository()
 
     var productsData by remember { mutableStateOf<List<ProductItem>?>(null) }
-
-    var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
-    var activeSysPackage by remember { mutableStateOf(sysPackage) }
-
     var totalProfit by remember { mutableDoubleStateOf(0.0) }
     var totalSales by remember { mutableDoubleStateOf(0.0)}
     var activeAfiliates by remember { mutableIntStateOf(0) }
@@ -91,7 +83,6 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     var showNotificationAlert by remember { mutableStateOf(true)}
 
     val coroutineScope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(true)}
     var showPerfilDiv by remember { mutableStateOf(false) }
     var showThemeModeChooserDiv by remember { mutableStateOf(false) }
     var actualTheme by remember { mutableStateOf(localStorage.getItem("system_theme"))}
@@ -153,7 +144,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
 
                 isLoading = false
                 //
-                if (activeSysPackage != SysPackages.L.desc) {
+                if (sysPackage != SysPackages.L.desc) {
                     productsData = products.fetchProducts()
                         .filter { it.minStock != null && it.stock < it.minStock }
                 }
@@ -168,12 +159,11 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     if (isLoading) {
         loadingModal()
     } else {
-        Menu(activePath = "sidebar-btn-home", userRole, activeSysPackage)
+        Menu(activePath = "sidebar-btn-home", userRole, sysPackage)
         //
-        Div(attrs = { classes("content-container", "dash-container") }) {
+        div(divClasses = listOf("content-container", "dash-container")) {
             Header {
-                Div(attrs = { id("header-top") }) {
-
+                div("header-top") {
                     productsData?.let { pro ->
                         if (pro.isNotEmpty()) {
                             if (showNotificationAlert) {
@@ -183,15 +173,14 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                                 }) {
                                     Text("X")
                                 }
-                                Div(attrs = { id("notificationAlertDiv") }) {
-
-                                    Div(attrs = { id("notificationAlertDiv-content") }) {
+                                div("notificationAlertDiv") {
+                                    div("notificationAlertDiv-content") {
 
                                         P(attrs = { id("notificationAlertDiv-content-title") }) { Text("Productos com estoque baixo") }
 
                                         Hr()
 
-                                        Div(attrs = { classes("p-content") }) {
+                                        div(divClasses = listOf("p-content")) {
                                             pro.take(4).forEach {
                                                 P() { Text(it.name) }
                                             }
@@ -210,9 +199,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                         }
                     }
 
-                    Div(attrs = {
-                        id("header-top-perfil-div")
-                    }) {
+                    div("header-top-perfil-div"){
                         Button(attrs = {
                             id("header-top-perfil-div-btn")
                             onClick {
@@ -225,8 +212,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                             }
                         }
                         if (showPerfilDiv) {
-
-                            Div(attrs = { id("user-perfil-options") }) {
+                            div("user-perfil-options") {
                                 P(attrs = { id("userNameLabel") }) {
                                     Text(userName)
                                 }
@@ -235,7 +221,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                                     router.navigate("/eachUser")
                                 }
 
-                                button("bt", "Tema: $actualTheme") {
+                                button("bt", "Tema: $currentActualThemeName") {
                                     showThemeModeChooserDiv = !showThemeModeChooserDiv
                                 }
 
@@ -270,19 +256,17 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                             }
                         }
                     }
-
                 }
 
-
-                Div(attrs = { id("header-bottom") }) {
-                    Div(attrs = { id("afiliatesInfo") }) {
+                div("header-bottom") {
+                    div("afiliatesInfo") {
                         Div {
                             H4(attrs = { id("allUsersP") }) {
                                 Text("Usuários")
                             }
                         }
 
-                        Div(attrs = { id("afiliatesInfo-divs") }) {
+                        div("afiliatesInfo-divs") {
                             afStatusIndicator("Usuários Activos", "active-Status", activeAfiliates)
                             afStatusIndicator("Usuários Bloqueados", "suspended-Status", suspendedAfiliates)
                             afStatusIndicator("Todos Usuários", "allUsers-Status", allAfiliatesCount)
@@ -300,23 +284,23 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
             Br()
 
             Main {
-                Div(attrs = { id("divCharts") }) {
-                    Div(attrs = { id("fChartsDiv") }) {
-                        Div(attrs = { id("chart1") }) {
+                div("divCharts") {
+                    div("fChartsDiv") {
+                        div("chart1") {
                             Canvas(attrs = { id("monthlySalesQuantities") })
                         }
 
-                        Div(attrs = { id("chart2") }) {
+                        div("chart2") {
                             Canvas(attrs = { id("topSales") })
                         }
                     }
 
-                    Div(attrs = { id("sChartsDiv") }) {
-                        Div(attrs = { id("chart3") }) {
+                    div("sChartsDiv") {
+                        div("chart3") {
                             Canvas(attrs = { id("topUsers") })
                         }
 
-                        Div(attrs = { id("chart4") }) {
+                        div("chart4") {
                             Canvas(attrs = { id("monthlyProfits") })
                         }
                     }
@@ -335,7 +319,6 @@ fun setThemeMode(mode: String) {
         "Dark" -> document.documentElement?.classList?.add("dark")
         "Auto" -> {
             val prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            console.log(prefersDark)
             if (prefersDark) {
                 document.documentElement?.classList?.add("dark");
             }

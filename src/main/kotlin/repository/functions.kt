@@ -13,6 +13,7 @@ const val apiStockPath = "$apiPath/stocks"
 const val apiBranchesPath = "$apiPath/branches"
 const val apiPayablesPath = "$apiPath/payables"
 const val apiReceivablesPath = "$apiPath/receivables"
+const val apiNotificationsPath = "$apiPath/notifications"
 
 
 enum class Role(val desc: String) { // desc -> description

@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CategoryItem(
     val id: Int?,
-    val name: String
+    val name: String,
+    val isDefault: Boolean,
 )
 
 //@Serializable
@@ -172,6 +173,7 @@ data class StockItem(
     val cost: Double,
     val price: Double,
     val reason: String,
+    val ownerName: String,
     val datetime: String,
     val userId: Int,
     val userName: String,
@@ -405,4 +407,27 @@ data class ReceivableItem(
 data class IdAndStatus(
     val id: Int,
     val status: Int,
+)
+
+@Serializable
+data class NotificationDraft(
+    val title: String,
+    val message: String,
+    val type: Int,
+)
+
+@Serializable
+data class NotificationItem(
+    val id: Int,
+    val title: String,
+    val message: String,
+    val type: String,
+    val createdAt: String,
+    val read: Boolean,
+)
+
+@Serializable
+data class IdAndReadState(
+    val id: Int,
+    val isRead: Boolean,
 )

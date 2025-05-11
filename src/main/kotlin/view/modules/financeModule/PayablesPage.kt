@@ -3,23 +3,21 @@ package view.modules.financeModule
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
 import components.*
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.attributes.min
 import org.jetbrains.compose.web.attributes.onSubmit
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.*
 import repository.*
-import view.modules.reportModule.reportPaper
+import view.state.AppState.isLoading
+import view.state.UiState.modalState
+import view.state.UiState.modalTitle
+import view.state.AppState.error
+import view.state.UiState.description
+import view.state.UiState.paymentForm
 
 
 @Composable
@@ -31,17 +29,10 @@ fun payablesPage(userRole: String, sysPackage: String) {
     var allPayableData by mutableStateOf(listOf<PayableItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
-    var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
-    var modalTitle by remember { mutableStateOf("") }
-    var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
     var payModal by remember { mutableStateOf("closed") } //closed = "" --------->>
-//    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
-    var maxModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
-//    var maxModalState by remember { mutableStateOf("open-max-modal") } //closed = "" --------->>
     var supplier by remember { mutableStateOf("") }
     var supplierError by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
     var payValue by remember { mutableDoubleStateOf(0.0) }
     var payValueLabel by remember { mutableDoubleStateOf(0.0) }
     var payValueError by remember { mutableStateOf("") }
@@ -49,15 +40,12 @@ fun payablesPage(userRole: String, sysPackage: String) {
     var expirationDateError by remember { mutableStateOf("") }
     var paymentDate by remember { mutableStateOf("") }
     var paymentDateError by remember { mutableStateOf("") }
-    var paymentForm by remember { mutableStateOf("") }
     var payAccountId by remember { mutableIntStateOf(0) }
 
     val router = Router.current
-    var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         try {
-            isLoading = true
             val dataDeffered = async { payables.allPayables() }
             allPayableData = dataDeffered.await()
         } catch (e: Exception) {
@@ -67,7 +55,9 @@ fun payablesPage(userRole: String, sysPackage: String) {
             isLoading = false
         }
     }
-
+    if (isLoading) {
+        loadingModal()
+    } else {
         NormalPage(
             showBackButton = true,
             onBackFunc = { router.navigate("/finances-module") },
@@ -81,14 +71,14 @@ fun payablesPage(userRole: String, sysPackage: String) {
             }
         }) {
             if (isLoading) {
-                Div(attrs = { classes("centerDiv") }) {
+                div(divClasses = listOf("centerDiv")) {
                     Text("Carregando...")
                 }
             } else {
 
                 if (error == null) {
                     if (allPayableData.isEmpty()) {
-                        Div(attrs = { classes("centerDiv") }) {
+                        div(divClasses = listOf("centerDiv")) {
                             Text("Nenhum registro de contas pagas.")
                         }
                     } else {
@@ -155,7 +145,6 @@ fun payablesPage(userRole: String, sysPackage: String) {
                     Div { Text("Loading...") }
                 }
             }
-
 
 // Pay account ------->>
             minModal(payModal, "Pagar Conta") {
@@ -303,4 +292,5 @@ fun payablesPage(userRole: String, sysPackage: String) {
                 }
             }
         }
+    }
 }

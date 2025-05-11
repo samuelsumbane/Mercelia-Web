@@ -3,12 +3,8 @@ package view.modules.financeModule
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
 import components.*
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.onSubmit
@@ -16,30 +12,25 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.*
 import repository.*
+import view.state.UiState.description
+import view.state.UiState.modalState
+import view.state.UiState.modalTitle
+import view.state.UiState.paymentForm
+import view.state.AppState.error
+import view.state.AppState.isLoading
 
 
 @Composable
 fun receivablesPage(userRole: String, sysPackage: String) {
-
-
     val receivables = FinanceRepository()
     val commonRepo = CommonRepository()
-
     var allReceivablesData by mutableStateOf(listOf<ReceivableItem>())
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
-    var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
-    var modalTitle by remember { mutableStateOf("") }
-    var modalState by remember { mutableStateOf("closed") } //closed = "" --------->>
     var payModal by remember { mutableStateOf("closed") } //closed = "" --------->>
-//    var modalState by remember { mutableStateOf("open-min-modal") } //closed = "" --------->>
-    var maxModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
-//    var maxModalState by remember { mutableStateOf("open-max-modal") } //closed = "" --------->>
-
     var client by remember { mutableStateOf("") }
     var clientError by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
     var receiveValue by remember { mutableDoubleStateOf(0.0) }
     var payValueLabel by remember { mutableDoubleStateOf(0.0) }
     var receiveValueError by remember { mutableStateOf("") }
@@ -47,13 +38,9 @@ fun receivablesPage(userRole: String, sysPackage: String) {
     var expirationDateError by remember { mutableStateOf("") }
     var paymentDate by remember { mutableStateOf("") }
     var receivementDateError by remember { mutableStateOf("") }
-    var paymentForm by remember { mutableStateOf("") }
     var receiveAccountId by remember { mutableIntStateOf(0) }
 
-
     val router = Router.current
-    var isLoading by remember { mutableStateOf(false) }
-
 
     LaunchedEffect(Unit) {
         try {
@@ -67,7 +54,9 @@ fun receivablesPage(userRole: String, sysPackage: String) {
             isLoading = false
         }
     }
-
+    if (isLoading) {
+        loadingModal()
+    } else {
         NormalPage(
             showBackButton = true,
             onBackFunc = { router.navigate("/finances-module") },
@@ -75,11 +64,11 @@ fun receivablesPage(userRole: String, sysPackage: String) {
             sysPackage = sysPackage,
             userRole = userRole,
             hasNavBar = true, navButtons = {
-            button("btnSolid", "+ C. Receber") {
-                modalTitle = "Adicionar Conta a Receber"
-                modalState = "open-min-modal"
-            }
-        }) {
+                button("btnSolid", "+ C. Receber") {
+                    modalTitle = "Adicionar Conta a Receber"
+                    modalState = "open-min-modal"
+                }
+            }) {
             if (isLoading) {
                 Div(attrs = { classes("centerDiv") }) {
                     Text("Carregando...")
@@ -126,6 +115,7 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                                                     payModal = "open-min-modal"
                                                     receiveAccountId = it.id.toInt()
                                                 }
+
                                                 "Pendente" -> button("btn", "receber") {
                                                     receiveValue = it.value
                                                     client = it.client
@@ -133,6 +123,7 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                                                     payModal = "open-min-modal"
                                                     receiveAccountId = it.id.toInt()
                                                 }
+
                                                 else -> button("btn", "Ver Detalhes") {
 
                                                 }
@@ -164,7 +155,10 @@ fun receivablesPage(userRole: String, sysPackage: String) {
 
                                 if (receiveValueError.isBlank()) {
                                     val receiveData = IdAndStatus(receiveAccountId, 2)
-                                    val (status, message) = commonRepo.postRequest("$apiReceivablesPath/receive-account-payment", receiveData)
+                                    val (status, message) = commonRepo.postRequest(
+                                        "$apiReceivablesPath/receive-account-payment",
+                                        receiveData
+                                    )
                                     when (status) {
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()
@@ -233,12 +227,18 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                             coroutineScope.launch {
                                 clientError = if (client.isBlank()) "O cliente é obrigatório" else ""
                                 receiveValueError = if (receiveValue == 0.0) "O a receber é obrigatório" else ""
-                                expirationDateError = if (expirationDate.isBlank()) "A data de expiração é obrigatória" else ""
-                                receivementDateError = if (client.isBlank()) "A data de Recebimento é obrigatória" else ""
+                                expirationDateError =
+                                    if (expirationDate.isBlank()) "A data de expiração é obrigatória" else ""
+                                receivementDateError =
+                                    if (client.isBlank()) "A data de Recebimento é obrigatória" else ""
                                 if (clientError.isBlank() && receiveValueError.isBlank() && expirationDateError.isBlank() && receivementDateError.isBlank()) {
 
-                                    val receiveData = ReceivableDraft(client, description, receiveValue, expirationDate, paymentForm)
-                                    val (status, message) = commonRepo.postRequest("$apiReceivablesPath/create-receivable", receiveData)
+                                    val receiveData =
+                                        ReceivableDraft(client, description, receiveValue, expirationDate, paymentForm)
+                                    val (status, message) = commonRepo.postRequest(
+                                        "$apiReceivablesPath/create-receivable",
+                                        receiveData
+                                    )
                                     when (status) {
                                         201 -> alertTimer(message)
                                         else -> unknownErrorAlert()
@@ -249,15 +249,18 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                     }
                 ) {
 
-                    formDiv("Cliente", client, InputType.Text, 48,
-                        { event -> client = event.value}, clientError
+                    formDiv(
+                        "Cliente", client, InputType.Text, 48,
+                        { event -> client = event.value }, clientError
                     )
 
-                    formDiv("Descrição", description, InputType.Text, 0,
-                        { event -> description = event.value}, ""
+                    formDiv(
+                        "Descrição", description, InputType.Text, 0,
+                        { event -> description = event.value }, ""
                     )
 
-                    formDiv("Valor a receber", receiveValue.toString(),
+                    formDiv(
+                        "Valor a receber", receiveValue.toString(),
                         InputType.Number, 0, { event ->
                             if (event.value != null) {
                                 receiveValue = event.value!!.toDouble()
@@ -300,4 +303,5 @@ fun receivablesPage(userRole: String, sysPackage: String) {
                 }
             }
         }
+    }
 }

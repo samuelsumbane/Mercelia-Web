@@ -10,5 +10,6 @@ fun basicSalePage(userRole: String, sysPackage: String) {
         BtnDetails("sellsBtn", "/sales", "Vendas"),
     )
 
-    basicGruppedPages("Vendas", reportPages, userRole, sysPackage)
+    basicGruppedPages("Vendas", reportPages, userRole,
+        sysPackage, "sidebar-btn-sales")
 }

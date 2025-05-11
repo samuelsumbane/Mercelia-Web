@@ -6,19 +6,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.softwork.routingcompose.HashRouter
 import app.softwork.routingcompose.Router
-import components.pageNotFoundScreen
 import components.userHasNotAccessScreen
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.browser.sessionStorage
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.renderComposable
 import repository.Role
 import repository.SettingsRepository
-import repository.SysConfigItem
 import repository.SysPackages
 import repository.UserDataAndSys
 import repository.UserRepository
@@ -36,55 +27,39 @@ import view.modules.productsModule.basicProductsPage
 import view.modules.productsModule.categoriesPage
 import view.modules.productsModule.productsPage
 import view.modules.reportModule.basicReportPage
-//import view.modules.productsModule.categoriesPage
-//import view.modules.productsModule.productsPage
-//import view.modules.reportModule.stockPage
 import view.modules.reportModule.reportsPage
 import view.modules.reportModule.stockPage
-//import view.modules.reportModule.reportsPage
 import view.modules.sellModule.basicSalePage
 import view.modules.sellModule.salesPage
-//import view.modules.settingsModule.usersPackage.UsersPage
 import view.modules.settingsModule.basicSettingsPage
 import view.modules.settingsModule.brancesPage
+import view.modules.settingsModule.notificationsPage
 import view.modules.settingsModule.usersPackage.UsersPage
-
-//import view.modules.settingsModule.brancesPage
-
-val httpClient = HttpClient {
-    install(ContentNegotiation) {
-        json(Json { isLenient = true })
-    }
-}
+import view.state.AppState.sysPackage
 
 
 fun main() {
     renderComposable(rootElementId = "root") {
         HashRouter(initPath = "/") {
             val router = Router.current
-            val settings = SettingsRepository(httpClient)
+            val settings = SettingsRepository()
             val users = UserRepository()
             var isLoggedIn by remember { mutableStateOf(false) }
-            var isLoading by remember { mutableStateOf(false) }
             var hasLoading by remember { mutableStateOf(false) }
-            var sysPackage by remember { mutableStateOf("") }
             val coroutine = rememberCoroutineScope()
-
             var user by remember { mutableStateOf(emptyLoggedUser) }
 
             LaunchedEffect(Unit) {
                 val session = users.checkSession()
-                console.log(session)
                 if (session != null) {
                     val (status, activePackage) = settings.getPackageName()
                     sysPackage = if (status == 200) {
                         activePackage
                     } else {
-                        "Lite"
+                        SysPackages.L.desc
                     }
 
                     if (session.isLogged) {
-                        isLoggedIn = true
                         user = session
                     } else {
                         isLoggedIn = false
@@ -92,15 +67,8 @@ fun main() {
                 } else {
                     console.log("session expired")
                 }
-                //
-
-
             }
 //            var sysPackage by remember { mutableStateOf(sysPackageC) }
-
-
-
-
 
 //            route("/") {
 //                loginPage()
@@ -110,14 +78,11 @@ fun main() {
 //                noMatch {
 //                    pageNotFoundScreen()
 //                }
-
                 route("/") {
                     loginPage()
                 }
 
-
                 if (user.userRole == Role.V.desc) {
-
                     route("/eachUser") {
                         eachUserPage(user.userId, user.userRole, sysPackage)
                     }
@@ -144,7 +109,7 @@ fun main() {
                         stockPage(paramData)
                     }
 
-                    for (uRoute in norForSellerUserRoutes) {
+                    for (uRoute in notForSellerUserRoutes) {
                         route(uRoute) {
                             userHasNotAccessScreen()
                         }
@@ -223,10 +188,13 @@ fun main() {
 //                    route("/finance-history") {
 //                    }
                     }
-
+                } else if (user.userRole == Role.V.desc || user.userRole == Role.G.desc
+                    || user.userRole == Role.A.desc) {
+                    // All users
+                    route("/notifications") {
+                        notificationsPage(user.userRole, sysPackage)
+                    }
                 }
-
-
                 // -------->>
 
                 route("/partners-module") {
@@ -256,52 +224,40 @@ fun main() {
                 route("/") {
                     loginPage()
                 }
-
             }
-
-
         }
     }
 }
 
 
-val routesList = listOf(
+val notForSellerUserRoutes = listOf(
     "/",
     "/basicSettingsPage",
     "/categories",
+    "/dashboard",
+    "/clients",
+    "/users",
+    "/suppliers",
+    "/settings",
+    "/branches",
+    "/partners-module",
+    "/payables",
+    "/receivables",
+)
+
+val routesList = notForSellerUserRoutes + listOf(
     "/products",
     "/sales",
     "/reports",
     "/stockPage",
-    "/dashboard",
-    "/clients",
-    "/users",
     "/eachUser",
-    "/suppliers",
     "/settings",
     "/branches",
     "/partners-module",
     "/products-module",
     "/inventories-module",
     "/sale-module",
+    "/notifications"
 )
-
-val norForSellerUserRoutes = listOf(
-    "/",
-    "/basicSettingsPage",
-    "/categories",
-    "/dashboard",
-    "/clients",
-    "/users",
-    "/suppliers",
-    "/settings",
-    "/branches",
-    "/partners-module",
-)
-
 
 val onlyForProPackage = listOf("/payables", "/receivables", "/finance-history")
-
-
-
-

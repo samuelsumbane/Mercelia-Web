@@ -8,6 +8,7 @@ import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.readOnly
 import org.jetbrains.compose.web.dom.*
 import repository.*
+import view.state.AppState.isLoading
 
 
 data class ConfigDetailsDc( // Dc (Data class) ------->>
@@ -18,41 +19,36 @@ data class ConfigDetailsDc( // Dc (Data class) ------->>
 )
 
 
-
 @Composable
 fun settingsPage(userRole: String, sysPackage: String) {
 
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { isLenient = true })
-        }
-    }
-
-    val settings = SettingsRepository(httpClient)
+    val settings = SettingsRepository()
     val users = UserRepository()
     var sysConfigs by remember { mutableStateOf(emptyList<SysConfigItem>()) }
-    var isLoggedIn by remember { mutableStateOf(false) }
     var user by remember { mutableStateOf(emptyLoggedUser) }
     var activeSysPackage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
        sysConfigs = settings.getSettings()
+       isLoading = false
     }
-
+    if (isLoading) {
+        loadingModal()
+    } else {
         if (userRole != Role.A.desc) {
             userHasNotAccessScreen("dashboard")
         } else {
             Menu(activePath = "sidebar-btn-settings", userRole, sysPackage)
 
             Div(attrs = { classes("content-container", "def-page") }) {
-                Div(attrs = { classes("def-page-header")}) {
+                Div(attrs = { classes("def-page-header") }) {
                     Br()
-                    H2(attrs = { classes("title")}) {
+                    H2(attrs = { classes("title") }) {
                         Text("Configurações")
                     }
                 }
 
-                Div(attrs = { classes("def-page-body")}) {
+                Div(attrs = { classes("def-page-body") }) {
                     Div(attrs = { classes("def-page-body-search") }) {
 
 //                Input(type = InputType.Text, attrs = {
@@ -73,30 +69,37 @@ fun settingsPage(userRole: String, sysPackage: String) {
 
                             var configsList = mutableListOf<ConfigDetailsDc>()
 
-                            for((k, v) in sysConfigs) {
+                            for ((k, v) in sysConfigs) {
                                 when (k) {
-                                    "percentual_iva" -> configsList.add(ConfigDetailsDc("Percentagem de IVA", "Será calculada nas vendas", v)
+                                    "percentual_iva" -> configsList.add(
+                                        ConfigDetailsDc("Percentagem de IVA", "Será calculada nas vendas", v)
                                     )
 
                                     "active_package" -> {
-                                        configsList.add(ConfigDetailsDc("Pacote do sistema (Apenas leitura)", "Sistema executa as funcionalidades do pacote $v", v, true)
+                                        configsList.add(
+                                            ConfigDetailsDc(
+                                                "Pacote do sistema (Apenas leitura)",
+                                                "Sistema executa as funcionalidades do pacote $v",
+                                                v,
+                                                true
+                                            )
                                         )
                                         activeSysPackage = v
                                     }
 
                                     "alert_min_pro_quantity" -> {
                                         if (activeSysPackage != SysPackages.L.desc) {
-                                            configsList.add(ConfigDetailsDc("Alerta de productos", "Alertar quando o producto atingir a sua quantidade minima", v)
+                                            configsList.add(
+                                                ConfigDetailsDc(
+                                                    "Alerta de productos",
+                                                    "Alertar quando o producto atingir a sua quantidade minima",
+                                                    v
+                                                )
                                             )
                                         }
                                     }
-
-
                                 }
-
                             }
-
-
 
                             for ((index, divConf) in configsList.withIndex()) {
                                 Div(attrs = { classes("defDivConf") }) {
@@ -128,7 +131,6 @@ fun settingsPage(userRole: String, sysPackage: String) {
                                         })
                                     }
 
-
                                 }
                             }
                         }
@@ -136,4 +138,5 @@ fun settingsPage(userRole: String, sysPackage: String) {
                 }
             }
         }
+    }
 }
