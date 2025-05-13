@@ -59,6 +59,7 @@ data class IncreaseProductStockDraft(
     val newStock: Int,
     val reason: String,
     val userId: Int,
+    val branchId: Int,
 )
 
 @Serializable
@@ -419,6 +420,7 @@ data class NotificationDraft(
 @Serializable
 data class NotificationItem(
     val id: Int,
+    val userName: String?,
     val title: String,
     val message: String,
     val type: String,

@@ -88,7 +88,7 @@ fun main() {
                     }
 
                     route("/products") {
-                        productsPage(user.userRole, sysPackage)
+                        productsPage(user.userRole, user.userId, sysPackage)
                     }
 
                     route("/sales") {
@@ -123,7 +123,7 @@ fun main() {
                     }
 
                     route("/products") {
-                        productsPage(user.userRole, sysPackage)
+                        productsPage(user.userRole, user.userId, sysPackage)
                     }
 
                     route("/sales") {
@@ -176,6 +176,10 @@ fun main() {
                         brancesPage(user.userRole, sysPackage)
                     }
 
+                    route("/notifications") {
+                        notificationsPage(user.userRole, sysPackage)
+                    }
+
                     if (sysPackage == SysPackages.PO.desc) {
                         route("/payables") {
                             payablesPage(user.userRole, sysPackage)
@@ -184,15 +188,8 @@ fun main() {
                         route("/receivables") {
                             receivablesPage(user.userRole, sysPackage)
                         }
-
 //                    route("/finance-history") {
 //                    }
-                    }
-                } else if (user.userRole == Role.V.desc || user.userRole == Role.G.desc
-                    || user.userRole == Role.A.desc) {
-                    // All users
-                    route("/notifications") {
-                        notificationsPage(user.userRole, sysPackage)
                     }
                 }
                 // -------->>

@@ -87,10 +87,10 @@
                 border-radius: 8px;
                 // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                 overflow:auto;
-            
+
             & button{
                 background:$btn-bg;
-            }    
+            }
         }
     }
 
@@ -127,7 +127,7 @@
         height:40px;
         padding:0 !important;
     }
-    
+
     &-title{
         text-transform:uppercase;
         padding: 17px
@@ -191,6 +191,7 @@
                     box-shadow: 0 0 7px rgba(black, 0.5);
                     display: flex;
                     justify-content: space-between;
+                    cursor:pointer;
 
                     & > P {
                         margin:auto 0;
@@ -381,7 +382,7 @@
         .reciboInputModal{
             width:60% !important;
             margin:auto;
-        }    
+        }
 
         #minRecibosDiv{
             min-height:40px;
@@ -472,5 +473,5 @@
         justify-content: space-around;
 
     }
-    
+
 }

@@ -197,6 +197,7 @@ body{
                         justify-content: space-between;
                         :last-child{
                             font-weight:bold;
+                            font-size: 13.3px;
                         }
                     }
 
@@ -229,14 +230,7 @@ body{
                     }
                 }
             }
-            .dark .card{
-                background:rgba(#031331, 0.3)
-            }
 
-            .card-warning{
-                background: red;
-                color:white;
-            }
         }
     }
     // &-footer{
@@ -245,6 +239,11 @@ body{
     // }
 }
 
+
+.warning{
+     background: red !important;
+     color:white;
+}
 .management-page{
     @include wh(96vw,100vh);
     background: radial-gradient(circle, rgb(197, 235, 241), white);
@@ -309,11 +308,23 @@ body{
     .card{
         background-color: $dark-bg-principal;
         color: $dark-text-principal;
+        &:hover{
+                            color: white;
+                            background-color: pink;
+                        }
     }
     .page-card, .management-page-body-card-div-btn{
         background-color: $dark-widget-bg !important;
         color: $dark-text-principal !important;
     }
+
+
+                .card-warning{
+                                background: green !important;
+                                color:white;
+
+            }
+
 }
 
 // .card{margin: 5px}

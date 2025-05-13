@@ -17,6 +17,8 @@ import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.KeyboardEvent
 import repository.*
+import view.state.AppState.branchDeffered
+import view.state.AppState.sysLocationId
 import kotlin.collections.listOf
 
 data class ProItem(
@@ -61,7 +63,6 @@ fun saleModal(
 
     var categoryData by remember { mutableStateOf(emptyList<CategoryItem>()) }
     var clientData by remember { mutableStateOf(emptyList<ClientItem>()) }
-    var sysLocationId by remember { mutableStateOf("") }
 
     var submitBtnText by remember { mutableStateOf("Submeter") }
     var productId by remember { mutableStateOf(0) }
@@ -76,7 +77,6 @@ fun saleModal(
     val inputRef = remember { mutableStateOf<HTMLInputElement?>(null) }
 
     val branches = BranchRepository()
-    var branchDeffered by remember { mutableStateOf("") }
 
     fun clearFields() {
         productList = emptyList()
@@ -141,7 +141,6 @@ fun saleModal(
             clientData = clients.getClients()
             clearFields()
             branchDeffered = branches.sysLocationId()
-//            if (branchDeffered == "404" || branchDeffered == "405") branchIdNotFoundAlert() else  sysLocationId = branchDeffered
             if (branchDeffered != "404" && branchDeffered != "405") {
                 sysLocationId = branchDeffered
             }
@@ -248,28 +247,33 @@ fun saleModal(
                         Div(attrs = { id("leftPart-center") }) {
                             filterProducts.forEach { pro ->
                                 if (pro.stock > 0) {
-                                    Div(attrs = { classes("productToSaleItem") }) {
-                                        P { Text(pro.name) }
-                                        Div {
-                                            button("throwRight", "") {
-                                                val productExists = productList.firstOrNull() { it.id == pro.id!! }
-                                                if (productExists != null) {
-                                                    alert("info", "Producto adicionado", "O producto já foi adicionado")
-                                                } else {
-                                                    val product = SellTableItem(
-                                                        id = pro.id!!,
-                                                        name = pro.name,
-                                                        quantity = 1,
-                                                        productCost = pro.cost,
-                                                        productPrice = pro.price,
-                                                        formatToTwoDecimalPlaces(pro.price),
-                                                        availableProQuantity = pro.stock,
-                                                    )
-                                                    productList = productList + product
-                                                    totalRequest += pro.price
-                                                }
+                                    val minProStock = pro.minStock ?: -1
+                                    val warningClass =
+                                        if (minProStock != -1 && pro.stock <= minProStock) "warning" else "empty"
+
+                                    Div(attrs = {
+                                        classes("productToSaleItem", warningClass)
+                                        onClick {
+                                            val productExists = productList.firstOrNull() { it.id == pro.id!! }
+                                            if (productExists != null) {
+                                                alert("info", "Producto adicionado", "O producto já foi adicionado")
+                                            } else {
+                                                val product = SellTableItem(
+                                                    id = pro.id!!,
+                                                    name = pro.name,
+                                                    quantity = 1,
+                                                    productCost = pro.cost,
+                                                    productPrice = pro.price,
+                                                    formatToTwoDecimalPlaces(pro.price),
+                                                    availableProQuantity = pro.stock,
+                                                )
+                                                productList = productList + product
+                                                totalRequest += pro.price
                                             }
                                         }
+                                    }) {
+                                        P { Text(pro.name) }
+                                        div(divClasses = listOf("throwRight")) {}
                                     }
                                 }
                             }

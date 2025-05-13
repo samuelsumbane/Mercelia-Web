@@ -68,7 +68,7 @@
     }
 }
 
-:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .smallEyeBtn, .card-editButton){
+:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .smallEyeBtn, .smallDeleteBtn, .card-editButton){
     @extend .btn;
     min-width:30px !important;
     height:30px;
@@ -76,7 +76,7 @@
     border:none;
     background-color:aliceblue;
 }
-.dark :is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .smallEyeBtn, .card-editButton){
+.dark :is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .eyeBtn, .smallEyeBtn, .smallDeleteBtn, .card-editButton){
     background-color:$dark-widget-bg;
 }
 
@@ -94,7 +94,7 @@
 }
 
 
-:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .smallEyeBtn, .card-editButton):hover{
+:is(.deleteButton, .removeButton, .disableButton, .disableUser, .updateButton, .payButton, .createButton, .addButton, .printButton, .addUser, .addClient, .checkButton, .disableClient, .activeUser, .promoveBtn, .despromoveBtn, .toGoReports, .throwRight, .eyeBtn, .smallEyeBtn,  .smallDeleteBtn, .card-editButton):hover{
     background-color:lightgray;
 }
 
@@ -102,7 +102,7 @@
 //     background-color:lightgray;
 // }
 
-.smallEyeBtn{
+.smallEyeBtn, .smallDeleteBtn{
     padding: 1px !important;
     height:20px !important;
 }
@@ -137,7 +137,7 @@
     background-image:url("/media/icons/dash.svg");
 }
 
-.deleteButton{
+.deleteButton, .smallDeleteBtn{
     background-image:url("/media/icons/excluir.svg");
 }
 

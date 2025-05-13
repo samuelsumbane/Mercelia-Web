@@ -54,9 +54,25 @@ header {
         color:white;
     }
 
+    .notificationContainer{
+//         width: 230px;
+//         background:red;
+        display: flex;
+        justify-content: flex-end;
+        &-indicator{
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            background:white;
+            border:none;
+            box-shadow:0 0 18px 2px rgba(black, 0.3)
+        }
+    }
     #notificationAlertDiv{
         position:relative;
         width: 230px;
+        top: 90%;
+        left:15%;
         min-height: 140px;
         background:white;
         border-radius:10px;
@@ -74,7 +90,7 @@ header {
 
             &-title{
                 margin: 0 auto;
-                font-weight: bold;
+                font-weight: 500;
                 padding-bottom:5px;
             }
 //             hr {padding:7px 0}

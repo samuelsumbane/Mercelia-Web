@@ -17,13 +17,15 @@ import org.w3c.dom.HTMLSelectElement
 import kotlinx.browser.document
 import repository.*
 import view.Afiliates.OwnersPage
+import view.state.AppState.branchDeffered
 import view.state.UiState.modalTitle
 import view.state.AppState.error
 import view.state.AppState.isLoading
+import view.state.AppState.sysLocationId
 
 
 @Composable
-fun productsPage(userRole: String, sysPackage: String) {
+fun productsPage(userRole: String, userId: Int, sysPackage: String) {
 
     val products = ProductRepository()
     val categories = CategoryRepository()
@@ -90,18 +92,28 @@ fun productsPage(userRole: String, sysPackage: String) {
         minProQuantityError = ""
         categoryError = ""
     }
-
+    val branches = BranchRepository()
     val router = Router.current
 
     LaunchedEffect(Unit) {
         try {
             productsData = products.fetchProducts()
             categoriesData = categories.getCategories()
+            branchDeffered = branches.sysLocationId()
+            if (branchDeffered != "404" && branchDeffered != "405") {
+                sysLocationId = branchDeffered
+            }
         } catch (e: Exception) {
             error = "Error: ${e.message}"
         } finally {
             ownerData = owners.getOwners()
             isLoading = false
+        }
+    }
+
+    fun branchIdNotFoundAlert() {
+        onOkayAlert("warning", "Localização do sistema não definida.", "Defina a localização do sistema na pagina de sucursais") {
+            router.navigate("/branches")
         }
     }
 
@@ -184,8 +196,7 @@ fun productsPage(userRole: String, sysPackage: String) {
                         } else {
                             val minProStock = item.minStock ?: -1
                             val warningClass =
-                                if (minProStock != -1 && item.stock <= minProStock) "card-warning" else "empty"
-
+                                if (minProStock != -1 && item.stock <= minProStock) "warning" else "empty"
                             cardWG(
                                 title = item.name,
                                 warningClass,
@@ -463,10 +474,15 @@ fun productsPage(userRole: String, sysPackage: String) {
                     if (userRole != "Vendedor/Caixa") {
                         modalPItem("", value = {
                             button("btn", "Aumentar Estoque") {
-                                modalMoreDetailsState = "closed"
-                                modalIncreaseStockState = "open-min-modal"
-                                modalIncreaseStockTitle = "Aumentar Estoque"
-                                proQuantity = 0
+                                if (sysLocationId.isBlank()) {
+                                    branchIdNotFoundAlert()
+                                } else {
+                                    modalMoreDetailsState = "closed"
+                                    modalIncreaseStockState = "open-min-modal"
+                                    modalIncreaseStockTitle = "Aumentar Estoque"
+                                    proQuantity = 1
+                                    
+                                }
                             }
                         })
                     }
@@ -559,11 +575,11 @@ fun productsPage(userRole: String, sysPackage: String) {
                         classes("modalform")
                         onSubmit { event ->
                             event.preventDefault()
-
+                            proQuantityError = if (proQuantity == 0) "A quantidade adicional deve ser superior a 0" else ""
                             proCostError = if (costValue == 0.0) "O custo é obrigatório" else ""
                             proPriceError = if (proPrice == 0.0) "O preço do producto é obrigatório" else ""
 
-                            if (proCostError == "" && proPriceError == "") {
+                            if (proQuantityError.isBlank() && proCostError.isBlank() && proPriceError.isBlank()) {
                                 coroutineScope.launch {
                                     //                                val minProQuantityChecker = if (minProQuantity == 0) null else minProQuantity
 
@@ -571,16 +587,19 @@ fun productsPage(userRole: String, sysPackage: String) {
                                         val (status, message) = commonRepo.postRequest(
                                             "$apiProductsPath/increase-stock",
                                             IncreaseProductStockDraft(
-                                                proId, costValue, proPrice, proQuantity, "Aumento de Estoque", 1,
+                                                proId, costValue, proPrice, proQuantity, "Aumento de Estoque", userId, sysLocationId.toInt()
                                             ), "put"
                                         )
                                         if (status == 201) {
-                                            alertTimer("Novo estoque adicionado com sucesso com valores actualizados.")
-                                        } else unknownErrorAlert()
+                                            alertTimer(message)
+                                            productsData = products.fetchProducts()
+                                            modalIncreaseStockState = "closed"
+                                        } else {
+                                            unknownErrorAlert()
+                                        }
                                     }
                                     cleanVarFields()
                                 }
-                                modalIncreaseStockState = "closed"
                             }
                         }
                     }
@@ -590,14 +609,14 @@ fun productsPage(userRole: String, sysPackage: String) {
                         onInput { event -> proId = event.value.toInt() }
                     })
 
-                    //                formDiv("Quantidade Adicional", proQuantity.toString(), InputType.Number, { event ->
-                    //                    proQuantity = if (event.value.toString() != "") {
-                    //                        event.value!!.toInt()
-                    //                    } else {
-                    //                        0
-                    //                    }
-                    //                }, proQuantityError)
-                    //
+                    formDiv("Quantidade Adicional", proQuantity.toString(), InputType.Number, 0,{ event ->
+                        proQuantity = if (event.value.toString() != "") {
+                            event.value!!.toInt()
+                        } else {
+                            0
+                        }
+                    }, proQuantityError)
+
                     if (sysPackage != SysPackages.L.desc) {
                         formDiv("Quantidade minima", minProQuantity.toString(), InputType.Number, 0, { event ->
                             minProQuantity = event.value!!.toInt()
@@ -624,8 +643,7 @@ fun productsPage(userRole: String, sysPackage: String) {
                     }
                 }
             }
-
-
+            
             // Change ProductName and category --------->>
             minModal(modalUpdateProState, modalUpdateProTitle) {
                 Form(
@@ -760,7 +778,6 @@ fun productsPage(userRole: String, sysPackage: String) {
                         value(proId)
                         onInput { event -> proId = event.value.toInt() }
                     })
-
                     //            CardPitem("Preço Actual", proPrice.toString())
 
                     formDiv("Novo Preço", proPrice.toString(), InputType.Number, 0, { event ->

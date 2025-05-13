@@ -69,8 +69,7 @@ fun OwnersPage(userRole: String, sysPackage: String) {
                 }
             }) {
 
-            if (ownerData != null) {
-                if (ownerData!!.isEmpty()) {
+                if (ownerData.isEmpty()) {
                     Div(attrs = { classes("centerDiv") }) {
                         Text("Nenhum proprietário encontrado.")
                     }
@@ -108,11 +107,6 @@ fun OwnersPage(userRole: String, sysPackage: String) {
                         }
                     }
                 }
-            } else if (error != null) {
-                Div { Text(error!!) }
-            } else {
-                Div { Text("Carregando...") }
-            }
 
             minModal(modalState, modalTitle) {
                 Form(

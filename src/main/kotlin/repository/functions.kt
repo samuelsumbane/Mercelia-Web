@@ -57,3 +57,9 @@ fun getUserLocalDateTimeString(): String {
 fun moneyFormat(money: Double): String {
     return js("money.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })") as String
 }
+
+
+fun String.cut(limit: Int): String {
+    return if (length > limit) take(limit) + " ..." else this
+}
+

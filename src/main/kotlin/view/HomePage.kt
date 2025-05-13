@@ -3,9 +3,6 @@ package view
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
 import components.*
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
@@ -15,8 +12,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.web.dom.*
-import org.w3c.dom.get
 import repository.*
+import view.state.AppState.allNotifications
 import view.state.AppState.isLoading
 
 
@@ -55,7 +52,6 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     val users = UserRepository()
     val products = ProductRepository()
 
-    var productsData by remember { mutableStateOf<List<ProductItem>?>(null) }
     var totalProfit by remember { mutableDoubleStateOf(0.0) }
     var totalSales by remember { mutableDoubleStateOf(0.0)}
     var activeAfiliates by remember { mutableIntStateOf(0) }
@@ -80,7 +76,7 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
 
     var salesProfitsMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
-    var showNotificationAlert by remember { mutableStateOf(true)}
+    var showNotificationAlert by remember { mutableStateOf(false)}
 
     val coroutineScope = rememberCoroutineScope()
     var showPerfilDiv by remember { mutableStateOf(false) }
@@ -145,10 +141,9 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                 isLoading = false
                 //
                 if (sysPackage != SysPackages.L.desc) {
-                    productsData = products.fetchProducts()
-                        .filter { it.minStock != null && it.stock < it.minStock }
+                    allNotifications = NotificationRepository().allNotifications()
+                        .filter { !it.read }
                 }
-
             } catch (e: Exception) {
                 console.log("Error: ${e.message}")
             }
@@ -164,36 +159,35 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
         div(divClasses = listOf("content-container", "dash-container")) {
             Header {
                 div("header-top") {
-                    productsData?.let { pro ->
-                        if (pro.isNotEmpty()) {
-                            if (showNotificationAlert) {
-                                Button(attrs = {
-                                    id("closeNotificationAlertButton")
-                                    onClick { showNotificationAlert = false }
-                                }) {
-                                    Text("X")
-                                }
-                                div("notificationAlertDiv") {
-                                    div("notificationAlertDiv-content") {
+                    allNotifications.let { notf ->
+                        if (notf.isNotEmpty()) {
+                                div(divClasses = listOf("notificationContainer")) {
+                                    if (showNotificationAlert) {
+                                        div("notificationAlertDiv") {
+                                            div("notificationAlertDiv-content") {
+                                                P(attrs = { id("notificationAlertDiv-content-title") }) { Text("Notificações não lidas") }
 
-                                        P(attrs = { id("notificationAlertDiv-content-title") }) { Text("Productos com estoque baixo") }
+                                                Hr()
 
-                                        Hr()
+                                                div(divClasses = listOf("p-content")) {
+                                                    notf.take(4).forEach {
+                                                        P() { Text(it.title) }
+                                                    }
+                                                }
 
-                                        div(divClasses = listOf("p-content")) {
-                                            pro.take(4).forEach {
-                                                P() { Text(it.name) }
-                                            }
-                                        }
-
-                                        Br()
-                                        if (pro.size > 4) {
-                                            button("btn", "Ver mais") {
-                                                router.navigate("/products")
+                                                Br()
+                                                if (notf.size > 4) {
+                                                    button("btn", "Ver mais") {
+                                                        router.navigate("/products")
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                }
+                                    val notificationLabel = if (notf.size == 1) "Notificação" else "Notificações"
+                                    button("notificationContainer-indicator", "${notf.size}", hoverText = notificationLabel, btnChildElement = "h3") {
+                                        showNotificationAlert = !showNotificationAlert
+                                    }
                             }
 
                         }
