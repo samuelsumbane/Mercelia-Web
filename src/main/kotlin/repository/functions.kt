@@ -1,8 +1,8 @@
 package repository
 import kotlinx.datetime.*
 
-const val apiPath = "http://0.0.0.0:2000"
-//const val apiPath = "http://192.168.48.253:2000"
+//const val apiPath = "http://0.0.0.0:2000"
+const val apiPath = "http://192.168.1.2:2000"
 const val apiCategoriesPath = "$apiPath/categories"
 const val apiOwnersPath = "$apiPath/owners"
 const val apiClientsPath = "$apiPath/clients"

@@ -35,7 +35,7 @@ fun loginPage() {
     // admin@gmain : 1110 -> admin
     // sam@gmail.com : 8262 -> gerente
     // seller@gmail :   -> vendedor
-    // marcos@gmail: 3792 -> vendedor
+    // marcos@gmail: 3792 -> 1111 -> vendedor
 
     var email by remember { mutableStateOf("admin@gmain") }
     var password by remember { mutableStateOf("1110") }

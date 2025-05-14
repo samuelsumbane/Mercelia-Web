@@ -21,6 +21,7 @@ import org.w3c.dom.set
 import repository.*
 import view.state.AppState.isLoading
 import view.state.AppState.error
+import view.state.AppState.sysLocationId
 import view.state.UiState.modalState
 import view.state.UiState.modalTitle
 import view.state.UiState.submitBtnText
@@ -74,6 +75,7 @@ fun brancesPage(userRole: String, sysPackage: String) {
             systemLocation = if (branchItemData != null) {
                 "${branchItemData.name} - ${branchItemData.address}"
             } else "Não definido"
+             if (branchItemData != null) { sysLocationId = branchItemData.id.toString() }
         }
     }
     fun closeAndFetch() {
@@ -126,7 +128,6 @@ fun brancesPage(userRole: String, sysPackage: String) {
                                 }
 
                                 inputValue?.let { option ->
-                                    //                                categoryError = ""
                                     localStorage["system_location"] = option
                                     locationDataFun()
                                 }

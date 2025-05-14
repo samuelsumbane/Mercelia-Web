@@ -15,6 +15,8 @@ import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.onSubmit
 import org.jetbrains.compose.web.dom.*
 import repository.*
+import view.state.UiState.submitBtnText
+import view.state.AppState.error
 
 typealias AfMap = Map<String, String>
 
@@ -26,13 +28,10 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
     val commonRepo = CommonRepository()
 
     var data by remember { mutableStateOf(emptyUserItem) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var email by remember { mutableStateOf("") }
     var minModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
     var securityModalState by remember { mutableStateOf("closed") } //closed = "" --------->>
     val coroutineScope = rememberCoroutineScope()
 
-    var submitBtnText by remember { mutableStateOf("Submeter") }
     var userName by remember { mutableStateOf("") }
 //    var userId by remember { mutableStateOf(0) }
     var role by remember { mutableStateOf("") }
@@ -56,7 +55,7 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
         try {
             data = users.getUserById(userId).also {
                 userName = it.name
-                email = it.email
+                userEmail = it.email
                 role = it.role
                 lastLogin = it.lastLogin
 //                userId = it.id
@@ -126,7 +125,6 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
                 P {}
                 button("btn", "Editar senha") {
                     securityModalState = "open-min-modal"
-                    console.log("clicked")
                     afPasscode = ""
                     afPasscodeError = ""
                     afNewPassword = ""

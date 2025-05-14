@@ -35,7 +35,6 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
         try {
             val fetched = async { orders.fetchOrders() }
             ordersData = if (userRole == Role.V.desc) fetched.await().filter { it.userId == userId } else fetched.await()
-
         } catch (e: Exception) {
             error = "Erro: ${e.message}"
         } finally {
@@ -111,7 +110,7 @@ fun salesPage(userId: Int, userRole: String, sysPackage: String) {
             }
         }
 
-        saleModal(toSaleSysPackage, saleMode, orders, userId, modalState) {
+        saleModal(toSaleSysPackage, saleMode, orders, userId, userRole, modalState) {
             modalState = "closed"
             coroutineScope.launch {
                 val allOrders = orders.fetchOrders()

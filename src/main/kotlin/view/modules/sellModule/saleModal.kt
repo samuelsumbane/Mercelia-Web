@@ -32,6 +32,7 @@ fun saleModal(
     saleMode: Boolean,
     orders: SaleRepository,
     userId: Int,
+    userRole: String,
     maxModalState: String,
     onCloseModal: () -> Unit,
 ) {
@@ -90,9 +91,16 @@ fun saleModal(
     val router = Router.current
 
     fun branchIdNotFoundAlert() {
-        onOkayAlert("warning", "Localização do sistema não definida.", "Defina a localização do sistema na pagina de sucursais") {
-            router.navigate("/branches")
+        if (userRole == Role.V.desc) {
+            onOkayAlert("warning", "Localização do sistema não definida.", "Entre contacto com o gerente ou Administrador para definir a localização do sistema") {
+                router.navigate("/sales")
+            }
+        } else {
+            onOkayAlert("warning", "Localização do sistema não definida.", "Defina a localização do sistema na pagina de sucursais") {
+                router.navigate("/branches")
+            }
         }
+
     }
 
     fun calcCharge(value: Double) {
@@ -341,14 +349,16 @@ fun saleModal(
 //                            Div(attrs = { id("sellControl")}) {
                         Div(attrs = { classes("chargeAndDiscont")}) {
                             P()
-                            formDiv("Desconto", descont.toString(),
-                                InputType.Number, 0, { event ->
-                                    val inputValue = (event.value as? String)?.toDoubleOrNull()
-                                    if (inputValue != null && inputValue >= 0) {
-                                        descont = inputValue
-                                    }
-                                }, ""
-                            )
+                            if (userRole != Role.V.desc) {
+                                formDiv("Desconto", descont.toString(),
+                                    InputType.Number, 0, { event ->
+                                        val inputValue = (event.value as? String)?.toDoubleOrNull()
+                                        if (inputValue != null && inputValue >= 0) {
+                                            descont = inputValue
+                                        }
+                                    }, ""
+                                )
+                            }
 
                             Div {
                                 Label { Text("Valor recebido (do comprador)") }
