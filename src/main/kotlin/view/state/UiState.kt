@@ -2,6 +2,7 @@ package view.state
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 
@@ -21,6 +22,11 @@ object UiState {
     var finalDateError by mutableStateOf("")
     var description by mutableStateOf("")
     var paymentForm by  mutableStateOf("")
+    var showThemeModeChooserDiv by mutableStateOf(false)
+    var showPerfilDiv by mutableStateOf(false)
+    var actualTheme by mutableStateOf("")
+    var currentActualThemeName by mutableStateOf("")
+
 
 
 

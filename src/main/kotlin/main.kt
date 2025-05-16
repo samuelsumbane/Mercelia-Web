@@ -36,6 +36,7 @@ import view.modules.settingsModule.brancesPage
 import view.modules.settingsModule.notificationsPage
 import view.modules.settingsModule.usersPackage.UsersPage
 import view.state.AppState.sysPackage
+import view.state.AppState.userName
 
 
 fun main() {
@@ -61,6 +62,7 @@ fun main() {
 
                     if (session.isLogged) {
                         user = session
+                        userName = session.userName
                     } else {
                         isLoggedIn = false
                     }
@@ -70,9 +72,9 @@ fun main() {
             }
 //            var sysPackage by remember { mutableStateOf(sysPackageC) }
 
-//            route("/") {
-//                loginPage()
-//            }
+            route("/") {
+                loginPage()
+            }
 
             if (user.isLogged) {
 //                noMatch {
@@ -107,6 +109,10 @@ fun main() {
                             UserDataAndSys(it.userId, it.userName, it.userRole, sysPackage)
                         }
                         stockPage(paramData)
+                    }
+
+                    route("/notifications") {
+                        notificationsPage(user.userRole, user.userId, sysPackage)
                     }
 
                     for (uRoute in notForSellerUserRoutes) {
@@ -177,7 +183,7 @@ fun main() {
                     }
 
                     route("/notifications") {
-                        notificationsPage(user.userRole, sysPackage)
+                        notificationsPage(user.userRole, user.userId, sysPackage)
                     }
 
                     if (sysPackage == SysPackages.PO.desc) {

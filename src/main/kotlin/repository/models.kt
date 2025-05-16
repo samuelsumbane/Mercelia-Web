@@ -324,6 +324,12 @@ data class UserDataAndSys(
     val sysPackage: String,
 )
 
+@Serializable
+data class UpdateUserPersonalData(
+    val userId: Int,
+    val userName: String,
+    val userEmail: String,
+)
 
 
 @Serializable
@@ -426,6 +432,7 @@ data class NotificationItem(
     val type: String,
     val createdAt: String,
     val read: Boolean,
+    val userId: Int?,
 )
 
 @Serializable

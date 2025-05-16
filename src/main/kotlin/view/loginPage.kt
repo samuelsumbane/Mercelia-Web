@@ -1,11 +1,13 @@
 package view
 
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import app.softwork.routingcompose.Router
 import components.formDiv
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
@@ -17,12 +19,27 @@ import org.jetbrains.compose.web.dom.*
 import repository.LoginRequest
 import repository.Role
 import repository.UserRepository
+import view.state.UiState.actualTheme
+import view.state.UiState.currentActualThemeName
 
 @Composable
 fun loginPage() {
 
     val users = UserRepository()
     val router = Router.current
+
+    actualTheme = localStorage.getItem("system_theme") ?: run {
+        localStorage.setItem("system_theme", "Auto")
+        "Auto".also { actualTheme = it }
+    }
+    currentActualThemeName =
+        when (actualTheme) {
+            "Light" -> "Claro"
+            "Dark" -> "Escuro"
+            else -> "Auto"
+        }
+
+
     sessionStorage.getItem("reloadFromLogin")?.let {
         when (it) {
            "1" -> router.navigate("/dashboard")
@@ -37,7 +54,7 @@ fun loginPage() {
     // seller@gmail :   -> vendedor
     // marcos@gmail: 3792 -> 1111 -> vendedor
 
-    var email by remember { mutableStateOf("admin@gmain") }
+    var email by remember { mutableStateOf("admin@gmail") }
     var password by remember { mutableStateOf("1110") }
     var errorText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()

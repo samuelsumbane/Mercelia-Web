@@ -1,10 +1,14 @@
 package components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import app.softwork.routingcompose.Router
+import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.forId
 import org.jetbrains.compose.web.attributes.max
 import org.jetbrains.compose.web.attributes.maxLength
 //import org.jetbrains.compose.web.attributes.InputType
@@ -12,8 +16,11 @@ import org.jetbrains.compose.web.attributes.min
 import org.jetbrains.compose.web.attributes.readOnly
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.events.SyntheticChangeEvent
 import org.jetbrains.compose.web.events.SyntheticInputEvent
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLSelectElement
+import repository.UserRepository
 import kotlin.math.max
 
 @Composable
@@ -346,6 +353,75 @@ fun homeDivMinResume(
         }
     }
 }
+
+@Composable
+fun UserPerfilOptions(
+    id: String,
+    userName: String,
+    currentTheme: String,
+    onChangeTheme: () -> Unit,
+) {
+    val router = Router.current
+    val coroutineScope = rememberCoroutineScope()
+
+    div( id, listOf("user-perfil-options")) {
+        P(attrs = { id("userNameLabel") }) {
+            Text(userName)
+        }
+
+        button("bt", "Perfil") {
+            router.navigate("/eachUser")
+        }
+
+        button("bt", "Tema: $currentTheme") { onChangeTheme() }
+
+        button("bt", "Sair") {
+            coroutineScope.launch {
+                val (status, message) = UserRepository().logout()
+                if (status == 200) {
+                    sessionStorage.removeItem("jwt_token")
+                    router.navigate("/")
+                } else {
+                    alert("error", "Erro", message)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun labelFor(id: String = "", lClasses: List<String> = emptyList(), text: String) {
+    Label(attrs = {
+        if (id.isNotBlank()) { forId(id) }
+        if (lClasses.isNotEmpty()) { classes(lClasses) }
+    }) { Text(text) }
+}
+
+@Composable
+fun selectDiv(
+    label: String,
+    selectId: String,
+    inputError: String = "",
+    onOptionChange: (String?) -> Unit,
+    optionsContent: @Composable () -> Unit
+) {
+    Div(attrs = {
+        style {
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+        }
+    }) {
+        labelFor(selectId, text = label)
+        Select(attrs = {
+            style { height(33.px) }
+            id(selectId)
+            classes("formTextInput")
+            onChange { onOptionChange(it.value) }
+        }) { optionsContent() }
+        labelFor(lClasses = listOf("errorText"), text = inputError)
+    }
+}
+
 
 fun unknownErrorAlert() {
     alert("error", "Erro", "Houve um erro desconhecido. Actualiza a pagina e tente novamente.\n Se o erro persistir entre em contacto com o gerente.")

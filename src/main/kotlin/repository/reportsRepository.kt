@@ -46,14 +46,14 @@ class ReportsRepository : ClassHttpClient(){
         return httpClient.get("$apiReportPath/productsMostBoughts").body()
     }
 
-
     suspend fun fetchDateTimeSales(
         initialDate: String,
         initialTime: String,
         finalDate: String,
         finalTime: String,
+        ownerId: String,
     ): List<SaleReportItem> {
-        return httpClient.get("$apiReportPath/filteredSalesByDates/$initialDate/$initialTime/$finalDate/$finalTime?timezoneid=Africa/Harare").body()
+        return httpClient.get("$apiReportPath/filteredSalesByDates/$initialDate/$initialTime/$finalDate/$finalTime/$ownerId?timezoneid=Africa/Harare").body()
     }
 }
 

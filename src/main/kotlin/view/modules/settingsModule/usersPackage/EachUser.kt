@@ -160,15 +160,18 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
                     userNameError = if (userName.isBlank()) "O nome é obrigatório" else ""
                     if (userNameError.isBlank()) {
                         coroutineScope.launch {
-                            //                            val editeachUserDraft = EditeachUserDraft(
-                            //                                userId, userName, afPhone, afLocation, "",
-                            //                                afBirthday, afEmail
-                            //                            )
-                            //                            users.editeachUser(editeachUserDraft)
-                            //                            alert("success", "Sucesso!", "Dados do afiliado actualizados com sucesso")
+                            val (status, message) = commonRepo.postRequest("$apiPath/user/update-user-personal-data",
+                               UpdateUserPersonalData(userId, userName, userEmail), "put")
+                            when (status) {
+                                200 -> alertTimer(message)
+                                404 -> alert("error", "A actualização falhou", message)
+                                else -> {
+                                    console.log(status)
+                                    unknownErrorAlert()
+                                }
+                            }
                         }
                     }
-
                 }
             }
         ) {
@@ -195,7 +198,6 @@ fun eachUserPage(userId: Int, userRole: String, sysPackage: String) {
     }
 
     minModal(securityModalState, "Editar e senha") {
-
 
         var passwordMatches by remember { mutableStateOf(false) }
 

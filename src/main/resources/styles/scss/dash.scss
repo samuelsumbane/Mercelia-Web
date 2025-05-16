@@ -139,13 +139,11 @@ header {
 }
 
 
-#user-perfil-options, .options-div {
+.user-perfil-options, .options-div {
     display: flex;
     box-shadow: 0 0 17px red;
     background:aliceblue;
     position:relative;
-    right: 100%;
-    top: 100%;
     flex-direction:column;
     padding:5px;
     width: 130px;
@@ -196,10 +194,26 @@ header {
      }
 }
 
+#home-user-perfil{
+    right: 100%;
+    top: 100%;
+}
+
+#sidebar-user-perfil{
+    left:100%;
+}
+
 #themeModeOptions{
     left: -620%;
     top: -55%;
     width:200px;
+}
+
+#themeModeOptions-sidebar{
+    left:360%;
+    top: -18%;
+    width:200px;
+    color:black;
 }
 
 #header-bottom {

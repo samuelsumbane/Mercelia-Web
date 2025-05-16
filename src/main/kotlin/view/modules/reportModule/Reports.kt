@@ -3,18 +3,13 @@ package view.modules.reportModule
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
 import components.*
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.onSubmit
-import org.jetbrains.compose.web.attributes.width
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.*
@@ -33,17 +28,28 @@ import view.state.UiState.maySendData
 import view.state.UiState.modalState
 import view.state.UiState.modalTitle
 import view.state.AppState.error
+import view.state.AppState.filledField
+import view.state.AppState.filledFields
+import view.state.AppState.finalDateRequired
+import view.state.AppState.finalTimeMessage
+import view.state.AppState.initialDateRequired
+import view.state.AppState.initialTimeMessage
+import view.state.AppState.owner
 
 
 @Composable
 fun reportsPage(paramData: UserDataAndSys) {
 
     val reports = ReportsRepository()
+    val owners = OwnersRepository()
+
     var allReportsData by remember { mutableStateOf(listOf<SaleReportItem>()) }
     var filteredReports by mutableStateOf(mutableListOf<SaleReportItem>(
     ))
+    var ownerData by remember { mutableStateOf<List<OwnerItem>?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val router = Router.current
+
 
     LaunchedEffect(Unit) {
         try {
@@ -56,6 +62,8 @@ fun reportsPage(paramData: UserDataAndSys) {
         } finally {
             initializeDataTable()
             isLoading = false
+            ownerData = owners.getOwners()
+            console.log("The owners are: $ownerData")
         }
     }
     if (isLoading) {
@@ -169,15 +177,14 @@ fun reportsPage(paramData: UserDataAndSys) {
                 Div { Text("Loading...") }
             }
 
-
             minModal(modalState, "Selecionar Intervalo de Datas") {
                 Form(
                     attrs = {
                         classes("modalform")
                         onSubmit { event ->
                             event.preventDefault()
-                            initialDateError = if (initialDate == "") "A data inicial é obrigatória" else ""
-                            finalDateError = if (finalDate == "") "A data final é obrigatória" else ""
+                            initialDateError = if (initialDate == "") initialDateRequired else ""
+                            finalDateError = if (finalDate == "") finalDateRequired else ""
 
                             if (initialDate != "" && finalDate != "") {
                                 if (initialTime == "" && finalTime == "") {
@@ -185,23 +192,21 @@ fun reportsPage(paramData: UserDataAndSys) {
                                     finalTime = "23:59"
                                     alert(
                                         "info",
-                                        "Campos Preenchidos",
-                                        "A hora inicial será 00:00 e a hora final será 23:59."
+                                        filledFields,
+                                        "$initialTimeMessage e a ${finalTimeMessage.lowercase()}"
                                     )
                                 } else if (initialTime == "") {
                                     initialTime = "00:00"
-                                    alert("info", "Campos Preenchido", "A hora inicial será 00:00.")
+                                    alert("info", filledField, initialTimeMessage )
                                 } else if (finalTime == "") {
                                     finalTime = "23:59"
-                                    alert("info", "Campos Preenchido", "A hora final será 23:59.")
+                                    alert("info", filledField, finalTimeMessage)
                                 }
 
                                 //                            maxModalState = "open-max-modal"
                                 coroutineScope.launch {
                                     var teredReports =
-                                        reports.fetchDateTimeSales(initialDate, initialTime, finalDate, finalTime)
-//                                    console.log(teredReports)
-
+                                        reports.fetchDateTimeSales(initialDate, initialTime, finalDate, finalTime, owner)
                                     if (teredReports.isEmpty()) {
                                         alert(
                                             "info",
@@ -224,7 +229,6 @@ fun reportsPage(paramData: UserDataAndSys) {
                             } else {
                                 finalDateError = "Selecione a data final"
                             }
-
                         }
                     }
                 ) {
@@ -249,6 +253,25 @@ fun reportsPage(paramData: UserDataAndSys) {
                         "Hora Final", finalTime, InputType.Time, 0,
                         oninput = { event -> finalTime = event.value }, ""
                     )
+
+                    selectDiv(
+                        "Proprietário", "selectOwnerId",
+                        onOptionChange = { option ->
+                            if (option != null && option.toInt() != 0) {
+                                owner = option
+                            } else {
+                                owner = "0"
+                            }
+                        }
+                    ) {
+                        Option("0") { Text("Todos") }
+                        ownerData?.forEach {
+                            Option("${it.id}") { Text(it.name) }
+                        }
+                        if (owner.isBlank()) {
+                            owner = "0" // Means none option selected ------->>
+                        }
+                    }
 
                     Div(attrs = { classes("min-submit-buttons") }) {
                         button("closeButton", "Fechar") {

@@ -11,10 +11,15 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import org.jetbrains.compose.web.css.not
 import org.jetbrains.compose.web.dom.*
 import repository.*
 import view.state.AppState.allNotifications
 import view.state.AppState.isLoading
+import view.state.UiState.actualTheme
+import view.state.UiState.currentActualThemeName
+import view.state.UiState.showPerfilDiv
+import view.state.UiState.showThemeModeChooserDiv
 
 
 @Serializable
@@ -77,17 +82,8 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
     var salesProfitsMonthsLabels by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var salesProfitsMonthsValues by remember { mutableStateOf<Array<String>>(emptyArray()) }
     var showNotificationAlert by remember { mutableStateOf(false)}
-
     val coroutineScope = rememberCoroutineScope()
-    var showPerfilDiv by remember { mutableStateOf(false) }
-    var showThemeModeChooserDiv by remember { mutableStateOf(false) }
-    var actualTheme by remember { mutableStateOf(localStorage.getItem("system_theme"))}
-    val currentActualThemeName =
-        when (actualTheme) {
-            "Light" -> "Claro"
-            "Dark" -> "Escuro"
-            else -> "Auto"
-        }
+
     LaunchedEffect(Unit) {
         if (userRole != Role.V.desc) {
             try {
@@ -206,30 +202,8 @@ fun homeScreen(userRole: String, userName: String, sysPackage: String) {
                             }
                         }
                         if (showPerfilDiv) {
-                            div("user-perfil-options") {
-                                P(attrs = { id("userNameLabel") }) {
-                                    Text(userName)
-                                }
-
-                                button("bt", "Perfil") {
-                                    router.navigate("/eachUser")
-                                }
-
-                                button("bt", "Tema: $currentActualThemeName") {
-                                    showThemeModeChooserDiv = !showThemeModeChooserDiv
-                                }
-
-                                button("bt", "Sair") {
-                                    coroutineScope.launch {
-                                        val (status, message) = users.logout()
-                                        if (status == 200) {
-                                            sessionStorage.removeItem("jwt_token")
-                                            router.navigate("/")
-                                        } else {
-                                            alert("error", "Erro", message)
-                                        }
-                                    }
-                                }
+                            UserPerfilOptions("home-user-perfil", userName, currentActualThemeName) {
+                                showThemeModeChooserDiv = !showThemeModeChooserDiv
                             }
                             if (showThemeModeChooserDiv) {
                                 OptionsDiv("themeModeOptions"){

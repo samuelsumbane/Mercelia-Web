@@ -27,7 +27,7 @@ import view.state.UiState.submitBtnText
 
 
 @Composable
-fun notificationsPage(userRole: String, sysPackage: String) {
+fun notificationsPage(userRole: String, userId: Int, sysPackage: String) {
 
     val notifications = NotificationRepository()
     val commonRepo = CommonRepository()
@@ -43,8 +43,7 @@ fun notificationsPage(userRole: String, sysPackage: String) {
     LaunchedEffect(Unit) {
         try {
             val dataDeffered = async { notifications.allNotifications() }
-            allNotifications = dataDeffered.await()
-//            console.log(allNotifications)
+            allNotifications = if (userRole == Role.V.desc) dataDeffered.await().filter { it.userId == userId } else dataDeffered.await()
         } catch (e: Exception) {
             error = "Error: ${e.message}"
         } finally {
