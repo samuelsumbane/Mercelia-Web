@@ -1,10 +1,8 @@
 package repository
 
-import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.browser.localStorage
 import kotlinx.browser.sessionStorage
 
 
@@ -23,8 +21,9 @@ class StockRepository : ClassHttpClient() {
         initialTime: String,
         finalDate: String,
         finalTime: String,
+        ownerId: String,
     ): List<StockItem> {
-        return httpClient.get("$apiStockPath/filteredStocksByDates/$initialDate/$initialTime/$finalDate/$finalTime?timezoneid=Africa/Harare").body()
+        return httpClient.get("$apiStockPath/filteredStocksByDates/$initialDate/$initialTime/$finalDate/$finalTime/$ownerId?timezoneid=Africa/Harare").body()
     }
 
 }

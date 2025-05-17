@@ -1,7 +1,10 @@
 package components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import app.softwork.routingcompose.Router
 import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
@@ -9,19 +12,16 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.ButtonType
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.forId
-import org.jetbrains.compose.web.attributes.max
 import org.jetbrains.compose.web.attributes.maxLength
 //import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.min
+import org.jetbrains.compose.web.attributes.onSubmit
 import org.jetbrains.compose.web.attributes.readOnly
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
-import org.jetbrains.compose.web.events.SyntheticChangeEvent
 import org.jetbrains.compose.web.events.SyntheticInputEvent
 import org.w3c.dom.HTMLInputElement
-import org.w3c.dom.HTMLSelectElement
 import repository.UserRepository
-import kotlin.math.max
 
 @Composable
 fun cardButtons(
@@ -56,18 +56,28 @@ fun userCardButtons(
 }
 
 @Composable
-fun multiFilesExportButton(
+fun optionsColectionDiv(
     btnText: String = "Exportar Todos",
     divContent: @Composable () -> Unit
 ) {
+    var showDivContent by mutableStateOf(false)
     Div(attrs = {classes("multiFilesExportButton")}) {
-        Button(attrs = { classes("multiFilesExportButton-btn") }) {
-            Text(btnText)
+        button("multiFilesExportButton-btn", btnText) {
+            showDivContent = !showDivContent
         }
-        Div(attrs = { classes("multiFilesExportButton-child")}) {
-            divContent()
+        if (showDivContent) {
+            Div(attrs = { classes("multiFilesExportButton-child")}) {
+                divContent()
+            }
         }
     }
+}
+
+@Composable
+fun clickableOption(text: String, onClickFun: () -> Unit) {
+    P(attrs = {
+        onClick { onClickFun() }
+    }) { Text(text) }
 }
 
 @Composable
@@ -125,43 +135,6 @@ fun loadingModal() {
             }
         }
     }
-}
-
-@JsName("showAlert")
-external fun showAlert(icon: String, title: String, text: String)
-
-@JsName("showOkayAlert")
-external fun showOkayAlert(icon: String, title: String, text: String, onOkay: () -> Unit)
-
-fun alert(icon: String, title: String, text: String) {
-    window.setTimeout({
-        showAlert(icon, title, text)
-    }, 50)
-}
-
-fun onOkayAlert(icon: String, title: String, text: String, onOkay: () -> Unit) {
-    window.setTimeout({
-        showOkayAlert(icon, title, text, onOkay)
-    }, 50)
-}
-
-
-@JsName("showAlertDelete")
-external fun showAlertDelete(title: String, text: String, onDelete: () -> Unit)
-
-fun alertDelete(title: String, text: String, onDelete: () -> Unit) {
-    window.setTimeout({
-        showAlertDelete(title, text, onDelete)
-    }, 50)
-}
-
-@JsName("showAlertTimer")
-external fun showAlertTimer(title: String)
-
-fun alertTimer(title: String) {
-    window.setTimeout({
-        showAlertTimer(title)
-    }, 10)
 }
 
 fun showSoldProductChart(labels: Array<String>, quantity: Array<String>) {
@@ -425,4 +398,62 @@ fun selectDiv(
 
 fun unknownErrorAlert() {
     alert("error", "Erro", "Houve um erro desconhecido. Actualiza a pagina e tente novamente.\n Se o erro persistir entre em contacto com o gerente.")
+}
+
+@Composable
+fun rightPartForReports(
+    title: String,
+    thisModalState: String,
+    onCloseModal: () -> Unit,
+    leftPartFun: @Composable () -> Unit,
+) {
+    Div(attrs = { classes("scrolled", "max-modal", "customizedMaxModal", thisModalState) }) {
+
+        Div(attrs = { classes("max-modal-header") }) {
+            H3(attrs = { classes("max-modal-title") }) { Text(title) }
+        }
+
+        Div(attrs = { classes("max-modal-body") }) {
+            Form(attrs = {
+                classes("max-modal-body-sellForm")
+                onSubmit { event ->
+                    event.preventDefault()
+                }
+            }) {
+
+                Div(attrs = { id("r-leftPart") }) { leftPartFun() }
+                Div(attrs = {
+                    id("r-rightPart")
+                    style {
+                        width(40.percent)
+                        property("margin", "0 0 0 auto")
+                    }
+                }) {
+                    Div(attrs = { id("rightPart-body") }) {
+                        Div(attrs = { classes("reportButtons") }) {
+                            Button(attrs = {
+                                id("cancelButton")
+                                onClick { onCloseModal() }
+                            }) {
+                                Label(attrs = { classes("btnLabel") }) {
+                                    Text("Fechar")
+                                }
+                            }
+
+                            Button(attrs = {
+                                id("printFatDoc")
+                                onClick { printPaper() }
+                            }) {
+                                Label(
+                                    attrs = { classes("btnLabel") }
+                                ) { Text("Imprimir") }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Div(attrs = { classes("max-modal-footer") })
+    }
+
 }

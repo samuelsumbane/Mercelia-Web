@@ -3,28 +3,26 @@ package view.modules.reportModule
 import androidx.compose.runtime.*
 import app.softwork.routingcompose.Router
 import components.*
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import org.jetbrains.compose.web.attributes.*
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.attributes.width
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.Event
 import repository.*
+import view.state.AppFunctions
 import view.state.UiState.modalState
 import view.state.AppState.error
 import view.state.AppState.isLoading
+import view.state.AppState.owner
 import view.state.UiState.finalDate
-import view.state.UiState.finalDateError
 import view.state.UiState.finalTime
 import view.state.UiState.initialDate
-import view.state.UiState.initialDateError
 import view.state.UiState.initialTime
 import view.state.UiState.maxModalState
 import view.state.UiState.maySendData
@@ -36,6 +34,9 @@ import kotlin.collections.filter
 fun stockPage(paramData: UserDataAndSys) {
 
     val stocks = StockRepository()
+    val owners = OwnersRepository()
+    var ownerData by remember { mutableStateOf<List<OwnerItem>?>(null) }
+
     var stockData by mutableStateOf(listOf<StockItem>())
     var filteredStocks by mutableStateOf(mutableListOf<StockItem>(
     ))
@@ -51,6 +52,7 @@ fun stockPage(paramData: UserDataAndSys) {
             error = "Error: ${e.message}"
         } finally {
             isLoading = false
+            ownerData = owners.getOwners()
         }
     }
 
@@ -64,51 +66,32 @@ fun stockPage(paramData: UserDataAndSys) {
             sysPackage = paramData.sysPackage,
             userRole = paramData.userRole,
             hasNavBar = true, navButtons = {
-                multiFilesExportButton(btnText = "Venda de hoje") {
-                    P(attrs = {
-                        onClick {
-                            val input = document.getElementById("dt-search-0") as? HTMLInputElement
-                            input?.value = getUserLocalDateString()
-                            input?.dispatchEvent(Event("input"))
-                        }
-                    }) {
-                        Text("Filtrar")
+                optionsColectionDiv(btnText = "Venda de hoje") {
+                    clickableOption("Filtrar") {
+                        val input = document.getElementById("dt-search-0") as? HTMLInputElement
+                        input?.value = getUserLocalDateString()
+                        input?.dispatchEvent(Event("input"))
                     }
 
-                    P(attrs = {
-                        onClick {
-                            val todayDate = getUserLocalDateString()
-                            filteredStocks = stockData.filter { it.datetime.split(" ")[0] == todayDate }.toMutableList()
+                    clickableOption("Imprimir") {
+                        val todayDate = getUserLocalDateString()
+                        filteredStocks = stockData.filter { it.datetime.split(" ")[0] == todayDate }.toMutableList()
+                        if (filteredStocks.isEmpty()) {
+                            todayRecordsNotFound()
+                        } else {
                             modalState = "closed"
                             maxModalState = "open-max-modal"
                             maySendData = true
                         }
-                    }) {
-                        Text("Imprimir")
                     }
                 }
                 if (paramData.sysPackage != SysPackages.L.desc) {
-                    multiFilesExportButton {
+                    optionsColectionDiv {
                         if (paramData.sysPackage == SysPackages.PO.desc) {
-                            P(attrs = {
-                                onClick {
-                                    window.open("http://0.0.0.0:2000/stocks/export/stocks/excel", "_blank")
-                                }
-                            }) {
-                                Text("Para Excel")
-                            }
+                            clickableOption("Para Excel") { window.open("http://0.0.0.0:2000/stocks/export/stocks/excel", "_blank") }
                         }
-
-                        P(attrs = {
-                            onClick { window.open("http://0.0.0.0:2000/stocks/export/stocks/csv", "_blank") }
-                        }) {
-                            Text("Para CSV")
-                        }
-                        P(attrs = {
-                            onClick { window.open("http://0.0.0.0:2000/stocks/export/stocks/json", "_blank") }
-                        }) {
-                            Text("Para Json")
-                        }
+                        clickableOption("Para CSV") { window.open("http://0.0.0.0:2000/stocks/export/stocks/csv", "_blank") }
+                        clickableOption("Para Json") { window.open("http://0.0.0.0:2000/stocks/export/stocks/json", "_blank") }
                     }
                 }
                 button("btnSolid", "Gerar Inventário") {
@@ -116,7 +99,7 @@ fun stockPage(paramData: UserDataAndSys) {
                     modalState = "open-min-modal"
                 }
             }) {
-//                if (error == null) {
+
             if (isLoading) {
                 Text("Carregando...")
             } else {
@@ -132,7 +115,7 @@ fun stockPage(paramData: UserDataAndSys) {
                             Tr {
                                 Th { Text("Producto") }
                                 Th { Text("Tipo") }
-                                Th { Text("Quantidade") }
+                                Th{ Text("Quant.") }
                                 Th { Text("Qtd Antes") }
                                 Th { Text("Qtd Depois") }
                                 Th { Text("Custo") }
@@ -151,14 +134,14 @@ fun stockPage(paramData: UserDataAndSys) {
                                 Tr {
                                     Td { Text(it.productName) }
                                     Td { Text(it.type) }
-                                    Td { Text(it.quantity.toString()) }
+                                    Td{ Text(it.quantity.toString()) }
                                     Td { Text(it.beforeQty.toString()) }
                                     Td { Text(it.afterQty.toString()) }
                                     Td { Text(cost.toString()) }
                                     Td { Text(price.toString()) }
                                     Td { Text(it.reason) }
                                     Td { Text(it.ownerName) }
-                                    Td { Text(it.branchName) }
+                                    Td { Text(it.branchName.cut(5)) }
                                     Td { Text(it.datetime) }
                                     Td { Text(it.userName) }
                                 }
@@ -168,149 +151,26 @@ fun stockPage(paramData: UserDataAndSys) {
                 }
             }
 
-            minModal(modalState, modalTitle) {
-                Form(
-                    attrs = {
-                        classes("modalform")
-                        onSubmit { event ->
-                            event.preventDefault()
-                            initialDateError = if (initialDate == "") "A data inicial é obrigatória" else ""
-                            finalDateError = if (finalDate == "") "A data final é obrigatória" else ""
-
-                            if (initialDate != "" && finalDate != "") {
-                                if (initialTime == "" && finalTime == "") {
-                                    initialTime = "00:00"
-                                    finalTime = "23:59"
-                                    alert(
-                                        "info",
-                                        "Campos Preenchidos",
-                                        "A hora inicial será 00:00 e a hora final será 23:59."
-                                    )
-                                } else if (initialTime == "") {
-                                    initialTime = "00:00"
-                                    alert("info", "Campos Preenchido", "A hora inicial será 00:00.")
-                                } else if (finalTime == "") {
-                                    finalTime = "23:59"
-                                    alert("info", "Campos Preenchido", "A hora final será 23:59.")
-                                }
-
-                                //                            console.log("$initialDate, $initialTime, $finalDate, $finalTime")
-                                coroutineScope.launch {
-                                    var teredReports =
-                                        stocks.fetchDateTimeStocks(initialDate, initialTime, finalDate, finalTime)
-
-                                    if (teredReports.isEmpty()) {
-                                        alert(
-                                            "info",
-                                            "Registros não encontrados",
-                                            "Nenhum registro encontrado com datas selecionadas"
-                                        )
-                                    } else {
-                                        filteredStocks = teredReports.toMutableList()
-
-                                        modalState = "closed"
-                                        maxModalState = "open-max-modal"
-                                        maySendData = true
-                                        initialDate = ""
-                                        initialTime = ""
-                                        finalDate = ""
-                                        finalTime = ""
-                                        teredReports = emptyList()
-                                    }
-                                }
-                            } else if (initialDate.isBlank()) {
-                                initialDateError = "Selecione a data inicial"
-                            } else {
-                                finalDateError = "Selecione a data final"
-                            }
-
+            if (ownerData != null) {
+                FilterRecordsByDateTime(modalState, ownerData!!, onCloseModal = {
+                    modalState = "c"
+                }) {
+                    coroutineScope.launch {
+                        var teredReports =
+                            stocks.fetchDateTimeStocks(initialDate, initialTime, finalDate, finalTime, owner)
+                        if (teredReports.isEmpty()) {
+                            recordsNotFound()
+                        } else {
+                            filteredStocks = teredReports.toMutableList()
+                            AppFunctions.resetFilterModalFields()
+                            teredReports = emptyList()
                         }
-                    }
-                ) {
-
-                    formDiv("Data Inicial", initialDate, inputType = InputType.Date, 0, oninput = { event ->
-                        initialDate = event.value
-                    }, initialDateError)
-
-                    formDiv(
-                        "Hora Inicial", initialTime, InputType.Time, 0,
-                        oninput = { event -> initialTime = event.value }, ""
-                    )
-                    Br()
-                    formDiv(
-                        "Data Final", finalDate, InputType.Date, 0,
-                        oninput = { event -> finalDate = event.value }, finalDateError
-                    )
-
-                    formDiv(
-                        "Hora Final", finalTime, InputType.Time, 0,
-                        oninput = { event -> finalTime = event.value }, ""
-                    )
-
-                    Div(attrs = { classes("min-submit-buttons") }) {
-                        button("closeButton", "Fechar") {
-                            modalState = "u"
-                        }
-                        button("submitButton", "Submeter", ButtonType.Submit)
                     }
                 }
             }
 
-            Div(attrs = { classes("scrolled", "max-modal", "customizedMaxModal", maxModalState) }) {
-
-                Div(attrs = { classes("max-modal-header") }) {
-                    H3(attrs = {
-                        classes("max-modal-title")
-                        style { color(Color.white) }
-                    }) { Text("Stocks filtrados") }
-                }
-
-                Div(attrs = { classes("max-modal-body") }) {
-                    Form(attrs = {
-                        classes("max-modal-body-sellForm")
-                        onSubmit { event ->
-                            event.preventDefault()
-                        }
-                    }) {
-
-                        Div(attrs = { id("r-leftPart") }) {
-                            if (maySendData) stockPaper(paramData.userName, filteredStocks)
-                        }
-                        //Right
-                        Div(attrs = {
-                            id("r-rightPart")
-                            style {
-                                width(40.percent)
-                                property("margin", "0 0 0 auto")
-                            }
-                        }) {
-                            Div(attrs = { id("rightPart-body") }) {
-                                Div(attrs = { classes("reportButtons") }) {
-                                    Button(attrs = {
-                                        id("cancelButton")
-                                        onClick {
-                                            maxModalState = "closed"
-                                        }
-                                    }) {
-                                        Label(attrs = { classes("btnLabel") }) {
-                                            Text("Fechar")
-                                        }
-                                    }
-
-                                    Button(attrs = {
-                                        id("printFatDoc")
-                                        onClick { printPaper() }
-                                    }) {
-                                        Label(
-                                            attrs = { classes("btnLabel") }
-                                        ) { Text("Imprimir") }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Div(attrs = { classes("max-modal-footer") })
+            rightPartForReports("Estoques filtrados", maxModalState, onCloseModal = { maxModalState = "closed"}) {
+                if (maySendData) stockPaper(paramData.userName, filteredStocks)
             }
         }
     }
